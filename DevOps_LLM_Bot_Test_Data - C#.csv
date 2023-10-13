@@ -1,0 +1,1340 @@
+Index,GitHub_Repo_Link,GitHub_Build_Pipeline_File_Link,GitHub_Build_Pipeline_File_Content,Generated_Build_Pipeline_File_Content,Result
+1.0,https://github.com/DapperLib/Dapper,https://github.com/DapperLib/Dapper/blob/main/.github/workflows/main.yml,"name: Main Build
+
+on:
+  pull_request:
+  push:
+    branches:
+    - main
+    paths:
+    - '*'
+    - '!/docs/*' # Don't run workflow when files are only in the /docs directory
+
+jobs:
+  vm-job:
+    name: Ubuntu
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres
+        ports:
+        - 5432/tcp
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+      sqlserver:
+        image: mcr.microsoft.com/mssql/server:2019-latest
+        ports:
+        - 1433/tcp
+        env:
+          ACCEPT_EULA: Y
+          SA_PASSWORD: ""Password.""
+      mysql:
+        image: mysql
+        ports:
+        - 3306/tcp
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: test
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v1
+    - name: .NET Build
+      run: dotnet build Build.csproj -c Release /p:CI=true
+    - name: Dapper Tests
+      run: dotnet test tests/Dapper.Tests/Dapper.Tests.csproj -c Release --logger GitHubActions /p:CI=true
+      env:
+        MySqlConnectionString: Server=localhost;Port=${{ job.services.mysql.ports[3306] }};Uid=root;Pwd=root;Database=test;Allow User Variables=true
+        OLEDBConnectionString: Provider=SQLOLEDB;Server=tcp:localhost,${{ job.services.sqlserver.ports[1433] }};Database=tempdb;User Id=sa;Password=Password.;
+        PostgesConnectionString: Server=localhost;Port=${{ job.services.postgres.ports[5432] }};Database=test;User Id=postgres;Password=postgres;
+        SqlServerConnectionString: Server=tcp:localhost,${{ job.services.sqlserver.ports[1433] }};Database=tempdb;User Id=sa;Password=Password.;
+    - name: .NET Lib Pack
+      run: dotnet pack Build.csproj --no-build -c Release /p:PackageOutputPath=%CD%\.nupkgs /p:CI=true","yaml
+name: Build and Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '5.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --configuration Release
+
+      - name: Run tests
+        run: dotnet test --configuration Release --no-build
+",
+2.0,https://github.com/huiyadanli/RevokeMsgPatcher,https://github.com/huiyadanli/RevokeMsgPatcher/blob/master/.github/workflows/build.yml,"name: .Net Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      Reason:
+        description: 'Reasons for temporary build'     
+        required: true
+        default: 'No reason.Just do it.'
+  push:
+        branches:
+          - master
+        paths-ignore:
+          - '**/*.md'
+          - .gitignore
+          - .editorconfig
+          - appveyor.yml
+
+  pull_request:
+          branches:
+            - master
+          paths-ignore:
+            - '**/*.md'
+            - .gitignore
+            - .editorconfig
+            - appveyor.yml
+
+env:
+  # Path to the solution file relative to the root of the project.
+  SOLUTION_FILE_PATH: .
+
+  # Configuration type to build.
+  # You can convert this to a build matrix if you need coverage of multiple configuration types.
+  # https://docs.github.com/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
+  #BUILD_CONFIGURATION: [Debug , Release]
+
+jobs:
+  build:
+    name: ${{matrix.BUILD_CONFIGURATION}}
+    runs-on: windows-2019
+    strategy:
+        matrix:
+          BUILD_CONFIGURATION: ['Debug', 'Release']
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Add MSBuild to PATH
+      uses: microsoft/setup-msbuild@v1.0.2
+
+    - name: Restore NuGet packages
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: nuget restore ${{env.SOLUTION_FILE_PATH}}
+
+    - name: Build ${{matrix.BUILD_CONFIGURATION}}
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      # Add additional options to the MSBuild command line here (like platform or verbosity level).
+      # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
+      run: msbuild /m /p:Configuration=${{matrix.BUILD_CONFIGURATION}} ${{env.SOLUTION_FILE_PATH}}
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: RevokeMsgPatcher-${{matrix.BUILD_CONFIGURATION}}
+        path: |
+          .\RevokeMsgPatcher\bin
+          !.\RevokeMsgPatcher\bin\**\RevokeMsgPatcher.exe.config
+          !.\RevokeMsgPatcher\bin\**\RevokeMsgPatcher.pdb","yaml
+name: Build and Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Setup MSBuild
+      uses: actions/setup-msbuild@v1.0.2
+
+    - name: Restore NuGet packages
+      run: nuget restore
+
+    - name: Build
+      run: msbuild /p:Configuration=Release
+
+    - name: Run tests
+      run: dotnet test --configuration Release --no-build
+",
+3.0,https://github.com/jasontaylordev/CleanArchitecture,https://github.com/jasontaylordev/CleanArchitecture/blob/main/.github/workflows/build.yml,"name: Build
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths-ignore:
+      - '.scripts/**'
+      - .gitignore
+      - CODE_OF_CONDUCT.md
+      - LICENSE
+      - README.md
+
+  workflow_call:
+    inputs:
+      build-artifacts:
+        type: boolean
+        required: true
+        default: false
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+      name: Checkout code
+
+    - name: Cache NuGet packages
+      uses: actions/cache@v3
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+
+    #if (!UseApiOnly)
+    - name: Install Node & cache npm packages
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18.x'
+        cache: 'npm'
+        cache-dependency-path: src/Web/ClientApp/package-lock.json
+    #endif
+
+    - name: Install .NET
+      uses: actions/setup-dotnet@v3
+
+    - name: Restore solution
+      run: dotnet restore
+
+    - name: Build solution
+      run: dotnet build --no-restore --configuration Release
+      
+    - name: Test solution
+      run: dotnet test --no-build --configuration Release --filter ""FullyQualifiedName!~AcceptanceTests""
+
+    - name: Publish website
+      if: ${{ inputs.build-artifacts == true }}
+      run: |
+        dotnet publish --configuration Release --runtime win-x86 --self-contained --output ./publish
+        cd publish
+        zip -r ./publish.zip .
+      working-directory: ./src/Web/
+
+    - name: Upload website artifact (website)
+      if: ${{ inputs.build-artifacts == true }}
+      uses: actions/upload-artifact@v3
+      with:
+        name: website
+        path: ./src/Web/publish/publish.zip
+        if-no-files-found: error
+    
+    - name: Create EF Core migrations bundle
+      if: ${{ inputs.build-artifacts == true }}
+      run: |
+        dotnet new tool-manifest
+        dotnet tool install dotnet-ef --prerelease
+        dotnet ef migrations bundle --configuration Release -p ./src/Infrastructure/ -s ./src/Web/ -o efbundle.exe
+        zip -r ./efbundle.zip efbundle.exe
+      env:
+        SkipNSwag: True
+
+    - name: Upload EF Core migrations bundle artifact (efbundle)
+      if: ${{ inputs.build-artifacts == true }}
+      uses: actions/upload-artifact@v3
+      with:
+        name: efbundle
+        path: ./efbundle.zip
+        if-no-files-found: error",,
+4.0,https://github.com/nilaoda/N_m3u8DL-CLI,https://github.com/nilaoda/N_m3u8DL-CLI/blob/master/.github/workflows/build_latest.yml,"name: Build_Latest
+ 
+on: [push]
+ 
+jobs:
+  build:
+ 
+    runs-on: windows-latest
+ 
+    steps:
+    - uses: actions/checkout@v1
+      name: Checkout Code
+     
+    - name: Setup MSBuild Path
+      uses: warrenbuckley/Setup-MSBuild@v1
+      env:
+        ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
+       
+    - name: Setup NuGet
+      uses: NuGet/setup-nuget@v1.0.2
+      env:
+        ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
+     
+    - name: Restore NuGet Packages
+      run: nuget restore N_m3u8DL-CLI.sln
+ 
+    - name: Build 
+      run: msbuild N_m3u8DL-CLI.sln /p:Configuration=Release /p:DebugSymbols=false /p:DebugType=None
+ 
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v1.0.0
+      with:
+        name: N_m3u8DL-CLI_latest
+        path: N_m3u8DL-CLI\bin\Release\N_m3u8DL-CLI.exe","yaml
+name: Build and Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '6.0.x'
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build
+      run: dotnet build --configuration Release
+
+    - name: Run tests
+      run: dotnet test --configuration Release --no-build
+",
+5.0,https://github.com/shadowsocks/shadowsocks-windows,https://github.com/shadowsocks/shadowsocks-windows/blob/main/.github/workflows/build.yml,"name: Build
+
+on:
+  push:
+    branches-ignore:
+      - 'v4'
+      - 'rm'
+    paths-ignore:
+      - 'README.md'
+      - 'LICENSE.txt'
+  pull_request:
+    branches-ignore:
+      - 'v4'
+      - 'rm'
+    paths-ignore:
+      - 'README.md'
+      - 'LICENSE.txt'
+
+jobs:
+  build:
+    name: Build
+    strategy:
+      matrix:
+        os: [ubuntu-20.04, windows-latest]
+      fail-fast: false
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Restore dependencies
+        if: matrix.os == 'windows-latest'
+        run: dotnet restore
+      - name: Build
+        if: matrix.os == 'windows-latest'
+        run: dotnet build --no-restore
+      - name: Test
+        if: matrix.os == 'windows-latest'
+        run: dotnet test --no-build --verbosity normal
+      # Publish CLI
+      - name: Define MSBuild properties
+        run: echo ""MSBUILD_PROPS=-p:PublishSingleFile=true -p:PublishTrimmed=true -p:TrimMode=link -p:DebuggerSupport=false -p:EnableUnsafeBinaryFormatterSerialization=false -p:EnableUnsafeUTF7Encoding=false -p:InvariantGlobalization=true"" >> $GITHUB_ENV
+      - name: Publish CLI framework-dependent
+        run: |
+          dotnet publish Shadowsocks.CLI -c Release
+      - name: Publish CLI self-contained for Linux ARM64
+        if: matrix.os == 'ubuntu-20.04'
+        run: |
+          dotnet publish Shadowsocks.CLI -c Release $MSBUILD_PROPS -r linux-arm64 --self-contained
+      - name: Publish CLI self-contained for Linux x64
+        if: matrix.os == 'ubuntu-20.04'
+        run: |
+          dotnet publish Shadowsocks.CLI -c Release $MSBUILD_PROPS -r linux-x64 --self-contained
+      - name: Publish CLI self-contained for Windows ARM64
+        if: matrix.os == 'windows-latest'
+        run: |
+          dotnet publish Shadowsocks.CLI -c Release $MSBUILD_PROPS -r win-arm64 --self-contained
+      - name: Publish CLI self-contained for Windows x64
+        if: matrix.os == 'windows-latest'
+        run: |
+          dotnet publish Shadowsocks.CLI -c Release $MSBUILD_PROPS -r win-x64 --self-contained
+      # Publish WPF
+      - name: Publish WPF framework-dependent
+        if: matrix.os == 'windows-latest'
+        run: dotnet publish Shadowsocks.WPF -c Release --no-restore
+      # - name: Publish WPF self-contained for Windows ARM64
+      #   if: matrix.os == 'windows-latest'
+      #   run: dotnet publish Shadowsocks.WPF -c Release -r win-arm64 --self-contained
+      - name: Publish WPF self-contained for Windows x64
+        if: matrix.os == 'windows-latest'
+        run: dotnet publish Shadowsocks.WPF -c Release -r win-x64 --self-contained
+      # Upload CLI
+      - name: Upload CLI artifacts for Linux ARM64
+        if: matrix.os == 'ubuntu-20.04'
+        uses: actions/upload-artifact@v2
+        with:
+          name: shadowsocks-cli-${{ github.sha }}-linux-arm64
+          path: Shadowsocks.CLI/bin/Release/net5.0/linux-arm64/publish/
+      - name: Upload CLI artifacts for Linux x64
+        if: matrix.os == 'ubuntu-20.04'
+        uses: actions/upload-artifact@v2
+        with:
+          name: shadowsocks-cli-${{ github.sha }}-linux-x64
+          path: Shadowsocks.CLI/bin/Release/net5.0/linux-x64/publish/
+      - name: Upload CLI artifacts for Linux framework-dependent
+        if: matrix.os == 'ubuntu-20.04'
+        uses: actions/upload-artifact@v2
+        with:
+          name: shadowsocks-cli-${{ github.sha }}-linux
+          path: Shadowsocks.CLI/bin/Release/net5.0/publish/
+      - name: Upload CLI artifacts for Windows ARM64
+        if: matrix.os == 'windows-latest'
+        uses: actions/upload-artifact@v2
+        with:
+          name: shadowsocks-cli-${{ github.sha }}-windows-arm64
+          path: Shadowsocks.CLI/bin/Release/net5.0/win-arm64/publish/
+      - name: Upload CLI artifacts for Windows x64
+        if: matrix.os == 'windows-latest'
+        uses: actions/upload-artifact@v2
+        with:
+          name: shadowsocks-cli-${{ github.sha }}-windows-x64
+          path: Shadowsocks.CLI/bin/Release/net5.0/win-x64/publish/
+      - name: Upload CLI artifacts for Windows framework-dependent
+        if: matrix.os == 'windows-latest'
+        uses: actions/upload-artifact@v2
+        with:
+          name: shadowsocks-cli-${{ github.sha }}-windows
+          path: Shadowsocks.CLI/bin/Release/net5.0/publish/
+      # Upload WPF
+      # - name: Upload WPF artifacts for Windows ARM64
+      #   if: matrix.os == 'windows-latest'
+      #   uses: actions/upload-artifact@v2
+      #   with:
+      #     name: shadowsocks-wpf-${{ github.sha }}-windows-arm64
+      #     path: Shadowsocks.WPF/bin/Release/net5.0-windows10.0.19041.0/win-arm64/publish/
+      - name: Upload WPF artifacts for Windows x64
+        if: matrix.os == 'windows-latest'
+        uses: actions/upload-artifact@v2
+        with:
+          name: shadowsocks-wpf-${{ github.sha }}-windows-x64
+          path: Shadowsocks.WPF/bin/Release/net5.0-windows10.0.19041.0/win-x64/publish/
+      - name: Upload WPF artifacts for Windows framework-dependent
+        if: matrix.os == 'windows-latest'
+        uses: actions/upload-artifact@v2
+        with:
+          name: shadowsocks-wpf-${{ github.sha }}-windows
+          path: Shadowsocks.WPF/bin/Release/net5.0-windows10.0.19041.0/publish/","yaml
+name: Build and Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '5.0.x'
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build
+      run: dotnet build --configuration Release
+
+    - name: Run tests
+      run: dotnet test --configuration Release --no-build
+",
+6.0,https://github.com/ShareX/ShareX,https://github.com/ShareX/ShareX/blob/develop/.github/workflows/build.yml,"name: Build ShareX
+
+on:
+  push:
+    branches:
+      - ""**""
+    tags:
+      - ""v[0-9]+.[0-9]+.[0-9]+""
+    paths-ignore:
+      - ""**/*.md""
+      - ""**/*.gitignore""
+      - ""**/*.gitattributes""
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build
+    runs-on: windows-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        configuration:
+          - Release
+          - Debug
+          - Steam
+          - MicrosoftStore
+          - MicrosoftStoreDebug
+        platform:
+          - Any CPU
+
+    env:
+      SOLUTION_FILE_PATH: ShareX.sln
+      ASSEMBLY_INFO_PATH: GlobalAssemblyInfo.cs
+
+    outputs:
+      APP_VERSION: ${{ env.APP_VERSION }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v1.1
+
+      - name: Set APP_VERSION
+        run: |
+          $content = Get-Content ""${{ env.ASSEMBLY_INFO_PATH }}"" -Raw
+          $pattern = 'Version\(""([0-9]+(?:\.[0-9]+){1,3})""\)'
+          $match = [regex]::Match($content, $pattern)
+          $version = $match.Groups[1].Value
+          if ($env:GITHUB_REF -eq ""refs/heads/develop"") {
+            $version = ""$version.$env:GITHUB_RUN_NUMBER""
+            $content = [regex]::Replace($content, $pattern, ""Version(`""$version`"")"")
+            Set-Content -Path ""${{ env.ASSEMBLY_INFO_PATH }}"" -Value ""$content"" -NoNewline
+          }
+          echo $version
+          echo ""APP_VERSION=$version"" >> $env:GITHUB_ENV
+
+      - name: Download API keys
+        env:
+          API_KEYS: ${{ secrets.API_KEYS }}
+        if: env.API_KEYS != ''
+        working-directory: ${{ env.GITHUB_WORKSPACE }}
+        run: |
+          Invoke-WebRequest -Uri ""$env:API_KEYS"" -OutFile ""ShareX.UploadersLib\APIKeys\APIKeysLocal.cs""
+
+      - name: Restore NuGet packages
+        working-directory: ${{ env.GITHUB_WORKSPACE }}
+        run: nuget restore ""${{ env.SOLUTION_FILE_PATH }}"" -Project2ProjectTimeOut 300
+
+      - name: Build
+        working-directory: ${{ env.GITHUB_WORKSPACE }}
+        run: msbuild -m -p:Configuration=""${{ matrix.configuration }}"" -p:Platform=""${{ matrix.platform }}"" ""${{ env.SOLUTION_FILE_PATH }}""
+
+      - name: Setup
+        working-directory: ${{ env.GITHUB_WORKSPACE }}
+        run: |
+          & ""ShareX.Setup\bin\${{ matrix.configuration }}\ShareX.Setup.exe"" -silent -job ""${{ matrix.configuration }}""
+
+      - name: Upload artifact (Setup)
+        if: matrix.configuration == 'Release'
+        uses: actions/upload-artifact@v3
+        with:
+          name: Setup
+          path: Output\ShareX-${{ env.APP_VERSION }}-setup.exe
+
+      - name: Upload artifact (Portable)
+        if: matrix.configuration == 'Release'
+        uses: actions/upload-artifact@v3
+        with:
+          name: Portable
+          path: Output\ShareX-${{ env.APP_VERSION }}-portable.zip
+
+      - name: Upload artifact (Debug)
+        if: matrix.configuration == 'Debug'
+        uses: actions/upload-artifact@v3
+        with:
+          name: Debug
+          path: Output\ShareX-${{ env.APP_VERSION }}-debug.zip
+
+      - name: Upload artifact (Steam)
+        if: matrix.configuration == 'Steam'
+        uses: actions/upload-artifact@v3
+        with:
+          name: Steam
+          path: Output\ShareX-${{ env.APP_VERSION }}-Steam.zip
+
+      - name: Upload artifact (MicrosoftStore)
+        if: matrix.configuration == 'MicrosoftStore'
+        uses: actions/upload-artifact@v3
+        with:
+          name: MicrosoftStore
+          path: Output\ShareX-${{ env.APP_VERSION }}.appx
+
+      - name: Upload artifact (MicrosoftStoreDebug)
+        if: matrix.configuration == 'MicrosoftStoreDebug'
+        uses: actions/upload-artifact@v3
+        with:
+          name: MicrosoftStoreDebug
+          path: Output\ShareX-${{ env.APP_VERSION }}-debug.appx",,
+7.0,https://github.com/DapperLib/Dapper,https://github.com/DapperLib/Dapper/blob/main/.github/workflows/main.yml,"name: Main Build
+
+on:
+  pull_request:
+  push:
+    branches:
+    - main
+    paths:
+    - '*'
+    - '!/docs/*' # Don't run workflow when files are only in the /docs directory
+
+jobs:
+  vm-job:
+    name: Ubuntu
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres
+        ports:
+        - 5432/tcp
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+      sqlserver:
+        image: mcr.microsoft.com/mssql/server:2019-latest
+        ports:
+        - 1433/tcp
+        env:
+          ACCEPT_EULA: Y
+          SA_PASSWORD: ""Password.""
+      mysql:
+        image: mysql
+        ports:
+        - 3306/tcp
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: test
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v1
+    - name: .NET Build
+      run: dotnet build Build.csproj -c Release /p:CI=true
+    - name: Dapper Tests
+      run: dotnet test tests/Dapper.Tests/Dapper.Tests.csproj -c Release --logger GitHubActions /p:CI=true
+      env:
+        MySqlConnectionString: Server=localhost;Port=${{ job.services.mysql.ports[3306] }};Uid=root;Pwd=root;Database=test;Allow User Variables=true
+        OLEDBConnectionString: Provider=SQLOLEDB;Server=tcp:localhost,${{ job.services.sqlserver.ports[1433] }};Database=tempdb;User Id=sa;Password=Password.;
+        PostgesConnectionString: Server=localhost;Port=${{ job.services.postgres.ports[5432] }};Database=test;User Id=postgres;Password=postgres;
+        SqlServerConnectionString: Server=tcp:localhost,${{ job.services.sqlserver.ports[1433] }};Database=tempdb;User Id=sa;Password=Password.;
+    - name: .NET Lib Pack
+      run: dotnet pack Build.csproj --no-build -c Release /p:PackageOutputPath=%CD%\.nupkgs /p:CI=true",,
+8.0,https://github.com/aalhour/C-Sharp-Algorithms,https://github.com/aalhour/C-Sharp-Algorithms/blob/master/.github/workflows/build_and_test.yml,"name: Build and Test
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 2.2.108
+    - name: Build with .NET Core
+      run: dotnet build --configuration Release
+  test:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+    - uses: actions/checkout@v1
+    - name: Run Tests
+      run: dotnet test",,
+9.0,https://github.com/Cysharp/UniTask,https://github.com/Cysharp/UniTask/blob/master/.github/workflows/build-release.yml,"name: build-release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: ""tag: git tag you want create. (sample 1.0.0)""
+        required: true
+      dry-run:
+        description: ""dry-run: true will never create relase/nuget.""
+        required: true
+        default: false
+        type: boolean
+
+env:
+  GIT_TAG: ${{ github.event.inputs.tag }}
+  DRY_RUN: ${{ github.event.inputs.dry-run }}
+
+jobs:
+  update-packagejson:
+    uses: Cysharp/Actions/.github/workflows/update-packagejson.yaml@main
+    with:
+      file-path: ./src/UniTask/Assets/Plugins/UniTask/package.json
+      tag: ${{ github.event.inputs.tag }}
+      dry-run: ${{ fromJson(github.event.inputs.dry-run) }}
+
+  build-dotnet:
+    needs: [update-packagejson]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - run: echo ${{ needs.update-packagejson.outputs.sha }}
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ needs.update-packagejson.outputs.sha }}
+      - uses: Cysharp/Actions/.github/actions/setup-dotnet@main
+        with:
+          dotnet-version: |
+            3.1.x
+            6.0.x
+      # build and pack
+      - run: dotnet build -c Release -p:Version=${{ env.GIT_TAG }}
+      - run: dotnet test -c Release --no-build
+      - run: dotnet pack ./src/UniTask.NetCore/UniTask.NetCore.csproj -c Release --no-build -p:Version=${{ env.GIT_TAG }} -o ./publish
+      # Store artifacts.
+      - uses: actions/upload-artifact@v2
+        with:
+          name: nuget
+          path: ./publish/",,
+10.0,https://github.com/EduardoPires/EquinoxProject,https://github.com/EduardoPires/EquinoxProject/blob/master/.github/workflows/dotnet-core.yml,"name: .NET Core
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 6.0.x
+    - name: Install dependencies
+      run: dotnet restore
+    - name: Build
+      run: dotnet build --configuration Release --no-restore
+    - name: Test
+      run: dotnet test --no-restore --verbosity normal",,
+11.0,https://github.com/felixse/FluentTerminal,https://github.com/felixse/FluentTerminal/blob/master/.github/workflows/main.yml,"name: CI
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@master
+    
+    - name: Build client
+      working-directory: ./FluentTerminal.Client
+      run: |
+        yarn
+        yarn build
+
+    - name: Setup MSBuild.exe
+      uses: microsoft/setup-msbuild@v1.0.2
+    
+    - name: MSBuild
+      run: msbuild FluentTerminal.sln -t:build -p:Configuration=Debug -p:Platform=x64 -m -restore",,
+12.0,https://github.com/graphql-dotnet/graphql-dotnet,https://github.com/graphql-dotnet/graphql-dotnet/blob/master/.github/workflows/build-artifacts-code.yml,"name: Build artifacts
+
+# ==== NOTE: do not rename this yml file or the run_number will be reset ====
+
+on:
+  push:
+    branches:
+      - master
+      - develop
+    paths:
+      - src/**
+      - .github/workflows/**
+
+env:
+  NODE_VERSION: '18.x'   # Node 18 LTS, see https://nodejs.org/en/about/releases/
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  pack:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: yarn docs2
+        working-directory: docs2
+        run: yarn
+      - name: yarn gatsby build
+        working-directory: docs2
+        run: yarn gatsby build
+      - name: Publish docs artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: Documentation
+          path: docs2/public/**
+          if-no-files-found: error
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '7.0.x'
+          source-url: https://nuget.pkg.github.com/graphql-dotnet/index.json
+        env:
+          NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+      - name: Install dependencies
+        working-directory: src
+        run: dotnet restore
+      - name: Build solution [Release]
+        working-directory: src
+        run: dotnet build --no-restore -c Release -p:VersionSuffix=$GITHUB_RUN_NUMBER
+      - name: Pack solution [Release]
+        working-directory: src
+        run: dotnet pack --no-restore --no-build -c Release -p:VersionSuffix=$GITHUB_RUN_NUMBER -o out
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: Nuget packages
+          path: |
+            src/out/*
+      - name: Publish Nuget packages to GitHub registry
+        working-directory: src
+        run: dotnet nuget push ""out/*"" -k ${{secrets.GITHUB_TOKEN}}",,
+13.0,https://github.com/gui-cs/Terminal.Gui,https://github.com/gui-cs/Terminal.Gui/blob/develop/.github/workflows/dotnet-core.yml,"name: .NET Core
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths-ignore:
+      - '**.md'
+  pull_request:
+    branches: [ main, develop ]
+    paths-ignore:
+      - '**.md'
+      
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 7.0
+        dotnet-quality: 'ga'
+
+    - name: Install dependencies
+      run: |
+        dotnet restore
+
+    - name: Build Debug
+      run: |
+        dotnet build --configuration Debug --no-restore
+        
+    - name: Test
+      run: |
+        sed -i 's/""stopOnFail"": false/""stopOnFail"": true/g' UnitTests/xunit.runner.json
+        dotnet test --no-restore --verbosity normal --collect:""XPlat Code Coverage""  --settings UnitTests/coverlet.runsettings
+        mv -v UnitTests/TestResults/*/*.* UnitTests/TestResults/
+
+    # Note: this step is currently not writing to the gist for some reason
+    - name: Create Test Coverage Badge
+      uses: simon-k/dotnet-code-coverage-badge@v1.0.0
+      id: create_coverage_badge
+      with:
+        label: Unit Test Coverage
+        color: brightgreen
+        path: UnitTests/TestResults/coverage.opencover.xml
+        gist-filename: code-coverage.json
+        # https://gist.github.com/migueldeicaza/90ef67a684cb71db1817921a970f8d27
+        gist-id: 90ef67a684cb71db1817921a970f8d27
+        gist-auth-token: ${{ secrets.GIST_AUTH_TOKEN }}   
+
+    - name: Print Code Coverage
+      run: |
+        echo ""Code coverage percentage: ${{steps.create_coverage_badge.outputs.percentage}}%""
+        echo ""Badge data: ${{steps.create_coverage_badge.outputs.badge}}""",,
+14.0,https://github.com/hellzerg/optimizer,https://github.com/hellzerg/optimizer/blob/master/.github/workflows/build.yml,"name: Build
+
+on:
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    name: Build
+    runs-on: windows-2022
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v1
+
+    - name: Setup NuGet
+      uses: nuget/setup-nuget@v1
+
+    - name: Navigate to Workspace
+      run: cd $GITHUB_WORKSPACE
+
+    - name: Restore Packages
+      run: nuget restore Optimizer.sln
+
+    - name: Build Solution
+      run: msbuild.exe Optimizer.sln",,
+15.0,https://github.com/JeffreySu/WeiXinMPSDK,https://github.com/JeffreySu/WeiXinMPSDK/blob/master/.github/workflows/master_SenparcWeixinSampleNetCore3.yml,"# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
+# More GitHub Actions for Azure: https://github.com/Azure/actions
+
+name: Build and deploy ASP app to Azure Web App - senparcweixinsamplenetcore3(senparcweixinsamplenet5)
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: 'windows-latest'
+
+    steps:
+    - uses: actions/checkout@master
+
+    - name: Setup MSBuild path
+      uses: microsoft/setup-msbuild@v1.0.2
+
+    - name: Setup NuGet
+      uses: NuGet/setup-nuget@v1.0.5
+
+    - name: Set up .NET Core 3.1
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '3.1.301'
+
+    - name: Set up .NET 6.0
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '6.0.100'
+        
+
+    - name: Set up .NET 7.0
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '7.0.302'
+        
+    #- name: CMD1
+    #  run: dir 
+      #`n cd ./Samples/net6-mvc/ `n dir `n nuget restore `n msbuild /nologo /verbosity:m /t:Build /t:pipelinePreDeployCopyAllFilesToOneFolder /p:_PackageTempDir=""\published\""
+      
+    #- name: CMD2
+    #  run: cd ./Samples/net6-mvc/
+
+    #- name: CMD3
+    #  run: dir
+      
+    - name: Restore NuGet packages
+      run: nuget restore ""./Samples/All/net7-mvc/""
+      #-SolutionDirectory ./Samples/All/net7-mvc/
+      
+    - name: Publish to folder
+      run: msbuild ""Samples/All/net7-mvc/Senparc.Weixin.Sample.Net7.sln"" /nologo /verbosity:m /t:Build /t:pipelinePreDeployCopyAllFilesToOneFolder /p:_PackageTempDir=""\published\""
+
+    #- name: Deploy to Azure Web App
+    #  uses: azure/webapps-deploy@v2
+    #  with:
+    #    app-name: 'senparcweixinsamplenetcore3'
+    #    slot-name: 'senparcweixinsamplenet5'
+    #    publish-profile: ${{ secrets.AzureAppService_PublishProfile_3ee3a42f0a324bf7be968d8c232a8555 }}
+    #    package: \published\",,
+16.0,https://github.com/jstedfast/MailKit,https://github.com/jstedfast/MailKit/blob/master/.github/workflows/main.yml,"name: MailKit CI/CD Pipeline
+
+on: [push, pull_request, workflow_dispatch]
+
+jobs:
+  ci:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ windows-latest, ubuntu-latest ]
+        build-configuration: [ Debug, Release ]
+    outputs:
+      latest-version: ${{ steps.semantic_version.outputs.version_num }}
+    environment: ci
+    env:
+      SOLUTION_PATH: MailKit.sln
+      BUILD_PLATFORM: Any CPU
+      BUILD_CONFIGURATION: ${{ matrix.build-configuration }}
+      GITHUB_RUN_NUMBER: ${{ github.run_number }}
+    steps:
+      - name: Setup/Install the .NET 6 SDK
+        id: install-net6
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 6.0.x
+
+      - name: Configure build options
+        id: configure
+        shell: pwsh
+        run: |
+          $IS_DEBUG = 'false'
+          $IS_RELEASE = 'false'
+          $IS_PUSH_TO_MASTER = 'false'
+          $IS_NOT_PR = 'true'
+          $IS_GITHUB_RELEASE = 'false'
+          $IS_WINDOWS = 'false'
+          $IS_UBUNTU = 'false'
+          $GENERATE_CODE_COVERAGE = 'no'
+
+          if ( $env:BUILD_CONFIGURATION -ceq 'Debug' ) {
+            $IS_DEBUG = 'true'
+          }
+          if ( $env:BUILD_CONFIGURATION -ceq 'Release' ) {
+            $IS_RELEASE = 'true'
+          }
+          if ( ($env:GITHUB_EVENT_NAME -ceq 'push') -and ($env:GITHUB_REF -ceq 'refs/heads/master') ) {
+            $IS_PUSH_TO_MASTER = 'true'
+          }
+          if ( $env:GITHUB_EVENT_NAME -ceq 'pull_request' ) {
+            $IS_NOT_PR = 'false'
+          }
+          if ( ($env:GITHUB_EVENT_NAME -ceq 'push') -and ($env:GITHUB_REF -ceq 'refs/heads/master') -and ($env:BUILD_CONFIGURATION -ceq 'Release') -and ($env:OS -ceq 'windows-latest') ) {
+            $IS_GITHUB_RELEASE = 'true'
+          }
+          if ( $env:OS -ceq 'windows-latest' ) {
+            $IS_WINDOWS = 'true'
+          }
+          if ( $env:OS -ceq 'ubuntu-latest' ) {
+            $IS_UBUNTU = 'true'
+          }
+          if ( $IS_WINDOWS -ceq 'true' -and $IS_DEBUG -ceq 'true' ) {
+            $GENERATE_CODE_COVERAGE = 'yes'
+          }
+
+          echo ""::set-output name=IS_DEBUG::$(echo $IS_DEBUG)""
+          echo ""::set-output name=IS_RELEASE::$(echo $IS_RELEASE)""
+          echo ""::set-output name=is_push_to_master::$(echo $IS_PUSH_TO_MASTER)""
+          echo ""::set-output name=is_not_pr::$(echo $IS_NOT_PR)""
+          echo ""::set-output name=is_github_release::$(echo $IS_GITHUB_RELEASE)""
+          echo ""::set-output name=is_windows::$(echo $IS_WINDOWS)""
+          echo ""::set-output name=is_ubuntu::$(echo $IS_UBUNTU)""
+          echo ""::set-output name=generate_code_coverage::$(echo $GENERATE_CODE_COVERAGE)""
+        env:
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
+          GITHUB_REF: ${{ github.ref }}
+          OS: ${{ matrix.os }}
+
+      - if: steps.configure.outputs.is_windows == 'true'
+        name: Setup MSBuild
+        id: setup_msbuild
+        uses: microsoft/setup-msbuild@v1.3.1
+
+      - name: Checkout repository
+        id: checkout_repo
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Get semantic version from csproj
+        id: semantic_version
+        shell: pwsh
+        run: |
+          $xml = [xml](gc MailKit/MailKit.csproj)
+          $SEMANTIC_VERSION_NUMBER = $xml.Project.PropertyGroup.VersionPrefix
+          echo ""::set-output name=version_num::$(echo $SEMANTIC_VERSION_NUMBER[0].Trim())""
+          echo ""::set-output name=version_tag::$(echo v""$SEMANTIC_VERSION_NUMBER[0].Trim()"")""
+
+      - if: steps.configure.outputs.is_github_release == 'true'
+        name: Get latest tag
+        id: get_latest_tag
+        shell: pwsh
+        run: |
+          $LATEST_TAG = git -c 'versionsort.suffix=-' ls-remote --exit-code --refs --sort='version:refname' --tags ""https://github.com/$env:GIT_URL.git"" '*.*.*' | tail --lines=1 | cut --delimiter='/' --fields=3
+          echo ""::set-output name=tag::$(echo $LATEST_TAG)""
+        env:
+          GIT_URL: ${{ github.repository }}
+
+      - if: steps.configure.outputs.is_github_release == 'true' && steps.semantic_version.outputs.version_tag != steps.get_latest_tag.outputs.tag
+        name: Add new tag to repo
+        id: add_new_tag_to_repo
+        shell: pwsh
+        run: |
+          git config --global user.name $env:GIT_USER_NAME
+          git config --global user.email $env:GIT_USER_EMAIL
+          git tag -a -m ""Tagged for $env:NEW_VERSION_NUM"" $env:NEW_VERSION_NUM
+          git push --follow-tags
+        env:
+          GIT_USER_NAME: ${{ github.event.head_commit.author.username }}
+          GIT_USER_EMAIL: ${{ github.event.head_commit.author.email }}
+          NEW_VERSION_NUM: ${{ steps.semantic_version.outputs.version_num }}
+
+      - name: Run NuGet restore
+        id: run_nuget_restore
+        shell: pwsh
+        run: |
+          nuget restore $env:SOLUTION_PATH
+
+      - name: Run .NET restore
+        shell: pwsh
+        run: |
+          dotnet restore $env:SOLUTION_PATH
+
+      - name: Run .NET tool restore
+        shell: pwsh
+        run: |
+          dotnet tool restore
+
+      - name: Build solution
+        id: build_solution
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          dotnet msbuild $env:SOLUTION_PATH -property:Platform=$env:BUILD_PLATFORM -property:Configuration=$env:BUILD_CONFIGURATION -property:MonoRuntime=$env:IS_UBUNTU
+        env:
+          IS_UBUNTU: ${{ steps.configure.outputs.is_ubuntu }}
+
+      - name: Run unit tests
+        id: run_unit_tests
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          & ./scripts/test.ps1 -Configuration:$env:BUILD_CONFIGURATION -GenerateCodeCoverage:$env:GENERATE_CODE_COVERAGE
+        env:
+          BUILD_CONFIGURATION: ${{ matrix.build-configuration }}
+          GENERATE_CODE_COVERAGE: ${{ steps.configure.outputs.generate_code_coverage }}",,
+17.0,https://github.com/JustArchiNET/ArchiSteamFarm,https://github.com/JustArchiNET/ArchiSteamFarm/blob/main/.github/workflows/ci.yml,"name: ASF-ci
+
+on: [push, pull_request]
+
+env:
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  DOTNET_NOLOGO: true
+  DOTNET_SDK_VERSION: 7.0.x
+
+jobs:
+  main:
+    strategy:
+      fail-fast: false
+      matrix:
+        configuration: [Debug, Release]
+        os: [macos-latest, ubuntu-latest, windows-latest]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4.1.0
+      with:
+        show-progress: false
+        submodules: recursive
+
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v3.2.0
+      with:
+        dotnet-version: ${{ env.DOTNET_SDK_VERSION }}
+
+    - name: Verify .NET Core
+      run: dotnet --info
+
+    - name: Build ${{ matrix.configuration }} ArchiSteamFarm and other projects
+      run: dotnet build -c ""${{ matrix.configuration }}"" -p:ContinuousIntegrationBuild=true -p:UseAppHost=false --nologo
+
+    - name: Run ${{ matrix.configuration }} ArchiSteamFarm.Tests
+      run: dotnet test ArchiSteamFarm.Tests -c ""${{ matrix.configuration }}"" -p:ContinuousIntegrationBuild=true -p:UseAppHost=false --nologo
+
+    - name: Upload latest strings for translation on Crowdin
+      if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && matrix.configuration == 'Release' && startsWith(matrix.os, 'ubuntu-') }}
+      uses: crowdin/github-action@v1.13.1
+      with:
+        crowdin_branch_name: main
+        config: '.github/crowdin.yml'
+        project_id: ${{ secrets.ASF_CROWDIN_PROJECT_ID }}
+        token: ${{ secrets.ASF_CROWDIN_API_TOKEN }}",,
+18.0,https://github.com/kgrzybek/modular-monolith-with-ddd,https://github.com/kgrzybek/modular-monolith-with-ddd/blob/master/.github/workflows/buildPipeline.yml,"name: CI Pipeline
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+
+  build:
+    name: Build and run Unit and Architecture Tests
+    runs-on: ubuntu-latest
+ 
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 3.1.301
+    - name: Run build
+      run: ./build.sh BuildAndUnitTests --configuration Release
+
+  integration:
+    name: Build and run Integration Tests
+    needs: [build]
+    runs-on: ubuntu-latest
+          
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 3.1.301
+    - name: Run build
+      run: ./build.sh RunAllIntegrationTests",,
+19.0,https://github.com/MahApps/MahApps.Metro,https://github.com/MahApps/MahApps.Metro/blob/develop/.github/workflows/ci.yml,"name: ci
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - develop
+
+jobs:
+  windows-latest:
+    name: windows-latest
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: | 
+            3.1.x
+            5.x
+            6.x
+      - name: List dotnet sdks
+        run: dotnet --list-sdks
+      - name: Run the Cake script
+        uses: cake-build/cake-action@v1
+        with:
+          cake-version: 1.3.0
+          cake-bootstrap: true
+          verbosity: Normal
+          script-path: build.cake
+          target: ci
+        env:
+          azure-key-vault-url: ${{ secrets.AZURE_KEY_VAULT_URL }}
+          azure-key-vault-client-id: ${{ secrets.AZURE_KEY_VAULT_CLIENT_ID }}
+          azure-key-vault-tenant-id: ${{ secrets.AZURE_KEY_VAULT_TENANT_ID }}
+          azure-key-vault-client-secret: ${{ secrets.AZURE_KEY_VAULT_CLIENT_SECRET }}
+          azure-key-vault-certificate: ${{ secrets.AZURE_KEY_VAULT_CERTIFICATE }}",,
+20.0,https://github.com/MassTransit/MassTransit,https://github.com/MassTransit/MassTransit/blob/develop/.github/workflows/build.yml,"name: MassTransit
+env:
+  MASSTRANSIT_VERSION: 8.1.2
+on:
+  push:
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - 'MassTransit.sln'
+      - 'Directory.Build.props'
+      - 'Directory.Packages.props'
+      - '**/build.yml'
+  pull_request:
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - 'MassTransit.sln'
+      - 'Directory.Build.props'
+      - 'Directory.Packages.props'
+      - '**/build.yml'
+  workflow_dispatch:
+
+jobs:
+  compile:
+    name: Build
+    timeout-minutes: 15
+    strategy:
+      max-parallel: 2
+      matrix:
+        os: ['ubuntu-latest', 'windows-latest']
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: Install .NET Core SDK
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '7.0.x'
+
+      - name: Restore NuGet packages
+        run: dotnet restore
+        working-directory: ./
+
+      - name: Build
+        run: dotnet build -c Release --no-restore
+        working-directory: ./
+
+      - name: Test Analyzers
+        run: dotnet test -c Release --logger:""console;verbosity=normal"" --no-build --filter Category!=Flaky
+        working-directory: tests/MassTransit.Analyzers.Tests",,
