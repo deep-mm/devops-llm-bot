@@ -67,22 +67,22 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
+    - name: Checkout repository
+      uses: actions/checkout@v2
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v1
-        with:
-          dotnet-version: '5.0.x'
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '5.0.x'
 
-      - name: Restore dependencies
-        run: dotnet restore
+    - name: Restore dependencies
+      run: dotnet restore
 
-      - name: Build
-        run: dotnet build --configuration Release
+    - name: Build application
+      run: dotnet build --configuration Release
 
-      - name: Run tests
-        run: dotnet test --configuration Release --no-build
+    - name: Run tests
+      run: dotnet test --configuration Release --no-build
 ",
 2.0,https://github.com/huiyadanli/RevokeMsgPatcher,https://github.com/huiyadanli/RevokeMsgPatcher/blob/master/.github/workflows/build.yml,"name: .Net Build
 
@@ -166,21 +166,29 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
+      - name: Checkout repository
+        uses: actions/checkout@v2
 
-    - name: Setup MSBuild
-      uses: actions/setup-msbuild@v1.0.2
+      - name: Setup MSBuild
+        uses: actions/setup-msbuild@v1.0.2
 
-    - name: Restore NuGet packages
-      run: nuget restore
+      - name: Restore NuGet packages
+        run: nuget restore
 
-    - name: Build
-      run: msbuild /p:Configuration=Release
+      - name: Build project
+        run: msbuild /p:Configuration=Release
 
-    - name: Run tests
-      run: dotnet test --configuration Release --no-build
-",
+      - name: Run tests
+        run: |
+          # Add commands to run tests here
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: build-artifact
+          path: path/to/artifact
+```
+Note: Replace `path/to/artifact` with the actual path to the build artifact in your repository.",
 3.0,https://github.com/jasontaylordev/CleanArchitecture,https://github.com/jasontaylordev/CleanArchitecture/blob/main/.github/workflows/build.yml,"name: Build
 
 on:
@@ -320,22 +328,22 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
+      - name: Checkout repository
+        uses: actions/checkout@v2
 
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: '6.0.x'
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '6.0.x'
 
-    - name: Restore dependencies
-      run: dotnet restore
+      - name: Restore dependencies
+        run: dotnet restore N_m3u8DL-CLI/N_m3u8DL-CLI.csproj
 
-    - name: Build
-      run: dotnet build --configuration Release
+      - name: Build application
+        run: dotnet build N_m3u8DL-CLI/N_m3u8DL-CLI.csproj --configuration Release
 
-    - name: Run tests
-      run: dotnet test --configuration Release --no-build
+      - name: Run tests
+        run: dotnet test N_m3u8DL-CLI/N_m3u8DL-CLI.csproj --configuration Release
 ",
 5.0,https://github.com/shadowsocks/shadowsocks-windows,https://github.com/shadowsocks/shadowsocks-windows/blob/main/.github/workflows/build.yml,"name: Build
 
@@ -477,26 +485,26 @@ on:
       - main
 
 jobs:
-  build:
+  build-and-test:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
+      - name: Checkout repository
+        uses: actions/checkout@v2
 
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: '5.0.x'
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '5.0.x'
 
-    - name: Restore dependencies
-      run: dotnet restore
+      - name: Restore dependencies
+        run: dotnet restore
 
-    - name: Build
-      run: dotnet build --configuration Release
+      - name: Build
+        run: dotnet build --configuration Release
 
-    - name: Run tests
-      run: dotnet test --configuration Release --no-build
+      - name: Run tests
+        run: dotnet test --configuration Release --no-build
 ",
 6.0,https://github.com/ShareX/ShareX,https://github.com/ShareX/ShareX/blob/develop/.github/workflows/build.yml,"name: Build ShareX
 
@@ -620,7 +628,39 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: MicrosoftStoreDebug
-          path: Output\ShareX-${{ env.APP_VERSION }}-debug.appx",,
+          path: Output\ShareX-${{ env.APP_VERSION }}-debug.appx","yaml
+name: Build and Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '6.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build application
+        run: dotnet build --configuration Release
+
+      - name: Run tests
+        run: dotnet test --configuration Release --no-build
+",
 7.0,https://github.com/DapperLib/Dapper,https://github.com/DapperLib/Dapper/blob/main/.github/workflows/main.yml,"name: Main Build
 
 on:
@@ -673,7 +713,39 @@ jobs:
         PostgesConnectionString: Server=localhost;Port=${{ job.services.postgres.ports[5432] }};Database=test;User Id=postgres;Password=postgres;
         SqlServerConnectionString: Server=tcp:localhost,${{ job.services.sqlserver.ports[1433] }};Database=tempdb;User Id=sa;Password=Password.;
     - name: .NET Lib Pack
-      run: dotnet pack Build.csproj --no-build -c Release /p:PackageOutputPath=%CD%\.nupkgs /p:CI=true",,
+      run: dotnet pack Build.csproj --no-build -c Release /p:PackageOutputPath=%CD%\.nupkgs /p:CI=true","yaml
+name: Build and Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '5.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --configuration Release
+
+      - name: Run tests
+        run: dotnet test --configuration Release --no-build
+",
 8.0,https://github.com/aalhour/C-Sharp-Algorithms,https://github.com/aalhour/C-Sharp-Algorithms/blob/master/.github/workflows/build_and_test.yml,"name: Build and Test
 
 on: [push]
@@ -695,7 +767,40 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: Run Tests
-      run: dotnet test",,
+      run: dotnet test","yaml
+name: Build and Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '5.0.x'
+
+    - name: Restore NuGet packages
+      run: dotnet restore
+
+    - name: Build
+      run: dotnet build --configuration Release
+
+    - name: Run tests
+      run: dotnet test --configuration Release --no-build --verbosity normal
+```
+Note: Replace `'5.0.x'` in the `Setup .NET` step with the appropriate version of .NET that matches the repository's language and framework.",
 9.0,https://github.com/Cysharp/UniTask,https://github.com/Cysharp/UniTask/blob/master/.github/workflows/build-release.yml,"name: build-release
 
 on:
@@ -744,7 +849,39 @@ jobs:
       - uses: actions/upload-artifact@v2
         with:
           name: nuget
-          path: ./publish/",,
+          path: ./publish/","yaml
+name: Build and Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@main
+      with:
+        dotnet-version: '5.0.x'
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build
+      run: dotnet build --configuration Release
+
+    - name: Run tests
+      run: dotnet test --configuration Release --no-build
+",
 10.0,https://github.com/EduardoPires/EquinoxProject,https://github.com/EduardoPires/EquinoxProject/blob/master/.github/workflows/dotnet-core.yml,"name: .NET Core
 
 on:
@@ -769,7 +906,39 @@ jobs:
     - name: Build
       run: dotnet build --configuration Release --no-restore
     - name: Test
-      run: dotnet test --no-restore --verbosity normal",,
+      run: dotnet test --no-restore --verbosity normal","yaml
+name: Build and Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build application
+      run: dotnet build --configuration Release
+
+    - name: Run tests
+      run: dotnet test --configuration Release --no-build
+```
+
+Note: This workflow assumes that the repository contains a .NET application. It checks out the repository, sets up the .NET environment, restores the dependencies, builds the application in Release configuration, and finally runs the tests in Release configuration.",
 11.0,https://github.com/felixse/FluentTerminal,https://github.com/felixse/FluentTerminal/blob/master/.github/workflows/main.yml,"name: CI
 
 on: [push]
@@ -792,7 +961,41 @@ jobs:
       uses: microsoft/setup-msbuild@v1.0.2
     
     - name: MSBuild
-      run: msbuild FluentTerminal.sln -t:build -p:Configuration=Debug -p:Platform=x64 -m -restore",,
+      run: msbuild FluentTerminal.sln -t:build -p:Configuration=Debug -p:Platform=x64 -m -restore","yaml
+name: Build and Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '6.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build application
+        run: dotnet build --configuration Release
+
+      - name: Run tests
+        run: dotnet test --configuration Release --no-build
+```
+
+Note: Replace `'6.0.x'` in the `Setup .NET` step with the appropriate version of .NET that is required for the repository.",
 12.0,https://github.com/graphql-dotnet/graphql-dotnet,https://github.com/graphql-dotnet/graphql-dotnet/blob/master/.github/workflows/build-artifacts-code.yml,"name: Build artifacts
 
 # ==== NOTE: do not rename this yml file or the run_number will be reset ====
@@ -912,7 +1115,39 @@ jobs:
     - name: Print Code Coverage
       run: |
         echo ""Code coverage percentage: ${{steps.create_coverage_badge.outputs.percentage}}%""
-        echo ""Badge data: ${{steps.create_coverage_badge.outputs.badge}}""",,
+        echo ""Badge data: ${{steps.create_coverage_badge.outputs.badge}}""","yaml
+name: Build and Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3.0.3
+        with:
+          dotnet-version: '5.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build application
+        run: dotnet build --configuration Release
+
+      - name: Run tests
+        run: dotnet test --configuration Release --no-build
+",
 14.0,https://github.com/hellzerg/optimizer,https://github.com/hellzerg/optimizer/blob/master/.github/workflows/build.yml,"name: Build
 
 on:
@@ -941,7 +1176,43 @@ jobs:
       run: nuget restore Optimizer.sln
 
     - name: Build Solution
-      run: msbuild.exe Optimizer.sln",,
+      run: msbuild.exe Optimizer.sln","yaml
+name: Build and Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup MSBuild
+        uses: actions/setup-msbuild@v1
+
+      - name: Setup NuGet
+        uses: actions/setup-nuget@v1
+
+      - name: Restore NuGet packages
+        run: nuget restore Optimizer/Optimizer.csproj
+
+      - name: Build
+        run: msbuild /p:Configuration=Release Optimizer/Optimizer.csproj
+
+      - name: Run tests
+        run: |
+          # Add commands to run tests here
+          # For example:
+          # dotnet test Optimizer.Tests/Optimizer.Tests.csproj
+",
 15.0,https://github.com/JeffreySu/WeiXinMPSDK,https://github.com/JeffreySu/WeiXinMPSDK/blob/master/.github/workflows/master_SenparcWeixinSampleNetCore3.yml,"# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
 # More GitHub Actions for Azure: https://github.com/Azure/actions
 
@@ -1005,7 +1276,40 @@ jobs:
     #    app-name: 'senparcweixinsamplenetcore3'
     #    slot-name: 'senparcweixinsamplenet5'
     #    publish-profile: ${{ secrets.AzureAppService_PublishProfile_3ee3a42f0a324bf7be968d8c232a8555 }}
-    #    package: \published\",,
+    #    package: \published\","yaml
+name: Build and Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '6.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build project
+        run: dotnet build --configuration Release
+
+      - name: Run tests
+        run: dotnet test --configuration Release --no-build
+```
+Note: Replace `'6.0.x'` in the `dotnet-version` field with the appropriate version of .NET for your project.",
 16.0,https://github.com/jstedfast/MailKit,https://github.com/jstedfast/MailKit/blob/master/.github/workflows/main.yml,"name: MailKit CI/CD Pipeline
 
 on: [push, pull_request, workflow_dispatch]
@@ -1162,7 +1466,39 @@ jobs:
           & ./scripts/test.ps1 -Configuration:$env:BUILD_CONFIGURATION -GenerateCodeCoverage:$env:GENERATE_CODE_COVERAGE
         env:
           BUILD_CONFIGURATION: ${{ matrix.build-configuration }}
-          GENERATE_CODE_COVERAGE: ${{ steps.configure.outputs.generate_code_coverage }}",,
+          GENERATE_CODE_COVERAGE: ${{ steps.configure.outputs.generate_code_coverage }}","yaml
+name: Build and Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '6.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build application
+        run: dotnet build --configuration Release
+
+      - name: Run tests
+        run: dotnet test --configuration Release --no-build
+",
 17.0,https://github.com/JustArchiNET/ArchiSteamFarm,https://github.com/JustArchiNET/ArchiSteamFarm/blob/main/.github/workflows/ci.yml,"name: ASF-ci
 
 on: [push, pull_request]
@@ -1246,7 +1582,39 @@ jobs:
       with:
         dotnet-version: 3.1.301
     - name: Run build
-      run: ./build.sh RunAllIntegrationTests",,
+      run: ./build.sh RunAllIntegrationTests","yaml
+name: Build and Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '3.1'
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --configuration Release
+
+      - name: Run tests
+        run: dotnet test --configuration Release --no-build
+",
 19.0,https://github.com/MahApps/MahApps.Metro,https://github.com/MahApps/MahApps.Metro/blob/develop/.github/workflows/ci.yml,"name: ci
 
 on:
@@ -1286,7 +1654,39 @@ jobs:
           azure-key-vault-client-id: ${{ secrets.AZURE_KEY_VAULT_CLIENT_ID }}
           azure-key-vault-tenant-id: ${{ secrets.AZURE_KEY_VAULT_TENANT_ID }}
           azure-key-vault-client-secret: ${{ secrets.AZURE_KEY_VAULT_CLIENT_SECRET }}
-          azure-key-vault-certificate: ${{ secrets.AZURE_KEY_VAULT_CERTIFICATE }}",,
+          azure-key-vault-certificate: ${{ secrets.AZURE_KEY_VAULT_CERTIFICATE }}","yaml
+name: Build and Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 5.0.x
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build application
+      run: dotnet build --configuration Release
+
+    - name: Run tests
+      run: dotnet test --configuration Release --no-build
+",
 20.0,https://github.com/MassTransit/MassTransit,https://github.com/MassTransit/MassTransit/blob/develop/.github/workflows/build.yml,"name: MassTransit
 env:
   MASSTRANSIT_VERSION: 8.1.2

@@ -3,10 +3,14 @@ const nock = require("nock");
 const myProbotApp = require("..");
 const { Probot, ProbotOctokit } = require("probot");
 // Requiring our fixtures
-const payload = require("./fixtures/issues.opened");
-const issueCreatedBody = { body: "Thanks for opening this issue!" };
+const installationCreatedPayload = require("./fixtures/installation.created");
 const fs = require("fs");
 const path = require("path");
+
+// Mocking out our use of random numbers
+const mockMath = Object.create(global.Math);
+mockMath.random = () => 1;
+global.Math = mockMath;
 
 const privateKey = fs.readFileSync(
   path.join(__dirname, "fixtures/mock-cert.pem"),
@@ -31,26 +35,50 @@ describe("My Probot app", () => {
     probot.load(myProbotApp);
   });
 
-  test("creates a comment when an issue is opened", async () => {
+  test("creates a pull request on installation", async () => {
     const mock = nock("https://api.github.com")
-      // Test that we correctly return a test token
       .post("/app/installations/2/access_tokens")
       .reply(200, {
         token: "test",
         permissions: {
-          issues: "write",
+          contents: "write",
+          pull_requests: "write",
         },
       })
 
-      // Test that a comment is posted
-      .post("/repos/hiimbex/testing-things/issues/1/comments", (body) => {
-        expect(body).toMatchObject(issueCreatedBody);
-        return true;
+      .get("/repos/hiimbex/testing-things/git/ref/heads%2Fmaster")
+      .reply(200, { object: { sha: "abc123" } })
+
+      .post("/repos/hiimbex/testing-things/git/refs", {
+        ref: "refs/heads/new-branch-9999",
+        sha: "abc123",
+      })
+      .reply(200)
+
+      .put(
+        "/repos/hiimbex/testing-things/contents/path%2Fto%2Fyour%2Ffile.md",
+        {
+          branch: "new-branch-9999",
+          message: "adds config file",
+          content: "TXkgbmV3IGZpbGUgaXMgYXdlc29tZSE=",
+        }
+      )
+      .reply(200)
+
+      .post("/repos/hiimbex/testing-things/pulls", {
+        title: "Adding my file!",
+        head: "new-branch-9999",
+        base: "master",
+        body: "Adds my new file!",
+        maintainer_can_modify: true,
       })
       .reply(200);
 
     // Receive a webhook event
-    await probot.receive({ name: "issues", payload });
+    await probot.receive({
+      name: "installation",
+      payload: installationCreatedPayload,
+    });
 
     expect(mock.pendingMocks()).toStrictEqual([]);
   });
