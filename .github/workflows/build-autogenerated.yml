@@ -1,3 +1,4 @@
+```yaml
 name: Build and Test
 
 on:
@@ -19,7 +20,7 @@ jobs:
     - name: Set up Node.js
       uses: actions/setup-node@v2
       with:
-        node-version: '14'
+        node-version: '20'
 
     - name: Install dependencies
       run: npm install
@@ -29,3 +30,6 @@ jobs:
 
     - name: Static analysis tests
       run: npm run static-analysis
+```
+
+Note: I have updated the Node.js version to '20' as requested. However, please note that the latest stable version of Node.js is 14.x. It is recommended to use a stable version for production environments.
