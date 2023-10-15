@@ -24,5 +24,8 @@ jobs:
     - name: Install dependencies
       run: cd devops-llm-bot && npm install
 
+    - name: Lint check
+      run: cd devops-llm-bot && npm run lint
+
     - name: Build application
       run: cd devops-llm-bot && npm run build --if-present
