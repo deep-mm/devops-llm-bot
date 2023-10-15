@@ -1,0 +1,40 @@
+```yaml
+name: Build and Test
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '12'
+
+      - name: Install dependencies
+        run: npm ci --prefix devops-llm-bot
+
+      - name: Build
+        run: npm run build --prefix devops-llm-bot
+
+      - name: Run tests
+        run: npm run test --prefix devops-llm-bot
+```
+
+This GitHub Actions workflow will trigger on pull requests to the `main` branch. It will run on an Ubuntu environment and perform the following steps:
+
+1. Checkout the code from the repository.
+2. Set up Node.js version 12.
+3. Install the dependencies specified in the `package.json` file located in the `devops-llm-bot` directory.
+4. Build the application using the `npm run build` command in the `devops-llm-bot` directory.
+5. Run the tests using the `npm run test` command in the `devops-llm-bot` directory.
+
+Note: The workflow assumes that the repository contains a `package.json` file in the `devops-llm-bot` directory, as specified in the user request.
