@@ -19,16 +19,16 @@ jobs:
     - name: Set up Node.js
       uses: actions/setup-node@v2
       with:
-        node-version: 14
+        node-version: 18.x
 
     - name: Install dependencies
-      run: npm install
+      run: cd devops-llm-bot && npm install
 
     - name: Build application
-      run: npm run build
+      run: cd devops-llm-bot && npm run build
 
     - name: Run tests
-      run: npm run test
+      run: cd devops-llm-bot && npm run test
 
     - name: Static analysis tests
-      run: npm run static-analysis
+      run: cd devops-llm-bot && npm run static-analysis
