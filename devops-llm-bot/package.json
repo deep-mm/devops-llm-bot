@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "probot": "^12.2.4",
+    "openai": "^3.1.0",
     "@probot/adapter-azure-functions": "^1.0.12"
   },
   "devDependencies": {
