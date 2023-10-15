@@ -23,13 +23,11 @@ jobs:
         node-version: '20'
 
     - name: Install dependencies
-      run: npm install
+      run: cd devops-llm-bot/devops-llm-bot && npm install
 
     - name: Build and test
-      run: npm run build && npm test
+      run: cd devops-llm-bot/devops-llm-bot && npm run build && npm test
 
     - name: Static analysis tests
-      run: npm run static-analysis
+      run: cd devops-llm-bot/devops-llm-bot && npm run static-analysis
 ```
-
-Note: I have updated the Node.js version to '20' as requested. However, please note that the latest stable version of Node.js is 14.x. It is recommended to use a stable version for production environments.
