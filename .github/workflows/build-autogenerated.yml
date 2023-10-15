@@ -28,4 +28,4 @@ jobs:
       run: cd devops-llm-bot && npm run build --if-present
 
     - name: Run tests
-      run: cd devops-llm-bot && npm test
+      run: cd devops-llm-bot && npm test --if-present
