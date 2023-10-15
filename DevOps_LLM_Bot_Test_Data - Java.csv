@@ -25,50 +25,7 @@ jobs:
           distribution: """"adopt""""
           cache: """"maven""""
       - name: Build with Maven
-        run: mvn -B package --file pom.xml""","yaml
-name: Build and Test
-
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v2
-
-      - name: Set up JDK
-        uses: actions/setup-java@v2
-        with:
-          java-version: 11
-
-      - name: Cache Maven Dependencies
-        uses: actions/cache@v2
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-
-      - name: Build and Test
-        run: |
-          mvn clean install
-```
-
-This GitHub Actions workflow will trigger on pushes to the `main` branch and pull requests targeting the `main` branch. It consists of a single job called `build` that runs on an Ubuntu environment.
-
-The steps in the workflow are as follows:
-1. Checkout the repository using the `actions/checkout` action.
-2. Set up the JDK version to 11 using the `actions/setup-java` action.
-3. Cache Maven dependencies to speed up subsequent builds using the `actions/cache` action.
-4. Build and test the project using the `mvn clean install` command.
-
-This workflow assumes that the repository contains a Maven project with a `pom.xml` file in the root directory.",
+        run: mvn -B package --file pom.xml""",,
 2,https://github.com/Blankj/AndroidUtilCode,https://github.com/Blankj/AndroidUtilCode/blob/master/.github/workflows/android.yml,"name: Android CI
 
 on: [push]
@@ -85,38 +42,7 @@ jobs:
       with:
         java-version: 1.8
     - name: Build with Gradle
-      run: ./gradlew build aR","yaml
-name: Build and Test
-
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: Set up Java
-        uses: actions/setup-java@v1
-        with:
-          java-version: 11
-
-      - name: Build and Test
-        run: |
-          ./gradlew build
-
-      - name: Run Tests
-        run: |
-          ./gradlew test
-",
+      run: ./gradlew build aR",,
 3,https://github.com/brettwooldridge/HikariCP,https://github.com/brettwooldridge/HikariCP/blob/dev/.github/workflows/ci.yml,"name: CI
 
 on:
@@ -149,54 +75,7 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-maven-
     - name: Build
-      run: mvn --no-transfer-progress -B clean package --file pom.xml","yaml
-name: Build and Test
-
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
-
-jobs:
-  build-and-test:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: Set up Java
-        uses: actions/setup-java@v1
-        with:
-          java-version: 11
-
-      - name: Cache Maven dependencies
-        uses: actions/cache@v2
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-
-      - name: Build with Maven
-        run: mvn clean install
-
-      - name: Run tests
-        run: mvn test
-```
-
-This GitHub Actions workflow will trigger on pushes to the `main` branch and pull requests targeting the `main` branch. It consists of a single job called `build-and-test` that runs on an Ubuntu environment.
-
-The steps in the workflow are as follows:
-
-1. Checkout repository: This step checks out the repository code onto the runner machine.
-2. Set up Java: This step sets up the Java environment using the specified version (Java 11).
-3. Cache Maven dependencies: This step caches the Maven dependencies to speed up subsequent builds. The cache is stored in the `~/.m2/repository` directory and is keyed based on the operating system and the hash of the `pom.xml` files.
-4. Build with Maven: This step runs the `mvn clean install` command to build the project.
-5. Run tests: This step runs the `mvn test` command to execute the tests.
-
-Note: The workflow assumes that the repository contains a Maven project with a `pom.xml` file. If the project uses a different build tool or has a different project structure, the workflow may need to be adjusted accordingly.",
+      run: mvn --no-transfer-progress -B clean package --file pom.xml",,
 4,https://github.com/apolloconfig/apollo,https://github.com/apolloconfig/apollo/blob/master/.github/workflows/build.yml,"#
 # Copyright 2023 Apollo Authors
 #
@@ -255,46 +134,7 @@ jobs:
       uses: codecov/codecov-action@v1
       with:
         file: ${{ github.workspace }}/apollo-*/target/site/jacoco/jacoco.xml
-","yaml
-name: Build and Test
-
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: Set up JDK
-        uses: actions/setup-java@v1
-        with:
-          java-version: 11
-
-      - name: Cache Maven dependencies
-        uses: actions/cache@v1
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-
-      - name: Build and test
-        run: mvn clean install
-
-      - name: Upload test coverage
-        uses: codecov/codecov-action@v1
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-```
-
-Note: Replace `${{ secrets.CODECOV_TOKEN }}` with the actual token for uploading test coverage to Codecov.",
+",,
 5,https://github.com/dianping/cat,https://github.com/dianping/cat/blob/master/.github/workflows/build.yml,"name: Build
 
 on:
@@ -331,36 +171,7 @@ jobs:
            docker buildx build --load
             -t $HUB/$IMAGE:$TAG -t $HUB/$IMAGE:latest
             -f docker/Dockerfile . &&
-            docker buildx rm cat-bulder","yaml
-name: Build and Test
-
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Set up Java
-        uses: actions/setup-java@v3
-        with:
-          java-version: 11
-
-      - name: Build and Test
-        run: |
-          mvn clean install
-```
-
-This GitHub Actions workflow will trigger on push or pull request events on the `main` branch. It sets up the Java environment, checks out the repository, and then runs the `mvn clean install` command to build and test the application.",
+            docker buildx rm cat-bulder",,
 6,https://github.com/google/dagger,https://github.com/google/dagger/blob/master/.github/actions/bazel-build/action.yml,"name: 'Bazel build'
 description: 'Builds artifacts and creates the Dagger local snapshots.'
 
@@ -402,42 +213,7 @@ runs:
       run: |
         rm -rf $(bazel info repository_cache)
         rm -rf ~/.cache/bazel/*/*/external/
-      shell: bash","yaml
-name: Build and Test
-
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Set up Java
-        uses: actions/setup-java@v3
-        with:
-          java-version: '11'
-
-      - name: Cache Maven dependencies
-        uses: actions/cache@v2
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-maven-
-
-      - name: Build and Test
-        run: |
-          mvn clean install
-
-",
+      shell: bash",,
 7,https://github.com/google/gson,https://github.com/google/gson/blob/main/.github/workflows/build.yml,"name: Build
 
 on: [push, pull_request]
@@ -482,51 +258,7 @@ jobs:
       - name: Build and run tests
         # Only run tests in `graal-native-image-test` (and implicitly build and run tests in `gson`),
         # everything else is covered already by regular build job above
-        run: mvn test --batch-mode --update-snapshots --no-transfer-progress --activate-profiles native-image-test --projects graal-native-image-test --also-make","yaml
-name: Build and Test
-
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
-
-      - name: Set up Java
-        uses: actions/setup-java@v3
-        with:
-          java-version: '11'
-
-      - name: Cache Maven Dependencies
-        uses: actions/cache@v3
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-maven-
-
-      - name: Build and Test
-        run: mvn clean install
-```
-
-This GitHub Actions workflow will trigger on every push to the `main` branch and on every pull request targeting the `main` branch. It consists of a single job called `build` that runs on an Ubuntu environment.
-
-The steps in the workflow are as follows:
-
-1. Checkout Repository: This step checks out the repository code onto the runner machine.
-2. Set up Java: This step sets up the Java environment using the specified Java version (Java 11 in this case).
-3. Cache Maven Dependencies: This step caches the Maven dependencies to speed up subsequent builds. It uses the `actions/cache` action to cache the `~/.m2/repository` directory.
-4. Build and Test: This step runs the `mvn clean install` command to build and test the project. Maven will automatically download the required dependencies and execute the build and test phases.
-
-Note: The workflow assumes that the repository contains a Maven project with a `pom.xml` file in the root directory. If the project structure or build process is different, the workflow may need to be adjusted accordingly.",
+        run: mvn test --batch-mode --update-snapshots --no-transfer-progress --activate-profiles native-image-test --projects graal-native-image-test --also-make",,
 8,https://github.com/greenrobot/EventBus,https://github.com/greenrobot/EventBus/blob/master/.github/workflows/gradle.yml,"# This workflow will build a Java project with Gradle
 # For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-gradle
 
@@ -554,42 +286,7 @@ jobs:
       - name: Gradle Info
         run: ./gradlew -version
       - name: Build with Gradle
-        run: ./gradlew build","yaml
-name: Build and Test
-
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Set up Java
-        uses: actions/setup-java@v3
-        with:
-          java-version: '11'
-
-      - name: Build and Test
-        run: |
-          cd EventBus
-          ./gradlew build
-
-      - name: Publish Test Results
-        if: always()
-        uses: actions/upload-artifact@v2
-        with:
-          name: test-results
-          path: EventBus/build/test-results
-",
+        run: ./gradlew build",,
 9,https://github.com/iBotPeaches/Apktool,https://github.com/iBotPeaches/Apktool/blob/master/.github/workflows/build.yml,"name: CI
 on:
   push:
@@ -671,50 +368,7 @@ jobs:
       - name: Build and test
         uses: gradle/gradle-build-action@v2.9.0
         with:
-          arguments: build shadowJar proguard","yaml
-name: Build and Test
-
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up Java
-        uses: actions/setup-java@v3
-        with:
-          java-version: 11
-
-      - name: Build with Gradle
-        uses: actions/gradle/gradle-build-action@v2.9.0
-        with:
-          arguments: build
-
-      - name: Run tests
-        run: |
-          if [ -d ""src/test"" ]; then
-            ./gradlew test
-          fi
-```
-
-This GitHub Actions workflow will trigger on pushes and pull requests to the `main` branch. It will perform the following steps:
-
-1. Checkout the repository.
-2. Set up Java 11.
-3. Build the project using Gradle.
-4. If the `src/test` directory exists, run the tests using `./gradlew test`.
-
-Note: This workflow assumes that the project is using Gradle as the build tool and follows the standard directory structure for a Java project. If the project structure or build tool is different, the workflow may need to be modified accordingly.",
+          arguments: build shadowJar proguard",,
 10,https://github.com/iluwatar/java-design-patterns,https://github.com/iluwatar/java-design-patterns/blob/master/.github/workflows/maven-ci.yml,"name: Java CI
 
 on:
@@ -767,39 +421,7 @@ jobs:
       env:
         # These two env variables are needed for sonar analysis
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}","yaml
-name: Build and Test
-
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Set up Java
-        uses: actions/setup-java@v3
-        with:
-          java-version: 11
-
-      - name: Cache Maven dependencies
-        uses: actions/cache@v2
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-
-      - name: Build and test
-        run: mvn clean install
-",
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}",,
 11,https://github.com/linlinjava/litemall,https://github.com/linlinjava/litemall/blob/master/.github/workflows/main.yml,"name: Actions
 
 on: [push, pull_request]
@@ -868,71 +490,7 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
     - run: npm --prefix litemall-vue install
-    - run: npm --prefix litemall-vue run test","yaml
-name: Build and Test
-
-on:
-  push:
-    branches:
-      - master
-  pull_request:
-    branches:
-      - master
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: Set up Java
-        uses: actions/setup-java@v2
-        with:
-          java-version: '11'
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v1
-        with:
-          node-version: '14'
-
-      - name: Cache Maven dependencies
-        uses: actions/cache@v2
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-maven-
-
-      - name: Cache npm dependencies
-        uses: actions/cache@v2
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: ${{ runner.os }}-npm-
-
-      - name: Build and test Java application
-        run: |
-          cd litemall
-          mvn clean install
-
-      - name: Build and test Vue application
-        run: |
-          cd litemall-vue
-          npm ci
-          npm run build
-
-      - name: Run tests
-        run: |
-          cd litemall
-          mvn test
-
-      - name: Publish test results
-        uses: actions/upload-artifact@v2
-        with:
-          name: test-results
-          path: litemall/target/surefire-reports
-",
+    - run: npm --prefix litemall-vue run test",,
 12,https://github.com/LMAX-Exchange/disruptor,https://github.com/LMAX-Exchange/disruptor/blob/master/.github/workflows/gradle-build.yml,"name: Java CI with Gradle
 
 on: [ push, pull_request ]
@@ -961,36 +519,7 @@ jobs:
           name: libs-and-reports
           path: |
             build/libs
-            build/reports","yaml
-name: Build and Test
-
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Set up Java
-        uses: actions/setup-java@v2
-        with:
-          java-version: '11'
-
-      - name: Build with Gradle
-        run: ./gradlew build
-
-      - name: Run tests
-        run: ./gradlew test
-",
+            build/reports",,
 13,https://github.com/Netflix/Hystrix,https://github.com/Netflix/Hystrix/blob/master/.github/workflows/nebula-ci.yml,"name: ""CI""
 on:
   push:
@@ -1035,48 +564,7 @@ jobs:
           CI_BUILD_NUMBER: ${{ github.sha }}
           CI_BUILD_URL: 'https://github.com/${{ github.repository }}'
           CI_BRANCH: ${{ github.ref }}
-          COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}","yaml
-name: Build and Test
-
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
-
-jobs:
-  build-and-test:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: Set up Java
-        uses: actions/setup-java@v1
-        with:
-          java-version: 11
-
-      - name: Cache Gradle dependencies
-        uses: actions/cache@v2
-        with:
-          path: ~/.gradle/caches
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
-          restore-keys: ${{ runner.os }}-gradle-
-
-      - name: Build and Test
-        run: |
-          ./gradlew build
-
-      - name: Publish test results
-        if: always()
-        uses: actions/upload-artifact@v2
-        with:
-          name: test-results
-          path: build/test-results
-",
+          COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}",,
 14,https://github.com/ReactiveX/RxAndroid,https://github.com/ReactiveX/RxAndroid/blob/3.x/.github/workflows/build.yaml,"name: build
 
 on:
@@ -1106,38 +594,7 @@ jobs:
         if: ${{ github.ref == 'refs/heads/3.x' && github.repository == 'ReactiveX/RxAndroid' }}
         env:
           ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.SONATYPE_USER }}
-          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.SONATYPE_PASSWORD }}","yaml
-name: Build and Test
-
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up Java
-        uses: actions/setup-java@v3
-        with:
-          java-version: '11'
-
-      - name: Validate Gradle Wrapper
-        uses: actions/gradle/wrapper-validation-action@v1.1.0
-
-      - name: Build and Test
-        run: |
-          ./gradlew build
-
-",
+          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.SONATYPE_PASSWORD }}",,
 15,https://github.com/seata/seata,https://github.com/seata/seata/blob/2.x/.github/workflows/build.yml,"name: ""build""
 
 on:
@@ -1239,36 +696,7 @@ jobs:
 
       - name: Print JVM thread dumps when cancelled
         uses: ./.github/actions/print-jvm-thread-dumps
-        if: cancelled()","yaml
-name: Build and Test
-
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up Java
-        uses: actions/setup-java@v3
-        with:
-          java-version: 11
-
-      - name: Build with Gradle
-        run: ./gradlew build
-
-      - name: Run tests
-        run: ./gradlew test
-",
+        if: cancelled()",,
 17,https://github.com/TheAlgorithms/Java,https://github.com/TheAlgorithms/Java/blob/master/.github/workflows/build.yml,"name: Build
 on: [push, pull_request]
 jobs:
@@ -1282,36 +710,7 @@ jobs:
           java-version: 17
           distribution: 'adopt'
       - name: Build with Maven
-        run: mvn --batch-mode --update-snapshots verify","yaml
-name: Build and Test
-
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up Java
-        uses: actions/setup-java@v3
-        with:
-          java-version: '11'
-
-      - name: Build with Maven
-        run: mvn clean install
-
-      - name: Run tests
-        run: mvn test
-",
+        run: mvn --batch-mode --update-snapshots verify",,
 18,https://github.com/spring-projects/spring-petclinic,https://github.com/spring-projects/spring-petclinic/blob/main/.github/workflows/maven-build.yml,"name: Java CI with Maven
 
 on:
@@ -1337,38 +736,7 @@ jobs:
           distribution: 'adopt'
           cache: maven
       - name: Build with Maven Wrapper
-        run: ./mvnw -B package","yaml
-name: Build and Test
-
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Set up Java
-        uses: actions/setup-java@v2
-        with:
-          java-version: '11'
-
-      - name: Build and Test
-        run: |
-          ./mvnw clean install
-
-      - name: Run Tests
-        run: |
-          ./mvnw test
-",
+        run: ./mvnw -B package",,
 19,https://github.com/square/javapoet,https://github.com/square/javapoet/blob/master/.github/workflows/build.yml,"name: build
 
 on: [push, pull_request]
@@ -1387,36 +755,7 @@ jobs:
       - run: mvn --no-transfer-progress verify source:jar javadoc:jar
 
       - run: mvn --no-transfer-progress deploy --settings="".github/workflows/settings.xml"" -Dmaven.test.skip=true
-        if: ${{ github.ref == 'refs/heads/master' && github.repository == 'square/javapoet' }}","yaml
-name: Build and Test
-
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
-
-jobs:
-  build-and-test:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Set up Java
-        uses: actions/setup-java@v3
-        with:
-          java-version: '11'
-
-      - name: Build with Maven
-        run: mvn clean install
-
-      - name: Run Tests
-        run: mvn test
-",
+        if: ${{ github.ref == 'refs/heads/master' && github.repository == 'square/javapoet' }}",,
 20,https://github.com/seata/seata,https://github.com/seata/seata/blob/2.x/.github/workflows/build.yml,"name: ""build""
 
 on:
@@ -1516,42 +855,7 @@ jobs:
       if: success()
       with:
         name: dex-tools
-        path: dex-tools/build/distributions/dex-tools-*.zip","yaml
-name: Build and Test
-
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Set up Java
-        uses: actions/setup-java@v3
-        with:
-          java-version: 11
-
-      - name: Build with Gradle
-        run: ./gradlew build
-
-      - name: Run tests
-        run: ./gradlew test
-
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: build-artifacts
-          path: build/
-",
+        path: dex-tools/build/distributions/dex-tools-*.zip",,
 22,https://github.com/pinpoint-apm/pinpoint,https://github.com/pinpoint-apm/pinpoint/blob/master/.github/workflows/maven.yml,"# This workflow will build a Java project with Maven
 # For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-maven
 
@@ -1625,36 +929,7 @@ jobs:
       with:
         java-version: 1.8
     - name: Build with Maven
-      run: mvn -B clean package -Pdev -DskipTests --file pom.xml","yaml
-name: Build and Test
-
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: Set up Java
-        uses: actions/setup-java@v1
-        with:
-          java-version: 11
-
-      - name: Build with Maven
-        run: mvn clean install
-
-      - name: Run tests
-        run: mvn test
-",
+      run: mvn -B clean package -Pdev -DskipTests --file pom.xml",,
 24,https://github.com/Nepxion/Discovery,https://github.com/Nepxion/Discovery/blob/6.x.x/.github/workflows/maven.yml,"# This workflow will build a Java project with Maven
 # For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-maven
 
@@ -1679,38 +954,7 @@ jobs:
         java-version: '8'
         distribution: 'adopt'
     - name: Build with Maven
-      run: mvn -B package --file pom.xml","yaml
-name: Build and Test
-
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: Set up JDK 11
-        uses: actions/setup-java@v2
-        with:
-          java-version: 11
-
-      - name: Build with Maven
-        run: mvn clean install -DskipTests
-
-      - name: Run tests
-        run: mvn test
-```
-
-This GitHub Actions workflow will trigger on every push or pull request to the `main` branch. It sets up the JDK 11 environment, checks out the repository, builds the project using Maven (skipping tests), and then runs the tests.",
+      run: mvn -B package --file pom.xml",,
 25,https://github.com/microg/GmsCore,https://github.com/microg/GmsCore/blob/master/.github/workflows/build.yml,"name: Build
 on: [pull_request, push]
 jobs:
@@ -1728,35 +972,7 @@ jobs:
       - run: ./gradlew --no-daemon build
         env:
           TERM: dumb
-          JAVA_OPTS: -Xmx2048m","yaml
-name: Build and Test
-
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: Set up Java
-        uses: actions/setup-java@v3
-        with:
-          java-version: '11'
-
-      - name: Build and Test
-        run: |
-          ./gradlew build
-
-",
+          JAVA_OPTS: -Xmx2048m",,
 26,https://github.com/micronaut-projects/micronaut-core,https://github.com/micronaut-projects/micronaut-core/blob/4.2.x/.github/workflows/gradle.yml,"name: Java CI
 on:
   push:
@@ -1828,47 +1044,7 @@ jobs:
         with:
           check_name: Java CI / Test Report (${{ matrix.java }})
           report_paths: '**/build/test-results/test/TEST-*.xml'
-          check_retries: 'true'","yaml
-name: Build and Test
-
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up Java
-        uses: actions/setup-java@v3
-        with:
-          java-version: '11'
-
-      - name: Build with Gradle
-        run: ./gradlew build
-
-      - name: Run tests
-        run: ./gradlew test
-```
-
-This is a basic GitHub Actions workflow that will build and test the Java project using Gradle. It is triggered on pushes to the `main` branch and pull requests targeting the `main` branch.
-
-The workflow consists of the following steps:
-
-1. Checkout repository: This step checks out the repository code.
-2. Set up Java: This step sets up the Java environment with the specified version (Java 11 in this case).
-3. Build with Gradle: This step runs the Gradle build command to build the project.
-4. Run tests: This step runs the Gradle test command to execute the tests.
-
-Note: Make sure to replace `./gradlew` with the correct Gradle wrapper command if your project uses a different wrapper script.",
+          check_retries: 'true'",,
 27,https://github.com/mockito/mockito,https://github.com/mockito/mockito/blob/main/.github/workflows/ci.yml,"name: CI
 
 on:
@@ -1956,60 +1132,7 @@ jobs:
       uses: codecov/codecov-action@v3
       with:
         files: build/reports/jacoco/mockitoCoverage/mockitoCoverage.xml
-        fail_ci_if_error: true","yaml
-name: Build and Test
-
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Set up Java
-        uses: actions/setup-java@v3
-        with:
-          java-version: '11'
-
-      - name: Build with Gradle
-        run: ./gradlew build
-
-      - name: Run Tests
-        run: ./gradlew test
-
-      - name: Upload Test Results
-        uses: actions/upload-artifact@v3
-        with:
-          name: test-results
-          path: '**/build/test-results'
-
-      - name: Code Coverage
-        uses: codecov/codecov-action@v3
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-
-      - name: Validate Gradle Wrapper
-        uses: actions/gradle/wrapper-validation-action@v1.1.0
-
-      - name: Run Android Emulator
-        uses: reactivecircus/android-emulator-runner@v2
-        with:
-          api-level: 28
-          arch: x86_64
-          profile: Nexus 5
-
-      - name: Build and Test Android
-        run: ./gradlew connectedAndroidTest
-",
+        fail_ci_if_error: true",,
 28,https://github.com/mybatis/generator,https://github.com/mybatis/generator/blob/master/.github/workflows/ci.yaml,"name: Java CI
 
 defaults:
@@ -2038,36 +1161,7 @@ jobs:
           java-version: ${{ matrix.java }}
           distribution: ${{ matrix.distribution }}
       - name: Test with Maven
-        run: ./mvnw test -B -D""license.skip=true""","yaml
-name: Build and Test
-
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up JDK
-        uses: actions/setup-java@v3
-        with:
-          java-version: 11
-
-      - name: Build with Maven
-        run: mvn clean install
-
-      - name: Run tests
-        run: mvn test
-",
+        run: ./mvnw test -B -D""license.skip=true""",,
 29,https://github.com/lzyzsd/JsBridge,https://github.com/lzyzsd/JsBridge/blob/master/.github/workflows/android.yml,"name: Android CI
 
 on: [push]
@@ -2084,35 +1178,7 @@ jobs:
       with:
         java-version: 1.8
     - name: Build with Gradle
-      run: ./gradlew build","yaml
-name: Build and Test
-
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: Setup Java
-        uses: actions/setup-java@v1
-        with:
-          java-version: 11
-
-      - name: Build and Test
-        run: |
-          cd library
-          ./gradlew build
-",
+      run: ./gradlew build",,
 30,https://github.com/libgdx/libgdx,https://github.com/libgdx/libgdx/blob/master/.github/workflows/build-pullrequest.yml,"name: Build pull request
 
 on:
@@ -2142,41 +1208,7 @@ jobs:
 
       - name: Build & test Java code
         run: |
-          ./gradlew fetchNatives build","yaml
-name: Build and Test
-
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: Set up Java
-        uses: actions/setup-java@v3
-        with:
-          java-version: 11
-
-      - name: Build with Gradle
-        uses: actions/gradle/gradle-build-action@v2
-        with:
-          arguments: build
-
-      - name: Run tests
-        run: |
-          if [ -d ""src/test"" ]; then
-            ./gradlew test
-          fi
-",
+          ./gradlew fetchNatives build",,
 31,https://github.com/json-path/JsonPath,https://github.com/json-path/JsonPath/blob/master/.github/workflows/ci.yml,"name: Java CI
 
 on:
@@ -2209,36 +1241,7 @@ jobs:
         run: ./gradlew check
 
       - name: Maven Install
-        run: ./gradlew clean publishToMavenLocal","yaml
-name: Build and Test
-
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: Set up Java
-        uses: actions/setup-java@v1
-        with:
-          java-version: '11'
-
-      - name: Build with Gradle
-        run: ./gradlew build
-
-      - name: Run tests
-        run: ./gradlew test
-",
+        run: ./gradlew clean publishToMavenLocal",,
 32,https://github.com/jhy/jsoup,https://github.com/jhy/jsoup/blob/master/.github/workflows/build.yml,"name: Build
 on:
   push:
@@ -2271,36 +1274,7 @@ jobs:
         run: mvn -X compile -B --file pom.xml
 
       - name: Maven Verify
-        run: mvn -X verify -B --file pom.xml","yaml
-name: Build and Test
-
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
-
-      - name: Set up Java
-        uses: actions/setup-java@v3
-        with:
-          java-version: '11'
-
-      - name: Build with Maven
-        run: mvn clean install
-
-      - name: Run Tests
-        run: mvn test
-",
+        run: mvn -X verify -B --file pom.xml",,
 33,https://github.com/karatelabs/karate,https://github.com/karatelabs/karate/blob/master/.github/workflows/maven-build.yml,"name: maven-build
 
 on:
@@ -2328,42 +1302,4 @@ jobs:
         key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
         restore-keys: ${{ runner.os }}-maven-
     - name: build with maven
-      run: mvn -B clean install -P pre-release -Djavacpp.platform=linux-x86_64","yaml
-name: Build and Test
-
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: Set up Java
-        uses: actions/setup-java@v3
-        with:
-          java-version: 11
-
-      - name: Build with Maven
-        run: mvn clean install
-
-      - name: Run tests
-        run: mvn test
-```
-
-This GitHub Actions workflow will trigger on every push to the `main` branch and on every pull request targeting the `main` branch. It runs on an Ubuntu environment and performs the following steps:
-
-1. Checks out the repository.
-2. Sets up Java 11.
-3. Builds the project using Maven.
-4. Runs the tests using Maven.
-
-Note: Make sure to replace `mvn clean install` and `mvn test` with the appropriate build and test commands for your specific project.",
+      run: mvn -B clean install -P pre-release -Djavacpp.platform=linux-x86_64",,

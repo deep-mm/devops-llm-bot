@@ -1,0 +1,882 @@
+Index,GitHub_Repo_Link,GitHub_Build_Pipeline_File_Link,GitHub_Build_Pipeline_File_Content,Generated_Build_Pipeline_File_Content,Result
+1,https://github.com/05bit/peewee-async,https://github.com/05bit/peewee-async/blob/master/.github/workflows/ci.yml,"name: CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 4
+      matrix:
+        python-version: ['3.7', '3.8', '3.9', '3.10', '3.11']
+
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        # needed because the postgres container does not provide a healthcheck
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+      mysql:
+        image: mysql
+        env:
+          MYSQL_ROOT_PASSWORD: mysql
+          MYSQL_DATABASE: mysql
+        ports:
+          - 3306:3306
+        options: --health-cmd ""mysqladmin ping -h 127.0.0.1 -u root --password=$MYSQL_ROOT_PASSWORD"" --health-interval 10s --health-timeout 5s --health-retries 10
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v1
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e .[develop]
+    - name: Run tests
+      run: pytest -s -v",,
+2,https://github.com/Anttek-io/grigory,https://github.com/Anttek-io/grigory/blob/master/.github/workflows/django.yml,"name: Django CI
+
+on:
+  push:
+    branches: [ ""master"" ]
+  pull_request:
+    branches: [ ""master"" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 4
+      matrix:
+        python-version: [""3.10""]
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v3
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    - name: Run Tests
+      run: |
+        python manage.py test",,
+3,https://github.com/APSL/puput,https://github.com/APSL/puput/blob/master/.github/workflows/tests.yml,"name: Test
+
+on: [push]
+
+jobs:
+  test:
+    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        python-version: [""3.8"", ""3.9"", ""3.10"", ""3.11""]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install tox tox-gh-actions
+      - name: Test with tox
+        run: tox",,
+4,https://github.com/Bearle/django_private_chat2,https://github.com/Bearle/django_private_chat2/blob/master/.github/workflows/test.yml,"name: Test CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 4
+      matrix:
+        include:
+
+          - python-version: 3.6
+            django-version: Django>=3.0,<3.1
+
+          - python-version: 3.6
+            django-version: Django>=3.1,<3.2
+
+          - python-version: 3.6
+            django-version: Django>=3.2,<3.3
+
+          - python-version: 3.7
+            django-version: Django>=3.0,<3.1
+
+          - python-version: 3.7
+            django-version: Django>=3.1,<3.2
+
+          - python-version: 3.7
+            django-version: Django>=3.2,<3.3
+
+          - python-version: 3.8
+            django-version: Django>=3.0,<3.1
+
+          - python-version: 3.8
+            django-version: Django>=3.1,<3.2
+
+          - python-version: 3.8
+            django-version: Django>=3.2,<3.3
+
+          - python-version: 3.8
+            django-version: Django>=4.0,<4.1
+
+          - python-version: 3.9
+            django-version: Django>=3.0,<3.1
+
+          - python-version: 3.9
+            django-version: Django>=3.1,<3.2
+
+          - python-version: 3.9
+            django-version: Django>=3.2,<3.3
+
+          - python-version: 3.9
+            django-version: Django>=4.0,<4.1
+
+          - python-version: ""3.10""
+            django-version: Django>=3.2,<3.3
+
+          - python-version: ""3.10""
+            django-version: Django>=4.0,<4.1
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip'
+          cache-dependency-path: '**/requirements_test.txt'
+
+      - name: Install Dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install -r requirements_test.txt
+          pip install ""${{ matrix.django-version }}""
+
+      - name: Run Tests
+        env:
+          DJANGO_SETTINGS_MODULE: tests.settings
+        run: |
+          python manage.py test",,
+5,https://github.com/brianrisk/qwaver,https://github.com/brianrisk/qwaver/blob/master/.github/workflows/unit-test.yml,"name: Django Tests
+
+on:
+  push:
+    branches:
+      - master
+  
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python 3
+      uses: actions/setup-python@v4.2.0
+      with:
+        python-version: 3.8
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    - name: Coverage report
+      run: |
+        pip install coverage
+        coverage run manage.py test && coverage report --fail-under=50 && coverage xml
+        coverage report
+    - name: Django Testing
+      run: |
+        python3 manage.py test
+    # PUT YOUR CODECOV_TOKEN IN SECRETS OF YOUR REPOSITORY THEN UNCOMMENT THE FOLLOWING LINE 👇🏿👇🏿
+    # - name: Setup CodeCov
+    #   uses: codecov/codecov-action@v3
+    #   with:
+    #     token: ${{ secrets.CODECOV_TOKEN }}
+    #     files: ./coverage.xml
+    #     directory: ./coverage/reports/
+    #     fail_ci_if_error: true",,
+6,https://github.com/climu/openstudyroom,https://github.com/climu/openstudyroom/blob/dev/.github/workflows/ci.yaml,"# https://docs.github.com/en/actions/guides/building-and-testing-python
+
+name: CI
+
+on:
+  push:
+    branches: '*'
+  pull_request:
+    branches: '*'
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - uses: actions/setup-python@v4
+      with:
+        python-version: '3.7'
+        cache: 'pip'
+
+    - name: install dependencies
+      run: pip3 install --quiet --requirement requirements_dev.txt
+
+    - name: pytest
+      run: ./manage.py makemigrations && pytest --create-db
+
+    - run: ruff check --format=github .",,
+7,https://github.com/OpenEthan/SMSBoom,https://github.com/OpenEthan/SMSBoom/blob/master/.github/workflows/run.yaml,"name: 🚀 Run SMSBoom in Action
+
+# 触发 Action 的条件
+on: 
+  # 定时触发 参考 https://docs.github.com/cn/actions/using-workflows/events-that-trigger-workflows#schedule
+  # schedule:
+  #     - cron: '30 5 * * 1,3'
+  #     - cron: '30 5 * * 2,4'
+  # 手动触发
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 签出项目代码
+      - uses: actions/checkout@v3
+      # 设置 py3.8 环境
+      - name: 🚀 Set up Python 3.x
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.8'
+      
+      - name: 🚀 Run SMSBoom Script
+        # 此处可以自定义命令行运行参数.替换手机号
+        run: |
+          pip3 install -r requirements.txt
+          python3 smsboom.py run -p ${{ secrets.NUMBER }} -t 32",,
+8,https://github.com/bugsnag/bugsnag-python,https://github.com/bugsnag/bugsnag-python/blob/master/.github/workflows/python-package.yml,"name: Test bugsnag-python against Python versions
+
+on: [ push, pull_request ]
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.7', '3.8', '3.9', '3.10', '3.11']
+        os: ['ubuntu-latest']
+        include:
+          - python-version: '3.5'
+            os: 'ubuntu-20.04'
+          - python-version: '3.6'
+            os: 'ubuntu-20.04'
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      run: |
+        python -m pip install coveralls 'tox<4.0.0' tox-factor
+
+    - name: Run tests
+      run: |
+        pyversion=${{ matrix.python-version }}
+        TOXFACTOR=${pyversion//.0-*/}
+        tox -f py${TOXFACTOR//./}
+
+    - name: Upload code coverage data
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        COVERALLS_FLAG_NAME: ${{ matrix.test-name }}
+        COVERALLS_PARALLEL: true
+      run: |
+        coverage combine
+        coveralls --service github
+
+  coveralls:
+    name: Finish Coveralls processing
+    needs: test
+    runs-on: ubuntu-latest
+    container: python:3-slim
+    steps:
+    - name: Send request
+      run: |
+        pip3 install --upgrade coveralls
+        coveralls --service github --finish
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}",,
+9,https://github.com/CheeseCake87/Flask-Imp,https://github.com/CheeseCake87/Flask-Imp/blob/master/.github/workflows/tests.yml,"name: Tests
+
+on:
+  push:
+    branches:
+      - master
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+  pull_request:
+    branches:
+      - master
+      - '*.x'
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+
+jobs:
+  tests:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { name: Linux, python: '3.11', os: ubuntu-latest }
+          - { name: Windows, python: '3.11', os: windows-latest }
+          - { name: Mac, python: '3.11', os: macos-latest }
+          - { name: '3.12-dev', python: '3.12-dev', os: ubuntu-latest }
+          - { name: '3.10', python: '3.10', os: ubuntu-latest }
+          - { name: '3.9', python: '3.9', os: ubuntu-latest }
+          - { name: '3.8', python: '3.8', os: ubuntu-latest }
+          - { name: 'PyPy', python: 'pypy-3.10', os: ubuntu-latest }
+          - { name: 'Development Versions', python: '3.8', os: ubuntu-latest }
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python ${{ matrix.python }}
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements_dev.txt
+      - name: Lint with flake8
+        run: |
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+      - name: Test with pytest
+        run: |
+          pytest",,
+10,https://github.com/hjlarry/flask-shop,https://github.com/hjlarry/flask-shop/blob/master/.github/workflows/python-app.yml,"# This workflow will install Python dependencies, run tests and lint with a single version of Python
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+
+name: Python application
+
+on:
+  push:
+    branches: [ ""master"" ]
+  pull_request:
+    branches: [ ""master"" ]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Shutdown Ubuntu MySQL (SUDO)
+      run: sudo service mysql stop
+    - uses: actions/checkout@v3
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v3
+      with:
+        python-version: ""3.10""
+    - uses: mirromutth/mysql-action@v1.1
+      with:
+        mysql database: 'testshop'
+        mysql root password: 'root'
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install flake8 pytest
+        pip install -r requirements.txt
+    - name: Lint with flake8
+      run: |
+        # stop the build if there are Python syntax errors or undefined names
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+        flake8 . --count --exit-zero --max-complexity=15 --max-line-length=127 --statistics
+    - name: Test with pytest
+      run: |
+        pytest",,
+11,https://github.com/jkenlooper/puzzle-massive,https://github.com/jkenlooper/puzzle-massive/blob/develop/.github/workflows/python-app.yml,"# This workflow will install Python dependencies, run tests and lint with a single version of Python
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+
+name: Python application
+
+on:
+  push:
+    branches: [ develop ]
+  pull_request:
+    branches: [ develop ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python 3.7
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.7
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install flake8 pytest
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+    - name: Lint with flake8
+      run: |
+        # stop the build if there are Python syntax errors or undefined names
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+    - name: Test with pytest
+      run: |
+        python -m unittest",,
+12,https://github.com/metabrainz/critiquebrainz,https://github.com/metabrainz/critiquebrainz/blob/master/.github/workflows/tests.yml,"name: CritiqueBrainz CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ '*' ]
+
+jobs:
+
+  test:
+    name: Run test suite
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Create configuration file
+      run: cp custom_config.py.example custom_config.py
+
+    - name: Login to Docker Hub
+      run: echo ${{ secrets.DOCKER_HUB_PASSWORD }} | docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} --password-stdin
+      continue-on-error: true
+
+    - name: Pull docker images
+      run: docker-compose -f docker/docker-compose.test.yml pull
+
+    - uses: satackey/action-docker-layer-caching@v0.0.11
+      continue-on-error: true
+      with:
+        key: critiquebrainz-prod-image-{hash}
+        restore-keys: |
+          critiquebrainz-prod-image-
+
+    - name: Run tests
+      run: ./test.sh
+
+    - name: Publish Test Results
+      uses: EnricoMi/publish-unit-test-result-action@v1.11
+      if: ${{ always() }}
+      with:
+        files: reports/tests.xml
+
+  prod:
+      name: Build Production Image
+      runs-on: ubuntu-latest
+      needs: test
+
+      steps:
+      - uses: actions/checkout@v2
+
+      - name: Login to Docker Hub
+        run: echo ${{ secrets.DOCKER_HUB_PASSWORD }} | docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} --password-stdin
+        continue-on-error: true
+
+      - uses: satackey/action-docker-layer-caching@v0.0.11
+        continue-on-error: true
+
+      - name: Build production image
+        run: docker build --build-arg GIT_COMMIT_SHA=HEAD .",,
+13,https://github.com/michael-lazar/flask-gopher,https://github.com/michael-lazar/flask-gopher/blob/master/.github/workflows/test.yml,"name: Test
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: [""3.7"", ""3.8"", ""3.9"", ""3.10"", ""3.11""]
+        flask-version: [""2.1"", ""2.2""]
+        os: [ubuntu-latest]
+    steps:
+    - name: Check out repository
+      uses: actions/checkout@v3
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install packages
+      run: |
+        pip install . Flask==${{ matrix.flask-version}}
+        pip install .[test]
+    - name: Run mypy
+      run: |
+        mypy flask_gopher/ demo/
+    - name: Run pytest
+      run: |
+        pytest -v tests/",,
+14,https://github.com/naorlivne/terraformize,https://github.com/naorlivne/terraformize/blob/master/.github/workflows/full_ci_cd_workflow.yml,"name: push CI CD
+
+on:
+  push:
+    branches: [ ""master"" ]
+
+jobs:
+
+  testing_job:
+
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [ ""3.9"", ""3.10"", ""3.11"" ]
+    services:
+      consul:
+        image: hashicorp/consul
+      rabbit:
+        image: rabbitmq:3.11.4-management-alpine
+    container: python:${{ matrix.python-version }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install dependencies
+        run: |
+          wget https://releases.hashicorp.com/terraform/1.2.5/terraform_1.2.5_linux_amd64.zip -O /tmp/terraform_1.2.5_linux_amd64.zip
+          unzip /tmp/terraform_*.zip
+          cp terraform /usr/bin/terraform
+          python -m pip install --upgrade pip
+          pip install flake8
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+      - name: Lint with flake8
+        run: |
+          # stop the build if there are Python syntax errors or undefined names
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+      - name: Test
+        run: |
+          coverage run -m unittest
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: true
+
+  build_and_publish_job:
+
+    runs-on: ubuntu-latest
+    needs: testing_job
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Build and push
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: naorlivne/${{ github.event.repository.name }}:latest
+
+  build_and_publish_job_version:
+
+    runs-on: ubuntu-latest
+    needs: testing_job
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Build and push
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: naorlivne/${{ github.event.repository.name }}:v${{ github.run_number }}",,
+15,https://github.com/vulnman/vulnman,https://github.com/vulnman/vulnman/blob/main/.github/workflows/django.yml,"name: Django Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 4
+      matrix:
+        python-version: [3.8, 3.9, ""3.10""]
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install -r requirements-dev.txt
+        echo 'SECRET_KEY = ""Test""' > vulnman/conf/secret_key.py
+        python manage.py create_secret_key
+    - name: Run Tests
+      run: |
+        python manage.py test",,
+16,https://github.com/whiskyechobravo/kerko,https://github.com/whiskyechobravo/kerko/blob/main/.github/workflows/tests.yml,"# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+
+name: tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [""3.7"", ""3.8"", ""3.9"", ""3.10"", ""3.11""]
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install tox
+      - name: Info
+        run: |
+          echo ""=====  PYTHON  =====""
+          python --version
+      - name: Run tests
+        run: tox -e py${{ matrix.python-version }}",,
+17,https://github.com/Ackee-Blockchain/woke,https://github.com/Ackee-Blockchain/woke/blob/main/.github/workflows/linux-ci.yaml,"name: Linux Woke tests
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: [""3.7"", ""3.8"", ""3.9"", ""3.10"", ""3.11""]
+        node-version: [16.x]
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install -e "".[tests,dev,fuzzer]""
+    - name: Test with pytest
+      run: |
+        pytest tests
+    - name: Set up Node ${{ matrix.node-version }}
+      uses: actions/setup-node@v2
+      with:
+        node-version: ${{ matrix.node-version }}
+    - name: Install Node dependencies
+      run: |
+        npm i -g pyright
+    - name: Run pyright
+      run: |
+        pyright woke
+",,
+18,https://github.com/acoular/acoular,https://github.com/acoular/acoular/blob/master/.github/workflows/python-package.yml,"# This workflow will install acoular and run tests a variety of Python versions
+
+name: Acoular install and test
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: ${{ matrix.os }} 
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python-version: ['3.7', '3.8', '3.9','3.10','3.11']
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install acoular
+      run: |
+        python -m pip install --upgrade pip
+        pip install .
+        python -c 'import acoular'
+    - name: Test with unittest *nix
+      run: |
+        chmod +x ../acoular/acoular/tests/run_tests.sh
+        cd ../acoular/acoular/tests/
+        bash run_tests.sh
+      if: ${{ matrix.os != 'windows-latest'}}
+    - name: Test with unittest Windows
+      run: |
+        cd ..\acoular\acoular\tests
+        python -m unittest discover -v -p ""test_*.py""
+      if: ${{ matrix.os == 'windows-latest'}}
+
+",,
+19,https://github.com/BSC-CNS-EAPM/AdaptivePELE,https://github.com/BSC-CNS-EAPM/AdaptivePELE/blob/master/.github/workflows/python-publish.yml,"# This workflow will upload a Python Package using Twine when a release is created
+# For more information see: https://help.github.com/en/actions/language-and-framework-guides/using-python-with-github-actions#publishing-to-package-registries
+
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+
+name: Upload Python Package
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  deploy:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install numpy
+        pip install build
+        pip install --requirement requirements.txt
+    - name: Build package
+      run: python setup.py sdist
+    - name: Publish package
+      uses: pypa/gh-action-pypi-publish@27b31702a0e7fc50959f5ad993c78deac1bdfc29
+      with:
+        user: __token__
+        password: ${{ secrets.PYPI_API_TOKEN }}",,
+20,https://github.com/AFM-SPM/TopoStats,https://github.com/AFM-SPM/TopoStats/blob/main/.github/workflows/tests.yaml,"name: Tests (pytest)
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    name: Ex1 (${{ matrix.python-version }}, ${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [""ubuntu-latest"", ""macos-latest"", ""windows-latest""]
+        python-version: ['3.9', '3.10', '3.11']
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4.3.0
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Upgrade pip and install test dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -e .[tests]
+      - name: Test with pytest
+        run: |
+          pytest --cov=topostats --mpl -x
+      - name: Determine coverage
+        run: |
+          coverage xml
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3.1.1",,
