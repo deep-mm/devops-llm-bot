@@ -251,7 +251,8 @@ async function update_pipeline (old_workflow, user_comment) {
 function generateUpdateWorkflowContent(old_workflow, user_comment) {
 
   return `Analyze the existing github workflow and user requested changes provided below to create a github action build workflow. You will provide the github action workflow as the answer. Only include the yaml file in the output. Do not add any other text before or after the code.
-      Take user requests into consideration, but ensure that you only restrict the output to build and test workflow, there should not be any deploy steps in the workflow.    
+      Take user requests into consideration, but ensure that you only restrict the output to build and test steps, there should not be any deploy steps in the workflow.
+      It's of utmost importance that you return only the workflow file, and not any other text.    
 
       Existing workflow:
       ${old_workflow}
