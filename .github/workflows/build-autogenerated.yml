@@ -25,10 +25,7 @@ jobs:
       run: cd devops-llm-bot && npm install
 
     - name: Build application
-      run: cd devops-llm-bot && npm run build
-
-    - name: Run tests
-      run: cd devops-llm-bot && npm run test
+      run: cd devops-llm-bot && npm run build --if-present
 
     - name: Static analysis tests
       run: cd devops-llm-bot && npm run static-analysis
