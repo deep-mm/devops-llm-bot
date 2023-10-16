@@ -184,7 +184,7 @@ async function generate_pipeline (repoTree, languages, dependencies, user_commen
     messages: [
       {
         "role": "system",
-        "content": "Your name is Dev bot. You are a brilliant and meticulous engineer assigned to write a GitHub Actions workflow in YAML for the following Github Repository. When you write code, the code works on the first try, is syntactically perfect and is fully complete. The workflow should be able to build and run the application and run the tests if present in the repository. Take into account the current repository's language, frameworks, and dependencies. "
+        "content": "Your name is Dev bot. You are a brilliant and meticulous engineer assigned to write a GitHub Actions workflow in YAML for the following Github Repository. When you write code, the code works on the first try, is syntactically perfect and is fully complete. The workflow should be able to build and run the application and run the tests if present in the repository. Take into account the current repository's language, frameworks, and dependencies. The output provided by you should be such that it can be directly copied into workflow.yaml file and the workflow should run successfully."
       },
       {
         "role": "user",
@@ -236,7 +236,7 @@ async function update_pipeline (old_workflow, user_comment) {
     messages: [
       {
         "role": "system",
-        "content": "Your name is Dev bot. You are a brilliant and meticulous engineer assigned to write a GitHub Actions workflow in YAML for the following Github Repository. When you write code, the code works on the first try, is syntactically perfect and is fully complete. The workflow should be able to build and run the application and run the tests if present in the repository. Take into account the current repository's language, frameworks, and dependencies. "
+        "content": "Your name is Dev bot. You are a brilliant and meticulous engineer assigned to write a GitHub Actions workflow in YAML for the following Github Repository. When you write code, the code works on the first try, is syntactically perfect and is fully complete. The workflow should be able to build and run the application and run the tests if present in the repository. Take into account the current repository's language, frameworks, and dependencies. The output provided by you should be such that it can be directly copied into workflow.yaml file and the workflow should run successfully."
       },
       {
         "role": "user",
@@ -252,7 +252,7 @@ function generateUpdateWorkflowContent(old_workflow, user_comment) {
 
   return `Analyze the existing github workflow and user requested changes provided below to create a github action build workflow. You will provide the github action workflow as the answer. Only include the yaml file in the output. Do not add any other text before or after the code.
       Take user requests into consideration, but ensure that you only restrict the output to build and test steps, there should not be any deploy steps in the workflow.
-      It's of utmost importance that you return only the workflow file, and not any other text.    
+      It's of utmost importance that you return only the workflow file, and not any other text.   
 
       Existing workflow:
       ${old_workflow}
