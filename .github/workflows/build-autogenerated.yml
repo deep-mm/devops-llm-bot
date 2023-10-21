@@ -1,0 +1,87 @@
+name: Build and Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 14
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run static analysis tests
+        run: npm run lint
+
+      - name: Build and run application
+        run: npm run build
+
+      - name: Run tests
+        run: npm test
+
+      - name: Docker Build and Push
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          push: false
+          tags: |
+            ${{ github.repository }}:${{ github.sha }}
+            ${{ github.repository }}:latest
+
+      - name: Docker Compose Up
+        run: docker-compose up -d
+
+      - name: Docker Compose Down
+        run: docker-compose down
+
+      - name: Cleanup Docker images
+        run: docker image prune -f
+
+      - name: Cleanup Docker volumes
+        run: docker volume prune -f
+
+      - name: Cleanup Docker networks
+        run: docker network prune -f
+
+      - name: Cleanup Docker containers
+        run: docker container prune -f
+
+      - name: Cleanup Docker system
+        run: docker system prune -f
+
+      - name: Cleanup Node.js dependencies
+        run: npm ci
+
+      - name: Cleanup npm cache
+        run: npm cache clean --force
+
+      - name: Cleanup GitHub Actions cache
+        uses: actions/cache@v2
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Cleanup GitHub Actions cache
+        uses: actions/cache@v2
+        with:
+          path: ~/.cache
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-modules-
