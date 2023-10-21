@@ -23,16 +23,16 @@ jobs:
           node-version: 14
 
       - name: Install dependencies
-        run: npm install
+        run: npm install --if-present
 
       - name: Run static analysis tests
-        run: npm run lint
+        run: npm run lint --if-present
 
       - name: Build and run application
-        run: npm run build
+        run: npm run build --if-present
 
       - name: Run tests
-        run: npm test
+        run: npm test --if-present
 
       - name: Docker Build and Push
         uses: docker/build-push-action@v2
