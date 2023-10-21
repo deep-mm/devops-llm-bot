@@ -18,7 +18,7 @@ async function invoke_openai(user_message) {
       messages: [
         {
           "role": "system",
-          "content": systemMessage
+          "content": systemMessage,
         },
         {
           "role": "user",
@@ -29,14 +29,29 @@ async function invoke_openai(user_message) {
     return completion.data.choices[0].message['content'];
 }
 
-const generate_pipeline = async (repoTree, languages, dependencies, user_comment) => {
+const generate_pipeline = async (repoTree, languages, dependencies, user_comment, default_branch) => {
     setup();
-    return await invoke_openai(generateContent(repoTree, languages, dependencies, user_comment));    
+    let user_message = generateContent(repoTree, languages, dependencies, user_comment, default_branch);
+    // Restrict user_message to 8000 characters
+    user_message = user_message;
+    if (user_message.length > 8000) {
+      user_message = user_message.substring(0, 8000);
+      user_message = user_message + " ... Output truncated to 8000 characters.";
+    }
+
+    return await invoke_openai(user_message);
 }
 
-const update_pipeline = async (old_workflow, user_comment) => {
+const update_pipeline = async (old_workflow, user_comment, past_conversations) => {
     setup();
-    return await invoke_openai(generateUpdateWorkflowContent(old_workflow, user_comment));
+    let user_message = generateUpdateWorkflowContent(old_workflow, user_comment, past_conversations);
+    // Restrict user_message to 8000 characters
+    if (user_message.length > 8000) {
+      user_message = user_message.substring(0, 8000);
+      user_message = user_message + " ... Output truncated to 8000 characters.";
+    }
+
+    return await invoke_openai(user_message);
 }
 
 module.exports = { generate_pipeline, update_pipeline };
