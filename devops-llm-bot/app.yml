@@ -16,34 +16,34 @@ default_events:
   # - check_run
   # - check_suite
   # - commit_comment
-  - create
+  # - create
   # - delete
   # - deployment
   # - deployment_status
   # - fork
   # - gollum
-  # - issue_comment
+  - issue_comment
   - issues
   # - label
   # - milestone
   # - member
   # - membership
   # - org_block
-  - organization
+  # - organization
   # - page_build
   # - project
   # - project_card
   # - project_column
   # - public
-  - pull_request
-  - pull_request_review
+  # - pull_request
+  # - pull_request_review
   - pull_request_review_comment
   # - push
   # - release
-  - repository
+  # - repository
   # - repository_import
   # - status
-  - team
+  # - team
 # - team_add
 # - watch
 
@@ -52,9 +52,13 @@ default_events:
 # the value (for example, write).
 # Valid values are `read`, `write`, and `none`
 default_permissions:
+  # Actions Workflows, workflow runs and artifacts.
+  # https://developer.github.com/v3/apps/permissions/#permission-on-actions
+  actions: write
+
   # Repository creation, deletion, settings, teams, and collaborators.
   # https://developer.github.com/v3/apps/permissions/#permission-on-administration
-  administration: read
+  # administration: read
 
   # Checks on code.
   # https://developer.github.com/v3/apps/permissions/#permission-on-checks
@@ -70,7 +74,7 @@ default_permissions:
 
   # Issues and related comments, assignees, labels, and milestones.
   # https://developer.github.com/v3/apps/permissions/#permission-on-issues
-  issues: read
+  issues: write
 
   # Search repositories, list collaborators, and access repository metadata.
   # https://developer.github.com/v3/apps/permissions/#metadata-permissions
@@ -102,7 +106,7 @@ default_permissions:
 
   # Organization members and teams.
   # https://developer.github.com/v3/apps/permissions/#permission-on-members
-  members: read
+  # members: read
 
   # View and manage users blocked by the organization.
   # https://developer.github.com/v3/apps/permissions/#permission-on-organization-user-blocking
@@ -122,7 +126,11 @@ default_permissions:
 
   # Get notified of, and update, content references.
   # https://developer.github.com/v3/apps/permissions/
-  organization_administration: read
+  # organization_administration: read
+
+  # Workflows - Update GitHub Action workflow files.
+  # https://developer.github.com/v3/apps/permissions/#permission-on-workflows
+  workflows: write
 # The name of the GitHub App. Defaults to the name specified in package.json
 # name: My Probot App
 

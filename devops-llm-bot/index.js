@@ -1,41 +1,10 @@
-// Git Data API use case example
-// See: https://developer.github.com/v3/git/ to learn more
+const { generate_pipeline, update_pipeline } = require("./src/chat-gpt");
 
-const { OpenAIApi, Configuration } = require("openai");
 /**
  * This is the main entrypoint to your Probot app
  * @param {import('probot').Probot} app
  */
 module.exports = (app) => {
-
-  // app.on("issue_comment.edited", async (context) => {
-  //   const repo = context.payload.repository.name;
-  //   const owner = context.payload.repository.owner.login;
-  //   const defaultBranch = "main"
-
-  //   const repositoryTree = await context.octokit.git.getTree({
-  //     repo,
-  //     owner,
-  //     tree_sha: "heads/" + defaultBranch,
-  //   });
-
-  //   console.log(repositoryTree.data.tree.map((item) => item.path));
-
-  //   const languages = await context.octokit.repos.listLanguages({
-  //     repo,
-  //     owner,
-  //   });
-
-  //   console.log(Object.keys(languages.data));
-  //   // Filter languages to only get keys
-
-  //   // const dependencies = context.octokit.dependencyGraph.exportSbom ({
-  //   //   repo,
-  //   //   owner,
-  //   // });
-
-  //   // console.log(dependencies);
-  // });
 
   app.on("issue_comment.created", async (context) => {
     if (context.payload.comment.body.startsWith("@devops-llm-bot") && context.payload.issue.pull_request!=null) {
@@ -155,108 +124,4 @@ module.exports = (app) => {
       });
     }
   });
-  // For more information on building apps:
-  // https://probot.github.io/docs/
-
-  // To get your app running against GitHub, see:
-  // https://probot.github.io/docs/development/
 };
-
-async function generate_pipeline (repoTree, languages, dependencies, user_comment) {
-  const configuration = new Configuration({
-    apiKey: process.env.OPENAI_API_KEY,
-  });
-  const openai = new OpenAIApi(configuration);
-  
-  if (!configuration.apiKey) {
-    res.status(500).json({
-      error: {
-        message: "OpenAI API key not configured, please follow instructions in README.md",
-      }
-    });
-    return;
-  }
-
-  const completion = await openai.createChatCompletion({
-    model: "gpt-3.5-turbo-16k",
-    temperature: 0.2,
-    max_tokens: 1000,
-    messages: [
-      {
-        "role": "system",
-        "content": "Your name is Dev bot. You are a brilliant and meticulous engineer assigned to write a GitHub Actions workflow in YAML for the following Github Repository. When you write code, the code works on the first try, is syntactically perfect and is fully complete. The workflow should be able to build and run the application and run the tests if present in the repository. Take into account the current repository's language, frameworks, and dependencies. The output provided by you should be such that it can be directly copied into workflow.yaml file and the workflow should run successfully."
-      },
-      {
-        "role": "user",
-        "content": generateContent(repoTree, languages, dependencies, user_comment),
-      },
-    ]
-  });
-  return completion.data.choices[0].message['content'];
-  
-}
-
-function generateContent(repoTree, languages, dependencies, user_comment) {
-
-  return `Analyze the github repository structure, language, framework and dependencies provide below to create a github action build workflow. You will provide the github action workflow as the answer. Only include the yaml file in the output. Do not add any other text before or after the code.
-      Take user requests into consideration, but ensure that you only restrict the output to build and test workflow, there should not be any deploy steps in the workflow.    
-
-      User requests:
-      ${user_comment}
-
-      Repository structure:
-      ${repoTree}
-
-      Languages: 
-      ${languages}
-
-      Dependencies: 
-      ${dependencies}`
-}
-
-async function update_pipeline (old_workflow, user_comment) {
-  const configuration = new Configuration({
-    apiKey: process.env.OPENAI_API_KEY,
-  });
-  const openai = new OpenAIApi(configuration);
-  
-  if (!configuration.apiKey) {
-    res.status(500).json({
-      error: {
-        message: "OpenAI API key not configured, please follow instructions in README.md",
-      }
-    });
-    return;
-  }
-
-  const completion = await openai.createChatCompletion({
-    model: "gpt-3.5-turbo-16k",
-    temperature: 0.2,
-    max_tokens: 1000,
-    messages: [
-      {
-        "role": "system",
-        "content": "Your name is Dev bot. You are a brilliant and meticulous engineer assigned to write a GitHub Actions workflow in YAML for the following Github Repository. When you write code, the code works on the first try, is syntactically perfect and is fully complete. The workflow should be able to build and run the application and run the tests if present in the repository. Take into account the current repository's language, frameworks, and dependencies. The output provided by you should be such that it can be directly copied into workflow.yaml file and the workflow should run successfully."
-      },
-      {
-        "role": "user",
-        "content": generateUpdateWorkflowContent(old_workflow, user_comment),
-      },
-    ]
-  });
-  return completion.data.choices[0].message['content'];
-  
-}
-
-function generateUpdateWorkflowContent(old_workflow, user_comment) {
-
-  return `Analyze the existing github workflow and user requested changes provided below to create a github action build workflow. You will provide the github action workflow as the answer. Only include the yaml file in the output. Do not add any other text before or after the code.
-      Take user requests into consideration, but ensure that you only restrict the output to build and test steps, there should not be any deploy steps in the workflow.
-      It's of utmost importance that you return only the workflow file, and not any other text.   
-
-      Existing workflow:
-      ${old_workflow}
-
-      User requests:
-      ${user_comment}`
-}
