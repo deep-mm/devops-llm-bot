@@ -12,7 +12,9 @@ const generateContent = (repoTree, languages, dependencies, user_comment, defaul
 
   return `
       Take into account the current repository's files, languages, and dependencies.
-      It's of utmost importance that you return only the workflow file contents, and not any other text, such that it can be pasted into workflow.yaml file.
+      
+      HIGH PRIORITY INSTRUCTION:
+      You have to return only the workflow file content, and not any other text, such that it can be pasted into workflow.yaml file.
 
       Repository default branch:
       ${default_branch}
@@ -33,7 +35,9 @@ const generateContent = (repoTree, languages, dependencies, user_comment, defaul
 const generateUpdateWorkflowContent = (old_workflow, user_comment, past_conversations) => {
   
     return `Analyze the existing github workflow and user requested changes provided below to create a github action build workflow.
-      It's of utmost importance that you return only the workflow file contents, and not any other text, such that it can be pasted into workflow.yaml file.
+    
+      HIGH PRIORITY INSTRUCTION:
+      You have to return only the workflow file content, and not any other text, such that it can be pasted into workflow.yaml file.
 
       Existing workflow:
       ${old_workflow}
