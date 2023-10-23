@@ -11,16 +11,13 @@ It's of utmost importance that you return only the workflow file contents, and n
 const generateContent = (repoTree, languages, dependencies, user_comment, default_branch) => {
 
   return `
-      Take into account the current repository's files, languages, and dependencies.
+      Take into account the current repository's files and dependencies.
       
       HIGH PRIORITY INSTRUCTION:
       You have to return only the workflow file content, and not any other text, such that it can be pasted into workflow.yaml file.
 
       Repository default branch:
       ${default_branch}
-
-      Languages: 
-      ${languages}
 
       Repository tree:
       ${repoTree}
