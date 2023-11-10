@@ -11,5 +11,5 @@ def get_github_pat():
     return load_api_key('secrets/github-pat.txt')
 
 def get_github_headers():
-    headers = {'Authorization': 'token ' + get_github_pat()}
+    headers = {'Authorization': 'token ' + get_github_pat(), 'Accept': 'application/vnd.github.v3+json'}
     return headers

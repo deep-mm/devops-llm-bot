@@ -1,9 +1,11 @@
 import Helper
 import requests
+import json
+import time
 
 def get_repository_tree(repository_identifier, branch='main'):
     repository_tree = []
-    response = requests.get(f'https://api.github.com/repos/{repository_identifier}/git/trees/{branch}', headers=Helper.get_github_headers)
+    response = requests.get(f'https://api.github.com/repos/{repository_identifier}/git/trees/{branch}', headers=Helper.get_github_headers())
     data = response.json()
 
     if response.status_code == 200:
@@ -20,14 +22,14 @@ def get_repository_tree(repository_identifier, branch='main'):
 def get_list_of_languages(repository_identifier):
     url = 'https://api.github.com/repos/' + repository_identifier + '/languages'
 
-    response = requests.get(url, headers=Helper.get_github_headers)
+    response = requests.get(url, headers=Helper.get_github_headers())
     
     return response.json().keys()
 
 def get_list_of_dependencies(repository_identifier):
     url = 'https://api.github.com/repos/' + repository_identifier + '/dependency-graph/sbom'
 
-    response = requests.get(url, headers=Helper.get_github_headers)
+    response = requests.get(url, headers=Helper.get_github_headers())
     response.json()['sbom']['packages']
     dependency_names = [package['name'] + ', version = ' + package['versionInfo'] for package in response.json()['sbom']['packages']]
     
@@ -36,6 +38,57 @@ def get_list_of_dependencies(repository_identifier):
 def get_default_branch(repository_identifier):
     url = 'https://api.github.com/repos/' + repository_identifier
 
-    response = requests.get(url, headers=Helper.get_github_headers)
+    response = requests.get(url, headers=Helper.get_github_headers())
+
+    responseJson = response.json()
     
-    return response.json()['default_branch']
+    return responseJson['default_branch']
+
+def get_all_workflow_files(repository_identifier):
+    url = 'https://api.github.com/repos/' + repository_identifier + '/actions/workflows'
+
+    response = requests.get(url, headers=Helper.get_github_headers())
+    workflow_files = [workflow_file['path'] for workflow_file in response.json()['workflows']]
+
+    # Filter only those files with path starting with .github/workflows
+    workflow_files = [workflow_file for workflow_file in workflow_files if workflow_file.startswith('.github/workflows')]
+    
+    return workflow_files
+
+def get_workflow_file_content(repository_identifier, workflow_file_path, default_branch='main'):
+    url = 'https://raw.githubusercontent.com/' + repository_identifier + f'/{default_branch}/' + workflow_file_path
+
+    response = requests.get(url, headers=Helper.get_github_headers())
+    if response.status_code != 200:
+        return ''
+    
+    workflow_file_content = response.text
+    return workflow_file_content
+
+def is_workflow_syntax_valid (workflow_file_content):
+    url = 'https://api.github.com/repos/devops-llm-bot/github-action-lint/actions'
+    data = {
+        "ref": "main", 
+        "inputs": { "workflow_content": f"{workflow_file_content}" }
+    }
+
+    # Convert data to JSON string
+    data = json.dumps(data)
+
+    response = requests.post(url + '/workflows/75703243/dispatches', headers=Helper.get_github_headers(), data=data)
+    if response.status_code == 204:
+        response = requests.get(url + f'/workflows/75703243/runs', headers=Helper.get_github_headers())
+        data = response.json()
+        run_id = data['workflow_runs'][0]['id']
+        # Delay 10s to wait for the workflow to finish
+        time.sleep(10)
+
+        response = requests.get(url + f'/runs/{run_id}', headers=Helper.get_github_headers())
+        data = response.json()
+        conclusion = data['conclusion']
+        if conclusion == 'success':
+            return True
+        else:
+            return False
+
+    return False

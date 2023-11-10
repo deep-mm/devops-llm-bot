@@ -2,8 +2,9 @@ import openai
 import Helper
 import Prompt
 import json
+from Config import Options
 
-def get_chat_response(user_prompt, system_message, model, max_tokens, temperature, output_schema):
+def get_chat_response(user_prompt, system_message, output_schema, model, max_tokens, temperature):
     openai.api_key = Helper.get_gpt_api_key()
     response = openai.ChatCompletion.create(
         model=model,
@@ -17,7 +18,10 @@ def get_chat_response(user_prompt, system_message, model, max_tokens, temperatur
     return response.choices[0].message['function_call'].arguments
 
 def generate_build_pipeline(repo_structure, dependencies, default_branch):
-    response = get_chat_response(user_prompt=Prompt.get_user_prompt(repo_structure, dependencies, default_branch), system_message=Prompt.get_system_message(), output_schema=Prompt.get_output_schema())
+    opts = Options()
+
+    response = get_chat_response(user_prompt=Prompt.get_user_prompt(repo_structure, dependencies, default_branch), system_message=Prompt.get_system_message(), 
+                                 output_schema=Prompt.get_output_schema(), model=opts.model, max_tokens=opts.max_tokens, temperature=opts.temperature)
 
     # Parse response as JSON
     response = json.loads(response)
