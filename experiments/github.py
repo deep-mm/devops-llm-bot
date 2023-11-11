@@ -2,6 +2,7 @@ import Helper
 import requests
 import json
 import time
+import yaml
 
 def get_repository_tree(repository_identifier, branch='main'):
     repository_tree = []
@@ -64,6 +65,14 @@ def get_workflow_file_content(repository_identifier, workflow_file_path, default
     
     workflow_file_content = response.text
     return workflow_file_content
+
+def check_yaml_syntax(yaml_file_content):
+    try:
+        yaml.safe_load(yaml_file_content)
+    except yaml.YAMLError as exc:
+        return False
+
+    return True
 
 def is_workflow_syntax_valid (workflow_file_content):
     url = 'https://api.github.com/repos/devops-llm-bot/github-action-lint/actions'

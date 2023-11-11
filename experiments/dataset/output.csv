@@ -68,24 +68,22 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v2
 
-    - name: Setup .NET Core
+    - name: Set up .NET Core
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 3.1
 
     - name: Restore dependencies
-      run: dotnet restore
+      run: |
+        dotnet restore
 
     - name: Build
-      run: dotnet build --configuration Release
+      run: |
+        dotnet build --configuration Release
 
     - name: Test
       run: |
-        if [ -f ""./tests"" ]; then
-          dotnet test
-        else
-          echo ""No tests found""
-        fi",0.057304277643260695,0.23474996398957093,Valid,
+        dotnet test",0.05816368923971749,0.20973400477066265,Valid,0.35897672487552423
 2.0,https://github.com/huiyadanli/RevokeMsgPatcher,"name: .Net Build
 
 on:
@@ -163,31 +161,18 @@ on:
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Setup MSBuild
+    - name: Set up MSBuild
       uses: actions/setup-msbuild@v1.0.2
 
     - name: Build with MSBuild
-      run: msbuild RevokeMsgPatcher.sln
-
-  test:
-    runs-on: windows-latest
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
-
-    - name: Setup MSBuild
-      uses: actions/setup-msbuild@v1.0.2
-
-    - name: Run Tests
-      run: |
-        # Add commands to run tests here",0.09358490566037736,0.23465557300387557,Valid,
+      run: msbuild /t:build
+",0.09049015500628405,0.14540261697470114,Valid,0.2407167356075942
 3.0,https://github.com/jasontaylordev/CleanArchitecture,"name: Package
 
 on:
@@ -247,7 +232,7 @@ jobs:
 
     - name: Test
       run: |
-        npm test",0.20287253141831238,0.5143476158874506,Valid,
+        npm test",0.20287253141831238,0.5143476158874506,Valid,0.265303327834189
 4.0,https://github.com/nilaoda/N_m3u8DL-CLI,"name: Build_Latest
  
 on: [push]
@@ -312,7 +297,10 @@ jobs:
       run: dotnet build --configuration Release
 
     - name: Test
-      run: dotnet test",0.07710100231303008,0.43799951736464104,Valid,
+      run: |
+        if [ -f ""./N_m3u8DL-CLI/N_m3u8DL-CLI.Tests.csproj"" ]; then
+          dotnet test ./N_m3u8DL-CLI/N_m3u8DL-CLI.Tests.csproj --configuration Release
+        fi",0.10192837465564739,0.5405431954137131,Valid,0.06783909869981306
 5.0,https://github.com/shadowsocks/shadowsocks-windows,"name: Build
 
 on:
@@ -458,10 +446,10 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v2
 
-    - name: Set up .NET Core
+    - name: Setup .NET
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: 5.0
+        dotnet-version: 5.0.201
 
     - name: Restore dependencies
       run: |
@@ -474,4 +462,4 @@ jobs:
     - name: Test
       run: |
         dotnet test --configuration Release
-",0.02063983488132095,0.08845075953647374,Valid,
+",0.023055746730901584,0.0879180634315335,Valid,0.07180623878483416
