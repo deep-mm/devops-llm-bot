@@ -1,57 +1,955 @@
 Index,GitHub_Repo_Link,GitHub_Build_Pipeline_File_Content,Generated_Build_Pipeline_File_Content,Exact_Match_Score,BLEU_Score,Syntax_Check,DevOps_Aware_Score
-1.0,https://github.com/DapperLib/Dapper,"name: Main Build
+1.0,https://github.com/05bit/peewee-async,,"name: Build and Test
 
 on:
-  pull_request:
   push:
     branches:
-    - main
-    paths:
-    - '*'
-    - '!/docs/*' # Don't run workflow when files are only in the /docs directory
+      - master
+  pull_request:
+    branches:
+      - master
 
 jobs:
-  vm-job:
-    name: Ubuntu
+  build:
     runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres
-        ports:
-        - 5432/tcp
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: test
-        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
-      sqlserver:
-        image: mcr.microsoft.com/mssql/server:2019-latest
-        ports:
-        - 1433/tcp
-        env:
-          ACCEPT_EULA: Y
-          SA_PASSWORD: ""Password.""
-      mysql:
-        image: mysql
-        ports:
-        - 3306/tcp
-        env:
-          MYSQL_ROOT_PASSWORD: root
-          MYSQL_DATABASE: test
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.7
+
+    - name: Install dependencies
+      run: |
+        pip install -r requirements.txt
+
+    - name: Build and Test
+      run: |
+        python setup.py build
+        python setup.py test",,,Valid,
+2.0,https://github.com/Anttek-io/grigory,"name: Django CI
+
+on:
+  push:
+    branches: [ ""master"" ]
+  pull_request:
+    branches: [ ""master"" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 4
+      matrix:
+        python-version: [""3.10""]
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v3
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    - name: Run Tests
+      run: |
+        python manage.py test","name: Build and Test
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
     steps:
     - name: Checkout code
-      uses: actions/checkout@v1
-    - name: .NET Build
-      run: dotnet build Build.csproj -c Release /p:CI=true
-    - name: Dapper Tests
-      run: dotnet test tests/Dapper.Tests/Dapper.Tests.csproj -c Release --logger GitHubActions /p:CI=true
-      env:
-        MySqlConnectionString: Server=localhost;Port=${{ job.services.mysql.ports[3306] }};Uid=root;Pwd=root;Database=test;Allow User Variables=true
-        OLEDBConnectionString: Provider=SQLOLEDB;Server=tcp:localhost,${{ job.services.sqlserver.ports[1433] }};Database=tempdb;User Id=sa;Password=Password.;
-        PostgesConnectionString: Server=localhost;Port=${{ job.services.postgres.ports[5432] }};Database=test;User Id=postgres;Password=postgres;
-        SqlServerConnectionString: Server=tcp:localhost,${{ job.services.sqlserver.ports[1433] }};Database=tempdb;User Id=sa;Password=Password.;
-    - name: .NET Lib Pack
-      run: dotnet pack Build.csproj --no-build -c Release /p:PackageOutputPath=%CD%\.nupkgs /p:CI=true
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v3
+      with:
+        python-version: '3.x'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Build and Test
+      run: |
+        python manage.py test
+",,,Valid,0.5898331159965098
+3.0,https://github.com/APSL/puput,"name: Test
+
+on: [push]
+
+jobs:
+  test:
+    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        python-version: [""3.8"", ""3.9"", ""3.10"", ""3.11""]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install tox tox-gh-actions
+      - name: Test with tox
+        run: tox
+","name: Build and Test
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.8
+
+    - name: Install dependencies
+      run: |
+        pip install -r requirements-test.txt
+
+    - name: Run tests
+      run: |
+        pytest
+",,,Valid,0.5
+4.0,https://github.com/Bearle/django_private_chat2,,"name: Build and Test\non:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.x
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install -r requirements_dev.txt
+          pip install -r requirements_test.txt
+      - name: Build and Test
+        run: |
+          python manage.py test
+",,,Valid,
+5.0,https://github.com/brianrisk/qwaver,"name: Django Tests
+
+on:
+  push:
+    branches:
+      - master
+  
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python 3
+      uses: actions/setup-python@v4.2.0
+      with:
+        python-version: 3.8
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    - name: Coverage report
+      run: |
+        pip install coverage
+        coverage run manage.py test && coverage report --fail-under=50 && coverage xml
+        coverage report
+    - name: Django Testing
+      run: |
+        python3 manage.py test
+    # PUT YOUR CODECOV_TOKEN IN SECRETS OF YOUR REPOSITORY THEN UNCOMMENT THE FOLLOWING LINE 👇🏿👇🏿
+    # - name: Setup CodeCov
+    #   uses: codecov/codecov-action@v3
+    #   with:
+    #     token: ${{ secrets.CODECOV_TOKEN }}
+    #     files: ./coverage.xml
+    #     directory: ./coverage/reports/
+    #     fail_ci_if_error: true","name: Build and Test
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.8
+
+    - name: Install dependencies
+      run: |
+        pip install -r requirements.txt
+
+    - name: Build and Test
+      run: |
+        python manage.py test
+",,,Valid,0.35765771622766585
+,https://github.com/climu/openstudyroom,"# https://docs.github.com/en/actions/guides/building-and-testing-python
+
+name: CI
+
+on:
+  push:
+    branches: '*'
+  pull_request:
+    branches: '*'
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - uses: actions/setup-python@v4
+      with:
+        python-version: '3.7'
+        cache: 'pip'
+
+    - name: install dependencies
+      run: pip3 install --quiet --requirement requirements_dev.txt
+
+    - name: pytest
+      run: ./manage.py makemigrations && pytest --create-db
+
+    - run: ruff check --format=github .
+","name: Build and Test
+
+on:
+  push:
+    branches:
+      - dev
+  pull_request:
+    branches:
+      - dev
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.8
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Build and Test
+        run: |
+          python manage.py test
+",,,Valid,0.43574850214882876
+,https://github.com/OpenEthan/SMSBoom,"name: 🚀 Run SMSBoom in Action
+
+# 触发 Action 的条件
+on: 
+  # 定时触发 参考 https://docs.github.com/cn/actions/using-workflows/events-that-trigger-workflows#schedule
+  # schedule:
+  #     - cron: '30 5 * * 1,3'
+  #     - cron: '30 5 * * 2,4'
+  # 手动触发
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 签出项目代码
+      - uses: actions/checkout@v3
+      # 设置 py3.8 环境
+      - name: 🚀 Set up Python 3.x
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.8'
+      
+      - name: 🚀 Run SMSBoom Script
+        # 此处可以自定义命令行运行参数.替换手机号
+        run: |
+          pip3 install -r requirements.txt
+          python3 smsboom.py run -p ${{ secrets.NUMBER }} -t 32
+","name: Build and Test
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v3
+      with:
+        python-version: 3.8
+
+    - name: Install dependencies
+      run: |
+        pip install -r requirements.txt
+
+    - name: Build and Test
+      run: |
+        # Add build and test commands here
+        # For example:
+        # python manage.py migrate
+        # python manage.py test
+",,,Valid,0.38270271286561774
+,https://github.com/bugsnag/bugsnag-python,,"name: Build and Test\non:
+  push:
+    branches:
+      - master\n  pull_request:\n    branches:
+      - master\njobs:\n  build:\n    runs-on: ubuntu-latest\n    steps:\n      - name: Checkout repository\n        uses: actions/checkout@v2\n      - name: Set up Python\n        uses: actions/setup-python@v2\n        with:\n          python-version: 3.8\n      - name: Install dependencies\n        run: |
+          pip install -r dev_requirements.txt\n      - name: Build and Test\n        run: |
+          python setup.py build\n          python setup.py test",,,Valid,
+,https://github.com/CheeseCake87/Flask-Imp,"name: Tests
+
+on:
+  push:
+    branches:
+      - master
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+  pull_request:
+    branches:
+      - master
+      - '*.x'
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+
+jobs:
+  tests:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { name: Linux, python: '3.11', os: ubuntu-latest }
+          - { name: Windows, python: '3.11', os: windows-latest }
+          - { name: Mac, python: '3.11', os: macos-latest }
+          - { name: '3.12-dev', python: '3.12-dev', os: ubuntu-latest }
+          - { name: '3.10', python: '3.10', os: ubuntu-latest }
+          - { name: '3.9', python: '3.9', os: ubuntu-latest }
+          - { name: '3.8', python: '3.8', os: ubuntu-latest }
+          - { name: 'PyPy', python: 'pypy-3.10', os: ubuntu-latest }
+          - { name: 'Development Versions', python: '3.8', os: ubuntu-latest }
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python ${{ matrix.python }}
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements_dev.txt
+      - name: Lint with flake8
+        run: |
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+      - name: Test with pytest
+        run: |
+          pytest","name: Build and Test
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v3
+      with:
+        python-version: 3.8
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Build and Test
+      run: |
+        # Add build and test commands here
+        # Example:
+        # python setup.py build
+        # pytest
+        echo ""Build and test commands executed""
+",,,Valid,0.5362380297566733
+,https://github.com/hjlarry/flask-shop,"# This workflow will install Python dependencies, run tests and lint with a single version of Python
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+
+name: Python application
+
+on:
+  push:
+    branches: [ ""master"" ]
+  pull_request:
+    branches: [ ""master"" ]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Shutdown Ubuntu MySQL (SUDO)
+      run: sudo service mysql stop
+    - uses: actions/checkout@v3
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v3
+      with:
+        python-version: ""3.10""
+    - uses: mirromutth/mysql-action@v1.1
+      with:
+        mysql database: 'testshop'
+        mysql root password: 'root'
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install flake8 pytest
+        pip install -r requirements.txt
+    - name: Lint with flake8
+      run: |
+        # stop the build if there are Python syntax errors or undefined names
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+        flake8 . --count --exit-zero --max-complexity=15 --max-line-length=127 --statistics
+    - name: Test with pytest
+      run: |
+        pytest
+","name: Build and Test
+
+on:
+  push:
+    branches:
+      - $master
+  pull_request:
+    branches:
+      - $master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          npm install
+
+      - name: Build and Test
+        run: |
+          # Replace with build and test commands
+          # Example:
+          # python app.py
+          # npm test",,,Valid,0.3281728497730018
+,https://github.com/jkenlooper/puzzle-massive,"# This workflow will install Python dependencies, run tests and lint with a single version of Python
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+
+name: Python application
+
+on:
+  push:
+    branches: [ develop ]
+  pull_request:
+    branches: [ develop ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python 3.7
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.7
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install flake8 pytest
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+    - name: Lint with flake8
+      run: |
+        # stop the build if there are Python syntax errors or undefined names
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+    - name: Test with pytest
+      run: |
+        python -m unittest
+","name: Build and Test
+
+on:
+  push:
+    branches:
+      - develop
+  pull_request:
+    branches:
+      - develop
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build
+        run: npm run build
+
+      - name: Test
+        run: npm test",,,Valid,0.2108806570989048
+,https://github.com/metabrainz/critiquebrainz,"# This workflow can be used to push an image off a branch to Docker Hub.
+# This is useful to deploy changes to CB beta for testing.
+name: Push development image
+
+on:
+  workflow_dispatch:
+    inputs:
+      pr:
+        description: 'PR number (if set, ignores above ^)'
+        required: false
+        type: string
+      tag:
+        description: 'Docker Image Tag (Version)'
+        required: true
+        default: 'beta'
+
+jobs:
+  dev:
+      runs-on: ubuntu-latest
+
+      steps:
+       # Run only if we are deploying a branch or tag from this repo
+      - uses: actions/checkout@v3
+        # empty strings evaluate to 0
+        if: ${{ github.event.inputs.pr == 0}}
+        
+      # Run only if we are deploying a PR (may be in a forked repo)
+      - uses: actions/checkout@v3
+        if: ${{ github.event.inputs.pr != 0}}
+        with:
+          ref: ${{ format('refs/pull/{0}/head', github.event.inputs.pr) }}
+
+      - name: Login to Docker Hub
+        run: echo ${{ secrets.DOCKER_HUB_PASSWORD }} | docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} --password-stdin
+        continue-on-error: true
+
+      - uses: satackey/action-docker-layer-caching@v0.0.11
+        continue-on-error: true
+
+      - name: Build development image
+        run: |
+          docker build \
+            --tag metabrainz/critiquebrainz:""${{ github.event.inputs.tag }}"" \
+            --build-arg GIT_COMMIT_SHA=""${{ github.sha }}"" \
+            --target critiquebrainz-prod .
+      - name: Push development image
+        run: docker push metabrainz/critiquebrainz:""${{ github.event.inputs.tag }}""
+","name: Build and Test
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: 14
+
+    - name: Install dependencies
+      run: |
+        npm install
+
+    - name: Build and Test
+      run: |
+        npm run build
+        npm test",,,Valid,0.333423868802687
+,https://github.com/michael-lazar/flask-gopher,"name: Test
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: [""3.7"", ""3.8"", ""3.9"", ""3.10"", ""3.11""]
+        flask-version: [""2.1"", ""2.2""]
+        os: [ubuntu-latest]
+    steps:
+    - name: Check out repository
+      uses: actions/checkout@v3
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install packages
+      run: |
+        pip install . Flask==${{ matrix.flask-version}}
+        pip install .[test]
+    - name: Run mypy
+      run: |
+        mypy flask_gopher/ demo/
+    - name: Run pytest
+      run: |
+        pytest -v tests/
+","name: Build and Test
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+
+    - name: Install dependencies
+      run: |
+        pip install flask>=2.1 pyfiglet<=0.7.6 pyopenssl tabulate
+
+    - name: Build and Test
+      run: |
+        # Add build and test commands here
+        # For example:
+        python setup.py build
+        python setup.py test",,,Valid,0.47399352069687006
+,https://github.com/naorlivne/terraformize,"name: push CI CD
+
+on:
+  push:
+    branches: [ ""master"" ]
+
+jobs:
+
+  testing_job:
+
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [ ""3.9"", ""3.10"", ""3.11"" ]
+    services:
+      consul:
+        image: hashicorp/consul
+      rabbit:
+        image: rabbitmq:3.11.4-management-alpine
+    container: python:${{ matrix.python-version }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install dependencies
+        run: |
+          wget https://releases.hashicorp.com/terraform/1.2.5/terraform_1.2.5_linux_amd64.zip -O /tmp/terraform_1.2.5_linux_amd64.zip
+          unzip /tmp/terraform_*.zip
+          cp terraform /usr/bin/terraform
+          python -m pip install --upgrade pip
+          pip install flake8
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+      - name: Lint with flake8
+        run: |
+          # stop the build if there are Python syntax errors or undefined names
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+      - name: Test
+        run: |
+          coverage run -m unittest
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: true
+
+  build_and_publish_job:
+
+    runs-on: ubuntu-latest
+    needs: testing_job
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Build and push
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: naorlivne/${{ github.event.repository.name }}:latest
+
+  build_and_publish_job_version:
+
+    runs-on: ubuntu-latest
+    needs: testing_job
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Build and push
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: naorlivne/${{ github.event.repository.name }}:v${{ github.run_number }}","name: Build and Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{secrets.DOCKER_USERNAME}}
+          password: ${{secrets.DOCKER_PASSWORD}}
+      - name: Build and push
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true",,,Valid,0.18852302953630237
+,https://github.com/vulnman/vulnman,"name: Django Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 4
+      matrix:
+        python-version: [3.8, 3.9, ""3.10""]
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install -r requirements-dev.txt
+        echo 'SECRET_KEY = ""Test""' > vulnman/conf/secret_key.py
+        python manage.py create_secret_key
+    - name: Run Tests
+      run: |
+        python manage.py test","name: Build and Test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '14'
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Build
+      run: npm run build
+
+    - name: Test
+      run: npm test",,,Valid,0.2108806570989048
+,https://github.com/whiskyechobravo/kerko,"# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+
+name: tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [""3.8"", ""3.9"", ""3.10"", ""3.11"", ""3.12""]
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install tox
+      - name: Info
+        run: |
+          echo ""=====  PYTHON  =====""
+          python --version
+      - name: Run tests
+        run: tox -e py${{ matrix.python-version }}
 ","name: Build and Test
 
 on:
@@ -68,23 +966,270 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v2
 
-    - name: Set up .NET Core
-      uses: actions/setup-dotnet@v1
+    - name: Set up Python
+      uses: actions/setup-python@v2
       with:
-        dotnet-version: 3.1
+        python-version: '3.x'
 
-    - name: Restore dependencies
+    - name: Install dependencies
       run: |
-        dotnet restore
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
 
-    - name: Build
+    - name: Build and Test
       run: |
-        dotnet build --configuration Release
+        python setup.py build
+        python setup.py test",,,Valid,0.5056283037507848
+,https://github.com/Ackee-Blockchain/woke,,"name: Build and Test
 
-    - name: Test
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.8
+
+    - name: Install dependencies
       run: |
-        dotnet test",0.05816368923971749,0.20973400477066265,Valid,0.35897672487552423
-2.0,https://github.com/huiyadanli/RevokeMsgPatcher,"name: .Net Build
+        pip install -r requirements.txt
+        npm install
+
+    - name: Build and Test
+      run: |
+        # Add build and test commands here
+        # For example:
+        # python manage.py migrate
+        # python manage.py test
+",,,Valid,
+,https://github.com/acoular/acoular,"# This workflow will install acoular and run tests a variety of Python versions
+
+name: Acoular install and test
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: ${{ matrix.os }} 
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python-version: ['3.7', '3.8', '3.9','3.10','3.11']
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install acoular
+      run: |
+        python -m pip install --upgrade pip
+        pip install .
+        python -c 'import acoular'
+    - name: Test with unittest *nix
+      run: |
+        chmod +x ../acoular/acoular/tests/run_tests.sh
+        cd ../acoular/acoular/tests/
+        bash run_tests.sh
+      if: ${{ matrix.os != 'windows-latest'}}
+    - name: Test with unittest Windows
+      run: |
+        cd ..\acoular\acoular\tests
+        python -m unittest discover -v -p ""test_*.py""
+      if: ${{ matrix.os == 'windows-latest'}}
+
+
+","name: Build and Test
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+
+    - name: Install dependencies
+      run: |
+        pip install -r requirements.txt
+
+    - name: Build and Test
+      run: |
+        python setup.py build
+        python setup.py test",,,Valid,0.34771662824031435
+,https://github.com/BSC-CNS-EAPM/AdaptivePELE,"# This workflow will upload a Python Package using Twine when a release is created
+# For more information see: https://help.github.com/en/actions/language-and-framework-guides/using-python-with-github-actions#publishing-to-package-registries
+
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+
+name: Upload Python Package
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  deploy:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install numpy
+        pip install build
+        pip install --requirement requirements.txt
+    - name: Build package
+      run: python setup.py sdist
+    - name: Publish package
+      uses: pypa/gh-action-pypi-publish@27b31702a0e7fc50959f5ad993c78deac1bdfc29
+      with:
+        user: __token__
+        password: ${{ secrets.PYPI_API_TOKEN }}
+","name: Build and Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.8
+
+    - name: Set up Conda
+      uses: s-weigand/setup-conda@v1
+      with:
+        environment-file: conda_recipe/environment.yml
+
+    - name: Install dependencies
+      run: |
+        pip install cython future numpy scipy six mdtraj
+
+    - name: Build and Test
+      run: |
+        python setup.py build
+        python setup.py test",,,Valid,0.3414792807636323
+,https://github.com/AFM-SPM/TopoStats,"# Source : https://github.com/marketplace/actions/sphinx-docs-to-github-pages
+name: Sphinx docs to gh-pages
+
+on:
+  push:
+    # Uncomment if only tagged releases are to have documentation built
+    # tags:
+    #   - v*
+  workflow_dispatch:        # Uncomment line if you also want to trigger action manually
+
+jobs:
+  sphinx_docs_to_gh-pages:
+    runs-on: ubuntu-latest
+    name: Sphinx docs to gh-pages
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Setup Python
+        uses: actions/setup-python@v4.3.0
+        with:
+          python-version: 3.9
+      - name: Installing the Documentation requirements
+        run: |
+          pip3 install .[docs]
+      - name: Running Sphinx to gh-pages Action
+        # Uncomment if only tagged releases are to have documentation built
+        # if: startsWith(github.ref, 'refs/tags')
+        uses: ns-rse/action-sphinx-docs-to-gh-pages@main
+        with:
+          # When testing set this branch to your branch, when working switch to main. It WILL fail if not
+          # defined as it defaults to 'main'.
+          branch: main
+          dir_docs: docs
+          sphinxapiexclude: '../*setup* ../*tests* ../*.ipynb ../demo.py ../make_baseline.py ../jupyter_notebook_config.py ../demo_ftrs.py'
+          sphinxapiopts: '--separate -o . ../'
+          sphinxopts: ''
+          multiversion: true
+          multiversionopts: ''
+","name: Build and Test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.8
+
+    - name: Install dependencies
+      run: |
+        pip install -r requirements.txt
+
+    - name: Build and Test
+      run: |
+        python setup.py build
+        python setup.py test",,,Valid,0.3486279300227524
+,https://github.com/huiyadanli/RevokeMsgPatcher,"name: .Net Build
 
 on:
   workflow_dispatch:
@@ -161,47 +1306,21 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Set up MSBuild
+    - name: Setup MSBuild
       uses: actions/setup-msbuild@v1.0.2
 
-    - name: Build with MSBuild
-      run: msbuild /t:build
-",0.09049015500628405,0.14540261697470114,Valid,0.2407167356075942
-3.0,https://github.com/jasontaylordev/CleanArchitecture,"name: Package
-
-on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'CleanArchitecture.nuspec'
-
-jobs:
-  publish:
-    name: Publish to NuGet.org
-
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v3
-        name: Checkout code
-
-      - uses: nuget/setup-nuget@v1
-        name: Setup NuGet
-        with:
-          nuget-version: '6.x'
-
-      - name: Create the package
-        run: nuget pack CleanArchitecture.nuspec -NoDefaultExcludes
-        
-      - name: Publish the package
-        run: nuget push *.nupkg -Source 'https://api.nuget.org/v3/index.json' -ApiKey ${{secrets.NUGET_API_KEY}} -SkipDuplicate","name: Build and Test
+    - name: Build and Test
+      run: |
+        msbuild RevokeMsgPatcher.sln
+        # Add test command here if tests are present in the repository
+",,,Valid,0.2407167356075942
+,https://github.com/jasontaylordev/CleanArchitecture,,"name: Build and Test
 
 on:
   push:
@@ -232,8 +1351,8 @@ jobs:
 
     - name: Test
       run: |
-        npm test",0.20287253141831238,0.5143476158874506,Valid,0.265303327834189
-4.0,https://github.com/nilaoda/N_m3u8DL-CLI,"name: Build_Latest
+        npm test",,,Valid,
+,https://github.com/nilaoda/N_m3u8DL-CLI,"name: Build_Latest
  
 on: [push]
  
@@ -271,11 +1390,9 @@ jobs:
 
 on:
   push:
-    branches:
-      - master
+    branches: [ master ]
   pull_request:
-    branches:
-      - master
+    branches: [ master ]
 
 jobs:
   build:
@@ -297,11 +1414,8 @@ jobs:
       run: dotnet build --configuration Release
 
     - name: Test
-      run: |
-        if [ -f ""./N_m3u8DL-CLI/N_m3u8DL-CLI.Tests.csproj"" ]; then
-          dotnet test ./N_m3u8DL-CLI/N_m3u8DL-CLI.Tests.csproj --configuration Release
-        fi",0.10192837465564739,0.5405431954137131,Valid,0.06783909869981306
-5.0,https://github.com/shadowsocks/shadowsocks-windows,"name: Build
+      run: dotnet test",,,Valid,0.06783909869981306
+,https://github.com/shadowsocks/shadowsocks-windows,"name: Build
 
 on:
   push:
@@ -449,7 +1563,7 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: 5.0.201
+        dotnet-version: 5.0.301
 
     - name: Restore dependencies
       run: |
@@ -462,4 +1576,3175 @@ jobs:
     - name: Test
       run: |
         dotnet test --configuration Release
-",0.023055746730901584,0.0879180634315335,Valid,0.07180623878483416
+",,,Valid,0.07180623878483416
+,https://github.com/ShareX/ShareX,"name: Build ShareX
+
+on:
+  push:
+    branches:
+      - ""**""
+    tags:
+      - ""v[0-9]+.[0-9]+.[0-9]+""
+    paths-ignore:
+      - ""**/*.md""
+      - ""**/*.gitignore""
+      - ""**/*.gitattributes""
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build
+    runs-on: windows-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        configuration:
+          - Release
+          - Debug
+          - Steam
+          - MicrosoftStore
+          - MicrosoftStoreDebug
+        platform:
+          - Any CPU
+
+    env:
+      SOLUTION_FILE_PATH: ShareX.sln
+      ASSEMBLY_INFO_PATH: GlobalAssemblyInfo.cs
+
+    outputs:
+      APP_VERSION: ${{ env.APP_VERSION }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v1.1
+
+      - name: Set APP_VERSION
+        run: |
+          $content = Get-Content ""${{ env.ASSEMBLY_INFO_PATH }}"" -Raw
+          $pattern = 'Version\(""([0-9]+(?:\.[0-9]+){1,3})""\)'
+          $match = [regex]::Match($content, $pattern)
+          $version = $match.Groups[1].Value
+          if ($env:GITHUB_REF -eq ""refs/heads/develop"") {
+            $version = ""$version.$env:GITHUB_RUN_NUMBER""
+            $content = [regex]::Replace($content, $pattern, ""Version(`""$version`"")"")
+            Set-Content -Path ""${{ env.ASSEMBLY_INFO_PATH }}"" -Value ""$content"" -NoNewline
+          }
+          echo $version
+          echo ""APP_VERSION=$version"" >> $env:GITHUB_ENV
+
+      - name: Download API keys
+        env:
+          API_KEYS: ${{ secrets.API_KEYS }}
+        if: env.API_KEYS != ''
+        working-directory: ${{ env.GITHUB_WORKSPACE }}
+        run: |
+          Invoke-WebRequest -Uri ""$env:API_KEYS"" -OutFile ""ShareX.UploadersLib\APIKeys\APIKeysLocal.cs""
+
+      - name: Restore NuGet packages
+        working-directory: ${{ env.GITHUB_WORKSPACE }}
+        run: nuget restore ""${{ env.SOLUTION_FILE_PATH }}"" -Project2ProjectTimeOut 300
+
+      - name: Build
+        working-directory: ${{ env.GITHUB_WORKSPACE }}
+        run: msbuild -m -p:Configuration=""${{ matrix.configuration }}"" -p:Platform=""${{ matrix.platform }}"" ""${{ env.SOLUTION_FILE_PATH }}""
+
+      - name: Setup
+        working-directory: ${{ env.GITHUB_WORKSPACE }}
+        run: |
+          & ""ShareX.Setup\bin\${{ matrix.configuration }}\ShareX.Setup.exe"" -silent -job ""${{ matrix.configuration }}""
+
+      - name: Upload artifact (Setup)
+        if: matrix.configuration == 'Release'
+        uses: actions/upload-artifact@v3
+        with:
+          name: Setup
+          path: Output\ShareX-${{ env.APP_VERSION }}-setup.exe
+
+      - name: Upload artifact (Portable)
+        if: matrix.configuration == 'Release'
+        uses: actions/upload-artifact@v3
+        with:
+          name: Portable
+          path: Output\ShareX-${{ env.APP_VERSION }}-portable.zip
+
+      - name: Upload artifact (Debug)
+        if: matrix.configuration == 'Debug'
+        uses: actions/upload-artifact@v3
+        with:
+          name: Debug
+          path: Output\ShareX-${{ env.APP_VERSION }}-debug.zip
+
+      - name: Upload artifact (Steam)
+        if: matrix.configuration == 'Steam'
+        uses: actions/upload-artifact@v3
+        with:
+          name: Steam
+          path: Output\ShareX-${{ env.APP_VERSION }}-Steam.zip
+
+      - name: Upload artifact (MicrosoftStore)
+        if: matrix.configuration == 'MicrosoftStore'
+        uses: actions/upload-artifact@v3
+        with:
+          name: MicrosoftStore
+          path: Output\ShareX-${{ env.APP_VERSION }}.appx
+
+      - name: Upload artifact (MicrosoftStoreDebug)
+        if: matrix.configuration == 'MicrosoftStoreDebug'
+        uses: actions/upload-artifact@v3
+        with:
+          name: MicrosoftStoreDebug
+          path: Output\ShareX-${{ env.APP_VERSION }}-debug.appx
+
+  release:
+    name: Release
+    needs: build
+    if: github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/tags/v')
+    runs-on: windows-latest
+
+    permissions:
+      contents: write
+
+    env:
+      REPO_DEV_BUILDS: ${{ github.repository_owner }}/DevBuilds
+      RELEASE_BODY_PATH: RELEASE_BODY.md
+      APP_VERSION: ${{ needs.build.outputs.APP_VERSION }}
+
+    steps:
+      - name: Download artifact (Setup)
+        uses: actions/download-artifact@v3
+        with:
+          name: Setup
+          path: Output
+
+      - name: Download artifact (Portable)
+        uses: actions/download-artifact@v3
+        with:
+          name: Portable
+          path: Output
+
+      - name: Download artifact (Debug)
+        if: github.ref == 'refs/heads/develop'
+        uses: actions/download-artifact@v3
+        with:
+          name: Debug
+          path: Output
+
+      - name: Download artifact (Steam)
+        if: github.ref == 'refs/heads/develop'
+        uses: actions/download-artifact@v3
+        with:
+          name: Steam
+          path: Output
+
+      - name: Download artifact (MicrosoftStore)
+        if: github.ref == 'refs/heads/develop'
+        uses: actions/download-artifact@v3
+        with:
+          name: MicrosoftStore
+          path: Output
+
+      - name: Download artifact (MicrosoftStoreDebug)
+        if: github.ref == 'refs/heads/develop'
+        uses: actions/download-artifact@v3
+        with:
+          name: MicrosoftStoreDebug
+          path: Output
+
+      - name: Create release body file
+        run: |
+          $checksums = Get-ChildItem -Path ""Output\"" -Recurse -File
+            | Sort-Object -Property Name
+            | ForEach-Object { ""| $($_.Name) | ``$((Get-FileHash $_.FullName -Algorithm SHA256).Hash)`` |"" }
+            | Out-String
+          $output = ""| File | SHA256 |`r`n| --- | --- |`r`n$($checksums.Trim())""
+          echo $output >> $env:GITHUB_STEP_SUMMARY
+          if ($env:GITHUB_REF.StartsWith(""refs/tags/v"")) {
+            $output = ""**Changelog:** https://getsharex.com/changelog#$env:GITHUB_REF_NAME`r`n`r`n$output""
+          }
+          echo $output
+          Set-Content -Path ""${{ env.RELEASE_BODY_PATH }}"" -Value ""$output"" -NoNewline
+
+      - name: Release (Dev)
+        env:
+          CUSTOM_GITHUB_TOKEN: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
+        if: env.CUSTOM_GITHUB_TOKEN != '' && env.REPO_DEV_BUILDS != '' && github.ref == 'refs/heads/develop'
+        uses: softprops/action-gh-release@v1
+        with:
+          repository: ${{ env.REPO_DEV_BUILDS }}
+          token: ${{ env.CUSTOM_GITHUB_TOKEN }}
+          tag_name: v${{ env.APP_VERSION }}
+          name: ShareX ${{ env.APP_VERSION }} Dev
+          body_path: ${{ env.RELEASE_BODY_PATH }}
+          draft: false
+          prerelease: false
+          files: |
+            Output/ShareX-${{ env.APP_VERSION }}-setup.exe
+            Output/ShareX-${{ env.APP_VERSION }}-portable.zip
+            Output/ShareX-${{ env.APP_VERSION }}-debug.zip
+            Output/ShareX-${{ env.APP_VERSION }}-Steam.zip
+            Output/ShareX-${{ env.APP_VERSION }}.appx
+            Output/ShareX-${{ env.APP_VERSION }}-debug.appx
+
+      - name: Release (Stable)
+        env:
+          CUSTOM_GITHUB_TOKEN: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
+        if: env.CUSTOM_GITHUB_TOKEN != '' && startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v1
+        with:
+          repository: ${{ github.repository }}
+          token: ${{ env.CUSTOM_GITHUB_TOKEN }}
+          tag_name: ${{ github.ref_name }}
+          name: ShareX ${{ env.APP_VERSION }}
+          body_path: ${{ env.RELEASE_BODY_PATH }}
+          draft: false
+          prerelease: true
+          files: |
+            Output/ShareX-${{ env.APP_VERSION }}-setup.exe
+            Output/ShareX-${{ env.APP_VERSION }}-portable.zip","name: Build and Test
+
+on:
+  push:
+    branches:
+      - develop
+  pull_request:
+    branches:
+      - develop
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Setup MSBuild
+        uses: actions/setup-msbuild@v1.1
+
+      - name: Restore NuGet packages
+        run: nuget restore ShareX.sln
+
+      - name: Build
+        run: msbuild /p:Configuration=Release ShareX.sln
+
+      - name: Test
+        run: |
+          if [ -f ""./tests"" ]; then
+            # Run tests if present
+            ./tests
+          fi",,,Valid,0.24959691293142683
+,https://github.com/DapperLib/Dapper,,"name: Build and Test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 3.1
+
+    - name: Restore dependencies
+      run: |
+        dotnet restore
+
+    - name: Build
+      run: |
+        dotnet build --configuration Release
+
+    - name: Test
+      run: |
+        dotnet test",,,Valid,
+,https://github.com/aalhour/C-Sharp-Algorithms,"name: Build and Test
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 2.2.108
+    - name: Build with .NET Core
+      run: dotnet build --configuration Release
+  test:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+    - uses: actions/checkout@v1
+    - name: Run Tests
+      run: dotnet test
+","name: Build and Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 3.1
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build
+      run: dotnet build
+
+    - name: Test
+      run: dotnet test",,,Valid,0.27560673314839856
+,https://github.com/Cysharp/UniTask,,"name: Build and Test
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 3.1
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build
+      run: dotnet build
+
+    - name: Test
+      run: dotnet test",,,Valid,
+,https://github.com/EduardoPires/EquinoxProject,"name: .NET Core
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 6.0.x
+    - name: Install dependencies
+      run: dotnet restore
+    - name: Build
+      run: dotnet build --configuration Release --no-restore
+    - name: Test
+      run: dotnet test --no-restore --verbosity normal
+","name: Build and Test
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 6.0.x
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build
+      run: dotnet build
+
+    - name: Test
+      run: |
+        dotnet test --no-build
+",,,Valid,0.6260536583621588
+,https://github.com/felixse/FluentTerminal,"name: CI
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@master
+    
+    - name: Build client
+      working-directory: ./FluentTerminal.Client
+      run: |
+        yarn
+        yarn build
+
+    - name: Setup MSBuild.exe
+      uses: microsoft/setup-msbuild@v1.0.2
+    
+    - name: MSBuild
+      run: msbuild FluentTerminal.sln -t:build -p:Configuration=Debug -p:Platform=x64 -m -restore
+","name: Build and Test
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 6.0.x
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build
+      run: dotnet build --configuration Release
+
+    - name: Test
+      run: dotnet test --configuration Release",,,Valid,0.051932711672843336
+,https://github.com/graphql-dotnet/graphql-dotnet,"name: Check formatting
+
+on:
+  pull_request:
+    branches:
+      - master
+      - develop
+    paths:
+      - src/**
+      - .github/workflows/**
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 7.0.x
+          source-url: https://nuget.pkg.github.com/graphql-dotnet/index.json
+        env:
+          NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+      - name: Install dependencies
+        working-directory: src
+        run: dotnet restore
+      - name: Check formatting
+        working-directory: src
+        run: |
+          dotnet format --no-restore --verify-no-changes --severity error --exclude ./GraphQL/obj/**/*.cs || (echo ""Run 'dotnet format' to fix issues"" && exit 1)
+","name: Build and Test
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 5.0
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build
+      run: dotnet build
+
+    - name: Test
+      run: dotnet test",,,Valid,0.7733336854045721
+,https://github.com/gui-cs/Terminal.Gui,"name: Build and publish API docs
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  generate-docs:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v3.0.3
+      with:
+        dotnet-version: 6.0.100
+    
+    - name: Setup DocFX
+      uses: crazy-max/ghaction-chocolatey@v2
+      with:
+        args: install docfx    
+
+    - name: Install dependencies
+      run: dotnet restore        
+
+    - name: DocFX Build
+      working-directory: docfx
+      # https://stackoverflow.com/questions/56726429/how-to-run-multiple-commands-in-one-github-actions-docker
+      run: |
+        rm ../docs -Recurse -Force -ErrorAction SilentlyContinue
+        docfx docfx.json
+      continue-on-error: false      
+
+    - name: Publish
+      if: github.event_name == 'push'
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: docs
+        force_orphan: true
+
+    # - name: Use docfx to build API Docs
+    #   uses: nikeee/docfx-action@v1.0.0
+    #   with:
+    #     args: docfx/docfx.json
+
+    # # Publish generated site using GitHub Pages
+    # - uses: maxheld83/ghpages@master
+    #   name: Publish API Documentation on GitHub Pages
+    #   env:
+    #     BUILD_DIR: docs # docfx's default output directory is _site
+    #     GH_PAT: ${{ secrets.GH_PAT }} # See https://github.com/maxheld83/ghpages","name: Build and Test
+
+on:
+  push:
+    branches:
+      - develop
+  pull_request:
+    branches:
+      - develop
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v3.0.3
+        with:
+          dotnet-version: 3.1.6
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build
+
+      - name: Test
+        run: dotnet test",,,Valid,0.7826618983833785
+,https://github.com/hellzerg/optimizer,"name: Build
+
+on:
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    name: Build
+    runs-on: windows-2022
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v1
+
+    - name: Setup NuGet
+      uses: nuget/setup-nuget@v1
+
+    - name: Navigate to Workspace
+      run: cd $GITHUB_WORKSPACE
+
+    - name: Restore Packages
+      run: nuget restore Optimizer.sln
+
+    - name: Build Solution
+      run: msbuild.exe Optimizer.sln
+","name: Build and Test
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Setup MSBuild
+      uses: actions/setup-msbuild@v1
+
+    - name: Setup NuGet
+      uses: actions/setup-nuget@v1
+
+    - name: Restore dependencies
+      run: nuget restore Optimizer.sln
+
+    - name: Build solution
+      run: msbuild /p:Configuration=Release Optimizer.sln
+
+    - name: Run tests
+      run: |
+        # Add commands to run tests if present
+        # Example: dotnet test
+",,,Valid,0.16305299208417492
+,https://github.com/JeffreySu/WeiXinMPSDK,"# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
+# More GitHub Actions for Azure: https://github.com/Azure/actions
+
+name: Build and deploy ASP app to Azure Web App - senparcweixinsamplenetcore3(senparcweixinsamplenet5)
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: 'windows-latest'
+
+    steps:
+    - uses: actions/checkout@master
+
+    - name: Setup MSBuild path
+      uses: microsoft/setup-msbuild@v1.0.2
+
+    - name: Setup NuGet
+      uses: NuGet/setup-nuget@v1.0.5
+
+    - name: Set up .NET Core 3.1
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '3.1.301'
+
+    - name: Set up .NET 6.0
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '6.0.100'
+        
+
+    - name: Set up .NET 7.0
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '7.0.302'
+        
+    #- name: CMD1
+    #  run: dir 
+      #`n cd ./Samples/net6-mvc/ `n dir `n nuget restore `n msbuild /nologo /verbosity:m /t:Build /t:pipelinePreDeployCopyAllFilesToOneFolder /p:_PackageTempDir=""\published\""
+      
+    #- name: CMD2
+    #  run: cd ./Samples/net6-mvc/
+
+    #- name: CMD3
+    #  run: dir
+      
+    - name: Restore NuGet packages
+      run: nuget restore ""./Samples/All/net7-mvc/""
+      #-SolutionDirectory ./Samples/All/net7-mvc/
+      
+    - name: Publish to folder
+      run: msbuild ""Samples/All/net7-mvc/Senparc.Weixin.Sample.Net7.sln"" /nologo /verbosity:m /t:Build /t:pipelinePreDeployCopyAllFilesToOneFolder /p:_PackageTempDir=""\published\""
+
+    #- name: Deploy to Azure Web App
+    #  uses: azure/webapps-deploy@v2
+    #  with:
+    #    app-name: 'senparcweixinsamplenetcore3'
+    #    slot-name: 'senparcweixinsamplenet5'
+    #    publish-profile: ${{ secrets.AzureAppService_PublishProfile_3ee3a42f0a324bf7be968d8c232a8555 }}
+    #    package: \published\
+","name: Build and Test
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '14'
+
+    - name: Install dependencies
+      run: |
+        npm install
+        npm install @vuepress/plugin-back-to-top@^1.9.9
+        npm install vuepress@^1.9.9
+
+    - name: Build and Test
+      run: |
+        npm run build
+        npm test",,,Valid,0.1618798416766436
+,https://github.com/jstedfast/MailKit,"name: MailKit CI/CD Pipeline
+
+on: [push, pull_request, workflow_dispatch]
+
+jobs:
+  ci:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ windows-latest, ubuntu-latest ]
+        build-configuration: [ Debug, Release ]
+    outputs:
+      latest-version: ${{ steps.semantic_version.outputs.version_num }}
+    environment: ci
+    env:
+      SOLUTION_PATH: MailKit.sln
+      BUILD_PLATFORM: Any CPU
+      BUILD_CONFIGURATION: ${{ matrix.build-configuration }}
+      GITHUB_RUN_NUMBER: ${{ github.run_number }}
+    steps:
+      - name: Setup/Install the .NET 6 SDK
+        id: install-net6
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 6.0.x
+
+      - name: Configure build options
+        id: configure
+        shell: pwsh
+        run: |
+          $IS_DEBUG = 'false'
+          $IS_RELEASE = 'false'
+          $IS_PUSH_TO_MASTER = 'false'
+          $IS_NOT_PR = 'true'
+          $IS_GITHUB_RELEASE = 'false'
+          $IS_WINDOWS = 'false'
+          $IS_UBUNTU = 'false'
+          $GENERATE_CODE_COVERAGE = 'no'
+
+          if ( $env:BUILD_CONFIGURATION -ceq 'Debug' ) {
+            $IS_DEBUG = 'true'
+          }
+          if ( $env:BUILD_CONFIGURATION -ceq 'Release' ) {
+            $IS_RELEASE = 'true'
+          }
+          if ( ($env:GITHUB_EVENT_NAME -ceq 'push') -and ($env:GITHUB_REF -ceq 'refs/heads/master') ) {
+            $IS_PUSH_TO_MASTER = 'true'
+          }
+          if ( $env:GITHUB_EVENT_NAME -ceq 'pull_request' ) {
+            $IS_NOT_PR = 'false'
+          }
+          if ( ($env:GITHUB_EVENT_NAME -ceq 'push') -and ($env:GITHUB_REF -ceq 'refs/heads/master') -and ($env:BUILD_CONFIGURATION -ceq 'Release') -and ($env:OS -ceq 'windows-latest') ) {
+            $IS_GITHUB_RELEASE = 'true'
+          }
+          if ( $env:OS -ceq 'windows-latest' ) {
+            $IS_WINDOWS = 'true'
+          }
+          if ( $env:OS -ceq 'ubuntu-latest' ) {
+            $IS_UBUNTU = 'true'
+          }
+          if ( $IS_WINDOWS -ceq 'true' -and $IS_DEBUG -ceq 'true' ) {
+            $GENERATE_CODE_COVERAGE = 'yes'
+          }
+
+          echo ""::set-output name=IS_DEBUG::$(echo $IS_DEBUG)""
+          echo ""::set-output name=IS_RELEASE::$(echo $IS_RELEASE)""
+          echo ""::set-output name=is_push_to_master::$(echo $IS_PUSH_TO_MASTER)""
+          echo ""::set-output name=is_not_pr::$(echo $IS_NOT_PR)""
+          echo ""::set-output name=is_github_release::$(echo $IS_GITHUB_RELEASE)""
+          echo ""::set-output name=is_windows::$(echo $IS_WINDOWS)""
+          echo ""::set-output name=is_ubuntu::$(echo $IS_UBUNTU)""
+          echo ""::set-output name=generate_code_coverage::$(echo $GENERATE_CODE_COVERAGE)""
+        env:
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
+          GITHUB_REF: ${{ github.ref }}
+          OS: ${{ matrix.os }}
+
+      - if: steps.configure.outputs.is_windows == 'true'
+        name: Setup MSBuild
+        id: setup_msbuild
+        uses: microsoft/setup-msbuild@v1.3.1
+
+      - name: Checkout repository
+        id: checkout_repo
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Get semantic version from csproj
+        id: semantic_version
+        shell: pwsh
+        run: |
+          $xml = [xml](gc MailKit/MailKit.csproj)
+          $SEMANTIC_VERSION_NUMBER = $xml.Project.PropertyGroup.VersionPrefix
+          echo ""::set-output name=version_num::$(echo $SEMANTIC_VERSION_NUMBER[0].Trim())""
+          echo ""::set-output name=version_tag::$(echo v""$SEMANTIC_VERSION_NUMBER[0].Trim()"")""
+
+      - if: steps.configure.outputs.is_github_release == 'true'
+        name: Get latest tag
+        id: get_latest_tag
+        shell: pwsh
+        run: |
+          $LATEST_TAG = git -c 'versionsort.suffix=-' ls-remote --exit-code --refs --sort='version:refname' --tags ""https://github.com/$env:GIT_URL.git"" '*.*.*' | tail --lines=1 | cut --delimiter='/' --fields=3
+          echo ""::set-output name=tag::$(echo $LATEST_TAG)""
+        env:
+          GIT_URL: ${{ github.repository }}
+
+      - if: steps.configure.outputs.is_github_release == 'true' && steps.semantic_version.outputs.version_tag != steps.get_latest_tag.outputs.tag
+        name: Add new tag to repo
+        id: add_new_tag_to_repo
+        shell: pwsh
+        run: |
+          git config --global user.name $env:GIT_USER_NAME
+          git config --global user.email $env:GIT_USER_EMAIL
+          git tag -a -m ""Tagged for $env:NEW_VERSION_NUM"" $env:NEW_VERSION_NUM
+          git push --follow-tags
+        env:
+          GIT_USER_NAME: ${{ github.event.head_commit.author.username }}
+          GIT_USER_EMAIL: ${{ github.event.head_commit.author.email }}
+          NEW_VERSION_NUM: ${{ steps.semantic_version.outputs.version_num }}
+
+      - name: Run NuGet restore
+        id: run_nuget_restore
+        shell: pwsh
+        run: |
+          nuget restore $env:SOLUTION_PATH
+
+      - name: Run .NET restore
+        shell: pwsh
+        run: |
+          dotnet restore $env:SOLUTION_PATH
+
+      - name: Run .NET tool restore
+        shell: pwsh
+        run: |
+          dotnet tool restore
+
+      - name: Build solution
+        id: build_solution
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          dotnet msbuild $env:SOLUTION_PATH -property:Platform=$env:BUILD_PLATFORM -property:Configuration=$env:BUILD_CONFIGURATION -property:MonoRuntime=$env:IS_UBUNTU
+        env:
+          IS_UBUNTU: ${{ steps.configure.outputs.is_ubuntu }}
+
+      - name: Run unit tests
+        id: run_unit_tests
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          & ./scripts/test.ps1 -Configuration:$env:BUILD_CONFIGURATION -GenerateCodeCoverage:$env:GENERATE_CODE_COVERAGE
+        env:
+          BUILD_CONFIGURATION: ${{ matrix.build-configuration }}
+          GENERATE_CODE_COVERAGE: ${{ steps.configure.outputs.generate_code_coverage }}
+
+      - name: Upload unit test results
+        id: upload_test_results
+        continue-on-error: true
+        uses: actions/upload-artifact@v1
+        with:
+          name: MailKit.${{ steps.semantic_version.outputs.version_num }}.${{ env.GITHUB_RUN_NUMBER }}-${{ matrix.os }}-${{ matrix.build-configuration }}-TestResults.xml
+          path: TestResult.xml
+
+      - if: steps.configure.outputs.generate_code_coverage == 'yes'
+        name: Upload code coverage data to coveralls.io
+        id: upload_to_coveralls
+        shell: pwsh
+        run: |
+          & ./scripts/coveralls.ps1
+        env:
+          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
+          GIT_COMMIT_SHA: ${{ github.sha }}
+          GIT_REF: ${{ github.ref }}
+          GIT_ACTOR: ${{ github.event.head_commit.author.username }}
+          GIT_ACTOR_EMAIL: ${{ github.event.head_commit.author.email }}
+          GIT_COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+          COVERALLS_JOB_ID: ${{ steps.semantic_version.outputs.version_num }}.${{ env.GITHUB_RUN_NUMBER }}
+
+      - if: steps.configure.outputs.is_github_release == 'true'
+        name: Create NuGet package
+        id: create_nuget_package
+        shell: pwsh
+        run: |
+          nuget pack nuget/MailKit.nuspec `
+          -Version ""$env:LATEST_VERSION.$env:GITHUB_RUN_NUMBER""
+        env:
+          LATEST_VERSION: ${{ steps.semantic_version.outputs.version_num }}
+
+      - if: steps.configure.outputs.is_github_release == 'true'
+        name: Push NuGet package to MyGet
+        id: push_nuget_package
+        shell: pwsh
+        run: |
+          nuget push $env:NUGET_PKG_PATH `
+          -ApiKey $env:MYGET_API_KEY `
+          -Source https://www.myget.org/F/mimekit/api/v3/index.json
+        env:
+          NUGET_PKG_PATH: MailKit.${{ steps.semantic_version.outputs.version_num }}.${{ env.GITHUB_RUN_NUMBER }}.nupkg
+          MYGET_API_KEY: ${{ secrets.MYGET_API_KEY }}
+
+      - if: steps.configure.outputs.is_github_release == 'true'
+        name: Upload NuGet package as artifact
+        id: upload_nuget_package
+        uses: actions/upload-artifact@v3
+        with:
+          name: MailKit.${{ steps.semantic_version.outputs.version_num }}.${{ env.GITHUB_RUN_NUMBER }}.nupkg
+          path: MailKit.${{ steps.semantic_version.outputs.version_num }}.${{ env.GITHUB_RUN_NUMBER }}.nupkg
+
+# Built with ❤ by [Pipeline Foundation](https://pipeline.foundation)
+","name: Build and Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 5.0
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build
+      run: dotnet build --configuration Release
+
+    - name: Test
+      run: dotnet test --configuration Release
+",,,Valid,0.32353694043675374
+,https://github.com/JustArchiNET/ArchiSteamFarm,"name: ASF-ci
+
+on: [push, pull_request]
+
+env:
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  DOTNET_NOLOGO: true
+  DOTNET_SDK_VERSION: 7.0.x
+
+jobs:
+  main:
+    strategy:
+      fail-fast: false
+      matrix:
+        configuration: [Debug, Release]
+        os: [macos-latest, ubuntu-latest, windows-latest]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4.1.1
+      with:
+        show-progress: false
+        submodules: recursive
+
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v3.2.0
+      with:
+        dotnet-version: ${{ env.DOTNET_SDK_VERSION }}
+
+    - name: Verify .NET Core
+      run: dotnet --info
+
+    - name: Build ${{ matrix.configuration }} ArchiSteamFarm and other projects
+      run: dotnet build -c ""${{ matrix.configuration }}"" -p:ContinuousIntegrationBuild=true -p:UseAppHost=false --nologo
+
+    - name: Run ${{ matrix.configuration }} ArchiSteamFarm.Tests
+      run: dotnet test ArchiSteamFarm.Tests -c ""${{ matrix.configuration }}"" -p:ContinuousIntegrationBuild=true -p:UseAppHost=false --nologo
+
+    - name: Upload latest strings for translation on Crowdin
+      if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && matrix.configuration == 'Release' && startsWith(matrix.os, 'ubuntu-') }}
+      uses: crowdin/github-action@v1.14.1
+      with:
+        crowdin_branch_name: main
+        config: '.github/crowdin.yml'
+        project_id: ${{ secrets.ASF_CROWDIN_PROJECT_ID }}
+        token: ${{ secrets.ASF_CROWDIN_API_TOKEN }}
+","name: Build and Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+
+      - name: Install dependencies
+        run: |
+          npm install
+
+      - name: Build and Test
+        run: |
+          npm run build
+          npm test",,,Valid,0.2798050381035472
+,https://github.com/kgrzybek/modular-monolith-with-ddd,"name: CI Pipeline
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+
+  build:
+    name: Build and run Unit and Architecture Tests
+    runs-on: ubuntu-latest
+ 
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 3.1.301
+    - name: Run build
+      run: ./build.sh BuildAndUnitTests --configuration Release
+
+  integration:
+    name: Build and run Integration Tests
+    needs: [build]
+    runs-on: ubuntu-latest
+          
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 3.1.301
+    - name: Run build
+      run: ./build.sh RunAllIntegrationTests","name: Build and Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 3.1
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build
+      run: dotnet build
+
+    - name: Test
+      run: dotnet test",,,Valid,0.27560673314839856
+,https://github.com/MahApps/MahApps.Metro,"
+name: ci
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - develop
+
+jobs:
+  windows-latest:
+    name: windows-latest
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: | 
+            5.x
+            6.x
+      - name: List dotnet sdks
+        run: dotnet --list-sdks
+      - name: Run the Cake script
+        uses: cake-build/cake-action@v1
+        with:
+          cake-version: tool-manifest
+          verbosity: Normal
+          script-path: build.cake
+          target: ci
+        env:
+          azure-key-vault-url: ${{ secrets.AZURE_KEY_VAULT_URL }}
+          azure-key-vault-client-id: ${{ secrets.AZURE_KEY_VAULT_CLIENT_ID }}
+          azure-key-vault-tenant-id: ${{ secrets.AZURE_KEY_VAULT_TENANT_ID }}
+          azure-key-vault-client-secret: ${{ secrets.AZURE_KEY_VAULT_CLIENT_SECRET }}
+          azure-key-vault-certificate: ${{ secrets.AZURE_KEY_VAULT_CERTIFICATE }}
+","name: Build and Test
+
+on:
+  push:
+    branches:
+      - develop
+  pull_request:
+    branches:
+      - develop
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 3.1
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build
+      run: dotnet build
+
+    - name: Test
+      run: dotnet test",,,Valid,0.4827638400083202
+,https://github.com/MassTransit/MassTransit,"name: MassTransit Documentation
+on:
+  push:
+    branches:
+      - develop
+    paths:
+      - 'docs/**'
+      - 'package.json'
+      - '**/docs.yml'
+jobs:
+  build:
+    name: Build and Deploy
+    runs-on: ubuntu-latest
+    if: (github.ref == 'refs/heads/develop') && github.repository == 'MassTransit/MassTransit'
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Build
+        run: |
+          npm install
+          npm run docs:build
+
+      - name: Deploy
+        working-directory: ./docs/.vuepress/dist
+        run: |
+          git init .
+          git config --global user.name ""MassTransit""
+          git config --global user.email ""mtproj@phatboyg.com""
+          git fetch https://github.com/MassTransit/masstransit.github.io.git
+          git checkout 220443cd2ab45d486fcee10a65669aff0bda31ab
+          git checkout -b master
+          git add .
+          git commit -am ""Deploy Documentation""
+          git push --force --set-upstream https://${{secrets.PHATBOYG_PAT}}:x-oauth-basic@github.com/MassTransit/masstransit.github.io.git master
+
+
+
+","name: Build and Test
+
+on:
+  push:
+    branches:
+      - develop
+  pull_request:
+    branches:
+      - develop
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+
+      - name: Install dependencies
+        run: |
+          npm install
+
+      - name: Build
+        run: |
+          npm run build
+
+      - name: Test
+        run: |
+          npm test",,,Valid,0.3775911556419404
+,https://github.com/apache/rocketmq,,"name: Build and Test
+
+on:
+  push:
+    branches:
+      - develop
+  pull_request:
+    branches:
+      - develop
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v2
+        with:
+          java-version: 11
+
+      - name: Build with Maven
+        run: |
+          mvn -B clean package --file pom.xml
+
+      - name: Run Tests
+        run: |
+          mvn test --file pom.xml",,,Valid,
+,https://github.com/Blankj/AndroidUtilCode,"name: Android CI
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: set up JDK 1.8
+      uses: actions/setup-java@v1
+      with:
+        java-version: 1.8
+    - name: Build with Gradle
+      run: ./gradlew build aR
+","name: Build and Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Java
+        uses: actions/setup-java@v1
+        with:
+          java-version: '12.x'
+
+      - name: Build with Gradle
+        run: |
+          ./gradlew build
+",,,Valid,0.7354818750130231
+,https://github.com/brettwooldridge/HikariCP,"name: CI
+
+on:
+  pull_request:
+    branches:
+      - master
+  push:
+    branches:
+      - master
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        java: ['11']
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up JDK
+      uses: actions/setup-java@v1
+      with:
+        java-version: ${{ matrix.java }}
+    - name: print Java version
+      run: java -version
+    - uses: actions/cache@v2
+      with:
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-maven-
+    - name: Build
+      run: mvn --no-transfer-progress -B clean package --file pom.xml
+","name: Build and Test
+
+on:
+  push:
+    branches: [ dev ]
+  pull_request:
+    branches: [ dev ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up JDK 11
+      uses: actions/setup-java@v1
+      with:
+        java-version: 11
+
+    - name: Cache Maven packages
+      uses: actions/cache@v2
+      with:
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        restore-keys: ${{ runner.os }}-maven-
+
+    - name: Build with Maven
+      run: mvn -B package --file pom.xml
+
+    - name: Run tests
+      run: mvn test",,,Valid,0.3511844061574504
+,https://github.com/apolloconfig/apollo,,name: Build and Test\non:\n  push:\n    branches:\n      - master\n  pull_request:\n    branches:\n      - master\njobs:\n  build:\n    name: Build\n    runs-on: ubuntu-latest\n    steps:\n      - name: Checkout repository\n        uses: actions/checkout@v2\n      - name: Set up Java\n        uses: actions/setup-java@v1\n        with:\n          java-version: '11'\n      - name: Build with Maven\n        run: mvn -B package --file pom.xml\n  test:\n    name: Test\n    runs-on: ubuntu-latest\n    needs: build\n    steps:\n      - name: Checkout repository\n        uses: actions/checkout@v2\n      - name: Set up Java\n        uses: actions/setup-java@v1\n        with:\n          java-version: '11'\n      - name: Run tests with Maven\n        run: mvn test,,,Valid,
+,https://github.com/dianping/cat,"# This workflow will build a package using Maven and then publish it to GitHub packages when a release is created
+# For more information see: https://github.com/actions/setup-java/blob/main/docs/advanced-usage.md#apache-maven-with-a-settings-path
+
+name: Maven Build CI
+
+on:
+  workflow_dispatch:
+    inputs:
+      logLevel:
+        description: 'Log level'
+        required: false
+        default: 'warning'
+        type: choice
+        options:
+          - info
+          - warning
+          - debug
+  push:
+    branches:
+      - master
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up JDK 8
+        uses: actions/setup-java@v3
+        with:
+          java-version: '8'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Build with Maven
+        run: mvn clean package -DskipTests
+","name: Build and Test
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up JDK 1.8
+      uses: actions/setup-java@v1
+      with:
+        java-version: 1.8
+
+    - name: Build and Test
+      run: |
+        mvn clean install
+",,,Valid,0.5479902028850049
+,https://github.com/google/dagger,,"name: Build and Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Java
+        uses: actions/setup-java@v1
+        with:
+          java-version: '11'
+
+      - name: Cache Maven dependencies
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-maven-
+
+      - name: Build with Maven
+        run: mvn -B package --file pom.xml
+
+      - name: Run Tests
+        run: mvn test",,,Valid,
+,https://github.com/google/gson,"name: Build
+
+on: [push, pull_request]
+
+permissions:
+  contents: read #  to fetch code (actions/checkout)
+
+jobs:
+  build:
+    name: ""Build on JDK ${{ matrix.java }}""
+    strategy:
+      matrix:
+        java: [ 11, 17 ]
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: ""Set up JDK ${{ matrix.java }}""
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: ${{ matrix.java }}
+          cache: 'maven'
+      - name: Build with Maven
+        # This also runs javadoc:jar to detect any issues with the Javadoc generated during release
+        run: mvn --batch-mode --update-snapshots --no-transfer-progress verify javadoc:jar
+
+  native-image-test:
+    name: ""GraalVM Native Image test""
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: ""Set up GraalVM""
+        uses: graalvm/setup-graalvm@v1
+        with:
+          java-version: '17'
+          distribution: 'graalvm'
+          # According to documentation in graalvm/setup-graalvm this is used to avoid rate-limiting issues
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          cache: 'maven'
+      - name: Build and run tests
+        # Only run tests in `graal-native-image-test` (and implicitly build and run tests in `gson`),
+        # everything else is covered already by regular build job above
+        run: mvn test --batch-mode --update-snapshots --no-transfer-progress --activate-profiles native-image-test --projects graal-native-image-test --also-make
+","name: Build and Test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Java
+      uses: actions/setup-java@v2
+      with:
+        java-version: '11'
+
+    - name: Build with Maven
+      run: mvn -B package --file pom.xml
+
+    - name: Run Tests
+      run: mvn test --file pom.xml",,,Valid,0.3334333891051859
+,https://github.com/greenrobot/EventBus,"# This workflow will build a Java project with Gradle
+# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-gradle
+
+name: Java CI with Gradle
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up JDK 11
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+          cache: gradle
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+      - name: Gradle Info
+        run: ./gradlew -version
+      - name: Build with Gradle
+        run: ./gradlew build
+","name: Build and Test
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Java
+      uses: actions/setup-java@v3
+      with:
+        java-version: '11'
+
+    - name: Build with Gradle
+      run: |
+        ./gradlew build
+",,,Valid,0.4733321714894325
+,https://github.com/iBotPeaches/Apktool,,"name: Build and Test
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Java
+      uses: actions/setup-java@v1
+      with:
+        java-version: '11'
+
+    - name: Build with Gradle
+      uses: actions/gradle/gradle-build-action@v2.9.0
+      with:
+        arguments: build
+
+    - name: Run Tests
+      run: |
+        # Add command to run tests if present in the repository
+        echo 'No tests available'
+",,,Valid,
+,https://github.com/iluwatar/java-design-patterns,,"name: Build and Test
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Java
+      uses: actions/setup-java@v1
+      with:
+        java-version: '11'
+
+    - name: Cache Maven packages
+      uses: actions/cache@v2
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        restore-keys: ${{ runner.os }}-maven-
+
+    - name: Build with Maven
+      run: mvn -B package --file pom.xml
+
+    - name: Run tests
+      run: mvn test",,,Valid,
+,https://github.com/linlinjava/litemall,"name: Actions
+
+on: [push, pull_request]
+
+jobs:
+  # Building and testing Java with Maven
+  # https://docs.github.com/en/actions/guides/building-and-testing-java-with-maven
+  Litemall-all:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        java-version:
+        - 8
+        - 8.0.192
+        - 11
+        - 11.0.3
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up JDK ${{ matrix.java-version }}
+      uses: actions/setup-java@v2
+      with:
+        java-version: ${{ matrix.java-version }}
+        distribution: zulu
+    - name: Cache Maven packages
+      uses: actions/cache@v2
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        restore-keys: ${{ runner.os }}-m2
+    - name: Build with Maven
+      run: mvn --batch-mode --update-snapshots verify
+
+  # Building and testing Node.js
+  # https://docs.github.com/en/actions/guides/building-and-testing-nodejs
+  Litemall-admin:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version:
+        - 10.x
+        - 12.x
+        - 14.x
+        # - 15.x
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+    - run: npm --prefix litemall-admin install
+    - run: npm --prefix litemall-admin run test
+
+  Litemall-vue:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version:
+        - 10.x
+        - 12.x
+        - 14.x
+        # - 15.x
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+    - run: npm --prefix litemall-vue install
+    - run: npm --prefix litemall-vue run test
+","name: Build and Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Set up JDK 11
+        uses: actions/setup-java@v2
+        with:
+          java-version: 11
+      - name: Set up Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: '14'
+      - name: Build with Maven
+        run: mvn -B package --file pom.xml
+      - name: Run Tests
+        run: mvn test",,,Valid,0.4187145133566923
+,https://github.com/LMAX-Exchange/disruptor,"name: Generate Documentation from ASCIIDoc
+
+on:
+  push:
+    branches-ignore: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  checkout-and-deploy:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        java: [ 11 ]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@master
+      - name: Set up java
+        uses: actions/setup-java@v2
+        with:
+          java-version: ${{ matrix.java }}
+          distribution: 'zulu'
+      - name: Build ASCIIDoc with Gradle
+        run: ./gradlew clean asciidoctor
+","name: Build and Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Java
+      uses: actions/setup-java@v2
+      with:
+        java-version: '11'
+
+    - name: Build with Gradle
+      run: |
+        ./gradlew build
+
+    - name: Test with Gradle
+      run: |
+        ./gradlew test",,,Valid,0.5789065624419303
+,https://github.com/Netflix/Hystrix,"name: ""Publish snapshot to NetflixOSS and Maven Central""
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Set up JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: 8
+      - uses: actions/cache@v2
+        id: gradle-cache
+        with:
+          path: |
+            ~/.gradle/caches
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
+      - uses: actions/cache@v2
+        id: gradle-wrapper-cache
+        with:
+          path: |
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradlewrapper-${{ hashFiles('gradle/wrapper/*') }}
+      - name: Build
+        run: ./gradlew build snapshot
+        env:
+          NETFLIX_OSS_SIGNING_KEY: ${{ secrets.ORG_SIGNING_KEY }}
+          NETFLIX_OSS_SIGNING_PASSWORD: ${{ secrets.ORG_SIGNING_PASSWORD }}
+          NETFLIX_OSS_REPO_USERNAME: ${{ secrets.ORG_NETFLIXOSS_USERNAME }}
+          NETFLIX_OSS_REPO_PASSWORD: ${{ secrets.ORG_NETFLIXOSS_PASSWORD }}
+","name: Build and Test
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up JDK 1.8
+      uses: actions/setup-java@v1
+      with:
+        java-version: 1.8
+
+    - name: Cache Gradle dependencies
+      uses: actions/cache@v2
+      with:
+        path: ~/.gradle/caches
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
+        restore-keys: ${{ runner.os }}-gradle-
+
+    - name: Build with Gradle
+      run: |
+        ./gradlew build
+",,,Valid,0.5800906024775576
+,https://github.com/ReactiveX/RxAndroid,"name: build
+
+on:
+  pull_request: {}
+  push:
+    branches:
+      - '**'
+    tags-ignore:
+      - '**'
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: gradle/wrapper-validation-action@v1.1.0
+
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: 8
+
+      - run: ./gradlew build
+
+      - run: ./gradlew publish
+        if: ${{ github.ref == 'refs/heads/3.x' && github.repository == 'ReactiveX/RxAndroid' }}
+        env:
+          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.SONATYPE_USER }}
+          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.SONATYPE_PASSWORD }}
+","name: Build and Test
+
+on:
+  push:
+    branches:
+      - '3.x'
+  pull_request:
+    branches:
+      - '3.x'
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+      - name: Validate Gradle Wrapper
+        uses: actions/gradle/wrapper-validation-action@v1.1.0
+      - name: Build with Gradle
+        run: |
+          ./gradlew build
+",,,Valid,0.49518745014816956
+,https://github.com/seata/seata,,"name: Build and Test
+
+on:
+  push:
+    branches:
+      - '2.x'
+  pull_request:
+    branches:
+      - '2.x'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v2
+        with:
+          java-version: 11
+
+      - name: Build with Maven
+        run: mvn -B package --file pom.xml
+
+      - name: Run Tests
+        run: mvn test --file pom.xml",,,Valid,
+,https://github.com/spring-projects/spring-boot,"name: Build Pull Request
+on: pull_request
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build pull request
+    runs-on: ubuntu22-8-32
+    if: ${{ github.repository == 'spring-projects/spring-boot' }}
+    steps:
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'liberica'
+
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Validate Gradle wrapper
+        uses: gradle/wrapper-validation-action@v1
+
+      - name: Set up Gradle
+        uses: gradle/gradle-build-action@842c587ad8aa4c68eeba24c396e15af4c2e9f30a
+
+      - name: Build
+        env:
+          CI: 'true'
+          GRADLE_ENTERPRISE_URL: 'https://ge.spring.io'
+        run: ./gradlew -Dorg.gradle.internal.launcher.welcomeMessageEnabled=false --no-daemon --no-parallel --continue build
+
+      - name: Print JVM thread dumps when cancelled
+        uses: ./.github/actions/print-jvm-thread-dumps
+        if: cancelled()
+
+      - name: Upload build reports
+        uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: build-reports
+          path: '**/build/reports/'
+","name: Build and Test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up JDK 11
+      uses: actions/setup-java@v1
+      with:
+        java-version: 11
+
+    - name: Build with Gradle
+      uses: actions/gradle/gradle-build-action@v1
+      with:
+        arguments: build
+",,,Valid,0.6303863282503209
+,https://github.com/TheAlgorithms/Java,,"name: Build and Test
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Java
+      uses: actions/setup-java@v3
+      with:
+        java-version: '11'
+
+    - name: Build with Maven
+      run: mvn -B package --file pom.xml
+
+    - name: Run Tests
+      run: mvn test",,,Valid,
+,https://github.com/spring-projects/spring-petclinic,"# This workflow will build a Java project with Maven, and cache/restore any dependencies to improve the workflow execution time
+# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-maven
+
+name: Java CI with Maven
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        java: [ '17' ]
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up JDK ${{matrix.java}}
+        uses: actions/setup-java@v2
+        with:
+          java-version: ${{matrix.java}}
+          distribution: 'adopt'
+          cache: maven
+      - name: Build with Maven Wrapper
+        run: ./mvnw -B package
+","name: Build and Test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up JDK 11
+      uses: actions/setup-java@v2
+      with:
+        java-version: 11
+
+    - name: Build with Maven
+      run: mvn -B package --file pom.xml
+",,,Valid,0.6062233286095289
+,https://github.com/square/javapoet,"name: build
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: 8
+
+      - run: mvn --no-transfer-progress verify source:jar javadoc:jar
+
+      - run: mvn --no-transfer-progress deploy --settings="".github/workflows/settings.xml"" -Dmaven.test.skip=true
+        if: ${{ github.ref == 'refs/heads/master' && github.repository == 'square/javapoet' }}
+","name: Build and Test
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up JDK 11
+      uses: actions/setup-java@v2
+      with:
+        java-version: 11
+
+    - name: Build with Maven
+      run: mvn -B package --file pom.xml
+
+    - name: Run Tests
+      run: mvn test",,,Valid,0.3334333891051859
+,https://github.com/seata/seata,,"name: Build and Test
+
+on:
+  push:
+    branches:
+      - '2.x'
+  pull_request:
+    branches:
+      - '2.x'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v2
+        with:
+          java-version: 11
+
+      - name: Build with Maven
+        run: mvn -B package --file pom.xml
+
+      - name: Run Tests
+        run: mvn test --file pom.xml",,,Valid,
+,https://github.com/pxb1988/dex2jar,"
+name: Java CI with Gradle
+
+on:
+  push:
+    branches: [ 2.x ]
+    tags:
+      - v*
+  pull_request:
+    branches: [ 2.x ]
+  workflow_dispatch:
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up JDK 1.8
+      uses: actions/setup-java@v3
+      with:
+        java-version: '8'
+        distribution: 'temurin'
+        cache: 'gradle'
+    - name: Build dex-tools with Gradle
+      run: |
+         ./gradlew ""-DGITHUB_REF_NAME=${GITHUB_REF_NAME}"" check distZip
+
+    - name: Archive dex tools
+      uses: actions/upload-artifact@v3
+      if: success()
+      with:
+        name: dex-tools
+        path: dex-tools/build/distributions/dex-tools-*.zip
+","name: Build and Test
+
+on:
+  push:
+    branches:
+      - '2.x'
+  pull_request:
+    branches:
+      - '2.x'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Java
+      uses: actions/setup-java@v1
+      with:
+        java-version: '11'
+
+    - name: Build with Gradle
+      run: |
+        ./gradlew build
+
+    - name: Test with Gradle
+      run: |
+        ./gradlew test",,,Valid,0.3334333891051859
+,https://github.com/pinpoint-apm/pinpoint,,"name: Build and Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+
+      - name: Build with Maven
+        run: mvn -B package --file pom.xml
+
+      - name: Run Tests
+        run: mvn test --file pom.xml",,,Valid,
+,https://github.com/PowerJob/PowerJob,"# This workflow will build a Java project with Maven
+# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-maven
+
+name: Java CI with Maven
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up JDK 1.8
+      uses: actions/setup-java@v1
+      with:
+        java-version: 1.8
+    - name: Build with Maven
+      run: mvn -B clean package -Pdev -DskipTests --file pom.xml
+    - name: upload build result
+      run: mkdir staging && cp powerjob-server/powerjob-server-starter/target/*.jar staging/powerjob-server.jar && cp powerjob-client/target/*.jar staging/powerjob-client.jar && cp powerjob-worker-agent/target/*.jar staging/powerjob-agent.jar
+    - uses: actions/upload-artifact@v1
+      with:
+        name: powerjob-server.jar
+        path: staging/powerjob-server.jar
+    - uses: actions/upload-artifact@v1
+      with:
+        name: powerjob-client.jar
+        path: staging/powerjob-client.jar
+    - uses: actions/upload-artifact@v1
+      with:
+        name: powerjob-agent.jar
+        path: staging/powerjob-agent.jar
+","name: Build and Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+
+      - name: Build with Maven
+        run: mvn -B package --file pom.xml
+",,,Valid,0.6017059262649256
+,https://github.com/Nepxion/Discovery,"# This workflow will build a Java project with Maven
+# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-maven
+
+name: build
+
+on:
+  push:
+    branches: [ 6.x.x ]
+  pull_request:
+    branches: [ 6.x.x ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up JDK 8
+      uses: actions/setup-java@v2
+      with:
+        java-version: '8'
+        distribution: 'adopt'
+    - name: Build with Maven
+      run: mvn -B package --file pom.xml","name: Build and Test
+
+on:
+  push:
+    branches: [ '6.x.x' ]
+  pull_request:
+    branches: [ '6.x.x' ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up JDK 11
+      uses: actions/setup-java@v2
+      with:
+        java-version: '11'
+
+    - name: Build with Maven
+      run: mvn -B package --file pom.xml
+
+    - name: Run Tests
+      run: mvn test",,,Valid,0.6049991286170744
+,https://github.com/microg/GmsCore,"name: Build
+on: [pull_request, push]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'gradle'
+      - run: ./gradlew --no-daemon build
+        env:
+          TERM: dumb
+          JAVA_OPTS: -Xmx2048m
+","name: Build and Test
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Java
+      uses: actions/setup-java@v3
+      with:
+        java-version: '11'
+
+    - name: Build with Gradle
+      run: |
+        ./gradlew build
+
+    - name: Test with Gradle
+      run: |
+        ./gradlew test
+",,,Valid,0.5275812376623716
+,https://github.com/micronaut-projects/micronaut-core,,"name: Build and Test\non:\n  push:\n    branches:\n      - '4.2.x'\n  pull_request:\n    branches:\n      - '4.2.x'\njobs:\n  build:\n    name: Build\n    runs-on: ubuntu-latest\n    steps:\n      - name: Checkout code\n        uses: actions/checkout@v4\n      - name: Set up JDK 11\n        uses: actions/setup-java@v3\n        with:\n          java-version: 11\n      - name: Validate Gradle Wrapper\n        uses: actions/gradle/wrapper-validation-action@v1\n      - name: Build with Gradle\n        uses: actions/gradle/gradle-build-action@v2.9.0\n  test:\n    name: Test\n    runs-on: ubuntu-latest\n    needs: build\n    steps:\n      - name: Checkout code\n        uses: actions/checkout@v4\n      - name: Set up JDK 11\n        uses: actions/setup-java@v3\n        with:\n          java-version: 11\n      - name: Validate Gradle Wrapper\n        uses: actions/gradle/wrapper-validation-action@v1\n      - name: Run Tests\n        run: |
+          ./gradlew test",,,Valid,
+,https://github.com/mockito/mockito,"#
+# CI build that assembles artifacts and runs tests.
+# If validation is successful this workflow releases from the main dev branch.
+#
+# - skipping CI: add [skip ci] to the commit message
+# - skipping release: add [skip release] to the commit message
+#
+name: CI
+
+on:
+  push:
+    branches: ['main']
+    tags: [v*]
+  pull_request:
+    branches: ['**']
+
+permissions:
+  contents: read
+
+jobs:
+
+  #
+  # Main build job
+  #
+  build:
+    runs-on: ubuntu-latest
+    if: ""! contains(toJSON(github.event.commits.*.message), '[skip ci]')""
+
+    # Definition of the build matrix
+    strategy:
+      matrix:
+        java: [11, 17, 21]
+        entry:
+          - { mock-maker: 'mock-maker-default', member-accessor: 'member-accessor-default' }
+          - { mock-maker: 'mock-maker-inline', member-accessor: 'member-accessor-module' }
+          - { mock-maker: 'mock-maker-subclass', member-accessor: 'member-accessor-module' }
+          - { mock-maker: 'mock-maker-subclass', member-accessor: 'member-accessor-reflection' }
+          - { mock-maker: 'mock-maker-inline', member-accessor: 'member-accessor-reflection' }
+
+    # All build steps
+    # SINGLE-MATRIX-JOB means that the step does not need to be executed on every job in the matrix
+    steps:
+
+    - name: 1. Check out code
+      uses: actions/checkout@v4 # https://github.com/actions/checkout
+      with:
+        fetch-depth: '0' # https://github.com/shipkit/shipkit-changelog#fetch-depth-on-ci
+
+    - name: 2. Set up Java for running Gradle build
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'zulu'
+        java-version: 17
+
+    - name: 3. Validate Gradle wrapper
+      if: matrix.java == 11 && matrix.entry.mock-maker == 'mock-maker-default' # SINGLE-MATRIX-JOB
+      uses: gradle/wrapper-validation-action@v1.1.0 # https://github.com/gradle/wrapper-validation-action
+
+    - name: 4. Build and check reproducibility of artifacts (single job only)
+      if: matrix.java == 11 && matrix.entry.mock-maker == 'mock-maker-default' # SINGLE-MATRIX-JOB
+      run: ./check_reproducibility.sh
+
+    - name: 5. Spotless check (single job only). Run './gradlew spotlessApply' locally if this job fails.
+      if: matrix.java == 11 && matrix.entry.mock-maker == 'mock-maker-default' # SINGLE-MATRIX-JOB
+      run: >
+        ./gradlew
+        spotlessCheck
+        --stacktrace
+        --scan
+
+    - name: 6. Build on Java ${{ matrix.java }} with ${{ matrix.entry.mock-maker }} and ${{ matrix.entry.member-accessor }}
+      run: >
+        ./gradlew
+        -Pmockito.test.java=${{ matrix.java }}
+        build
+        idea
+        --stacktrace
+        --scan
+      env:
+        MOCK_MAKER: ${{ matrix.entry.mock-maker }}
+        MEMBER_ACCESSOR: ${{ matrix.entry.member-accessor }}
+
+    - name: 7. Generate coverage report
+      run: >
+        ./gradlew
+        -Pmockito.test.java=${{ matrix.java }}
+        coverageReport
+        --stacktrace
+        --scan
+
+    - name: 8. Upload coverage report
+      uses: codecov/codecov-action@v3
+      with:
+        files: build/reports/jacoco/mockitoCoverage/mockitoCoverage.xml
+        fail_ci_if_error: true
+        token: ${{secrets.CODECOV_TOKEN}}
+
+  #
+  # Android build job
+  #
+  android:
+    runs-on: macos-latest
+    if: ""! contains(toJSON(github.event.commits.*.message), '[skip ci]')""
+    timeout-minutes: 30
+
+    # Definition of the build matrix
+    strategy:
+      matrix:
+        # Minimum supported and maximum available.
+        android-api: [ 26, 33 ]
+
+    # All build steps
+    steps:
+    - name: 1. Check out code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: '0' # https://github.com/shipkit/shipkit-changelog#fetch-depth-on-ci
+
+    - name: 2. Set up Java for running Gradle build
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'zulu'
+        java-version: 17
+
+    - name: 3. Run Android tests on Android API level ${{ matrix.android-api }}
+      uses: reactivecircus/android-emulator-runner@v2
+      with:
+        arch: x86_64
+        api-level: ${{ matrix.android-api }}
+        # Workaround for https://issuetracker.google.com/issues/267458959
+        target: ${{ matrix.android-api >= 32 && 'google_apis' || 'default' }}
+        # Workaround for https://github.com/ReactiveCircus/android-emulator-runner/issues/160, but newer version.
+        emulator-build: 9322596 # 31.3.14.0 got it via `emulator -version`
+        # Override default ""-no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim""
+        # See emulator manual for reference: https://developer.android.com/studio/run/emulator-commandline
+        emulator-options: >
+          -no-window
+          -gpu swiftshader_indirect
+          -no-snapshot
+          -noaudio
+          -no-boot-anim
+          -camera-back none
+          -camera-front none
+        # See logcat manual for reference: https://developer.android.com/studio/command-line/logcat
+        script: |
+          # Capture logcat output from ""Launch Emulator"" to a file.
+          adb logcat -d > emulator-startup.log
+          # Shorten the logcat output, by truncating at this point, the relevant part is yet to come.
+          # Best effort, could fail with ""failed to clear the 'main' log"",
+          # because something is locking logcat, so try a few times, and ignore errors each time.
+          adb logcat --clear || true
+          adb logcat --clear || true
+          adb logcat --clear || true
+          # Capture full logcat output to a file.
+          adb logcat > emulator.log & echo $! > logcat_file.pid
+          # Output instrumentation test logs to the GitHub Actions output.
+          adb logcat ""*:S MonitoringInstr:V AndroidJUnitRunner:V TestRequestBuilder:V TestExecutor:V TestRunner:V"" --format=color & echo $! > logcat_console.pid
+
+          echo 0 > gradle.exit # Set a default exit code.
+          # Run the actual tests (suppress build failures by saving the exit code).
+          ./gradlew :androidTest:connectedCheck --no-daemon --no-build-cache || echo $? > gradle.exit
+
+          # Stop capturing logcat output.
+          kill $(cat logcat_file.pid)    || echo ""::warning file=.github/workflows/ci.yml::Logcat process $(cat logcat_file.pid) didn't exist.""
+          kill $(cat logcat_console.pid) || echo ""::warning file=.github/workflows/ci.yml::Logcat process $(cat logcat_console.pid) didn't exist.""
+          # Make sure the step fails if the tests failed.
+          exit $(cat gradle.exit)
+
+    - name: 4. Upload artifact ""androidTest-results-${{ matrix.android-api }}""
+      if: success() || failure()
+      uses: actions/upload-artifact@v3
+      with:
+        name: androidTest-results-${{ matrix.android-api }}
+        path: |
+          ${{ github.workspace }}/subprojects/androidTest/build/reports/androidTests/connected/**
+          ${{ github.workspace }}/emulator.log
+          ${{ github.workspace }}/emulator-startup.log
+
+    # :androidTest:connectedCheck (which depends on :androidTest:createDebugAndroidTestCoverageReport) already generated coverage report.
+    - name: 5. Upload coverage report
+      uses: codecov/codecov-action@v3
+      with:
+        files: subprojects/androidTest/build/reports/coverage/androidTest/debug/connected/report.xml
+        fail_ci_if_error: true
+
+  #
+  # Release job, only for pushes to the main development branch
+  #
+  release:
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    needs: [build] # build job must pass before we can release
+
+    if: github.event_name == 'push'
+        && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
+        && github.repository == 'mockito/mockito'
+        && !contains(toJSON(github.event.commits.*.message), '[skip release]')
+
+    steps:
+
+      - name: 1. Check out code
+        uses: actions/checkout@v4 # https://github.com/actions/checkout
+        with:
+          fetch-depth: '0' # https://github.com/shipkit/shipkit-changelog#fetch-depth-on-ci
+
+      - name: 2. Set up Java for running Gradle build
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: 17
+
+      - name: 3. Build and release
+        run: >
+          ./gradlew
+          githubRelease
+          publishToSonatype
+          closeAndReleaseStagingRepository
+          releaseSummary
+          --stacktrace
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+          NEXUS_TOKEN_USER: ${{secrets.NEXUS_TOKEN_USER}}
+          NEXUS_TOKEN_PWD: ${{secrets.NEXUS_TOKEN_PWD}}
+          PGP_KEY: ${{secrets.PGP_KEY}}
+          PGP_PWD: ${{secrets.PGP_PWD}}
+","name: Build and Test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Java
+      uses: actions/setup-java@v3
+      with:
+        java-version: '11'
+
+    - name: Validate Gradle Wrapper
+      uses: actions/gradle/wrapper-validation-action@v1.1.0
+
+    - name: Build with Gradle
+      run: |
+        ./gradlew build
+
+    - name: Run Tests
+      run: |
+        ./gradlew test",,,Valid,0.265303327834189
+,https://github.com/mybatis/generator,"name: ""CodeQL""
+
+on:
+  push:
+    branches: [ 'master' ]
+  pull_request:
+    # The branches below must be a subset of the branches above
+    branches: [ 'master' ]
+  schedule:
+    - cron: '30 7 * * 5'
+
+jobs:
+  analyze:
+    name: Analyze
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [ 'java' ]
+        # CodeQL supports [ 'cpp', 'csharp', 'go', 'java', 'javascript', 'python', 'ruby' ]
+        # Use only 'java' to analyze code written in Java, Kotlin or both
+        # Use only 'javascript' to analyze code written in JavaScript, TypeScript or both
+        # Learn more about CodeQL language support at https://aka.ms/codeql-docs/language-support
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up JDK
+      uses: actions/setup-java@v3
+      with:
+        java-version: 21
+        distribution: 'zulu'
+
+    - name: Install Toolchain JDK
+      uses: battila7/jdk-via-jabba@v1
+      with:
+        jdk: zulu@1.11.0-10
+        javaHomeEnvironmentVariable: TOOLCHAIN_JDK
+
+    - name: Set up Toolchain
+      shell: bash
+      run: |
+        mkdir -p $HOME/.m2 \
+        && cat << EOF > $HOME/.m2/toolchains.xml
+        <?xml version=""1.0"" encoding=""UTF8""?>
+        <toolchains>
+          <toolchain>
+            <type>jdk</type>
+              <provides>
+                <version>11</version>
+                <vendor>zulu</vendor>
+              </provides>
+              <configuration>
+                <jdkHome>${{ env.TOOLCHAIN_JDK }}</jdkHome>
+              </configuration>
+          </toolchain>
+        </toolchains>
+        EOF
+
+    # Initializes the CodeQL tools for scanning.
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v2
+      with:
+        languages: ${{ matrix.language }}
+        # If you wish to specify custom queries, you can do so here or in a config file.
+        # By default, queries listed here will override any specified in a config file.
+        # Prefix the list here with ""+"" to use these queries and those in the config file.
+
+        # For more details on CodeQL's query packs, refer to: https://docs.github.com/en/code-security/code-scanning/automatically-scanning-your-code-for-vulnerabilities-and-errors/configuring-code-scanning#using-queries-in-ql-packs
+        # queries: security-extended,security-and-quality
+
+    - name: Autobuild
+      uses: github/codeql-action/autobuild@v2
+      with:
+        working-directory: core
+
+    - name: Autobuild
+      working-directory: eclipse
+      run: ./mvnw clean install -DskipTests
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v2
+      with:
+        category: ""/language:${{matrix.language}}""
+","name: Build and Test
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Java
+      uses: actions/setup-java@v1
+      with:
+        java-version: 11
+
+    - name: Build with Maven
+      run: mvn -B package --file pom.xml
+
+    - name: Run Tests
+      run: mvn test",,,Valid,0.4727897461877407
+,https://github.com/lzyzsd/JsBridge,"name: Android CI
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: set up JDK 1.8
+      uses: actions/setup-java@v1
+      with:
+        java-version: 1.8
+    - name: Build with Gradle
+      run: ./gradlew build
+","name: Build and Test
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Java
+      uses: actions/setup-java@v1
+      with:
+        java-version: '12'
+
+    - name: Build with Gradle
+      run: |
+        ./gradlew build
+",,,Valid,0.7719315261511307
+,https://github.com/libgdx/libgdx,"name: ""Validate Gradle Wrapper""
+on: [push, pull_request]
+
+jobs:
+  validation:
+    name: ""Validation""
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: gradle/wrapper-validation-action@e6e38bacfdf1a337459f332974bb2327a31aaf4b
+","name: Build and Test
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Java
+      uses: actions/setup-java@v3
+      with:
+        java-version: '11'
+
+    - name: Build with Gradle
+      uses: actions/gradle/gradle-build-action@v2
+      with:
+        arguments: build
+
+    - name: Run Tests
+      run: |
+        if [ -d ""src/test"" ]; then
+          ./gradlew test
+        else
+          echo ""No tests to run""
+        fi",,,Valid,0.34597537287235824
+,https://github.com/json-path/JsonPath,"---
+name: Java CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        java: [8, 11, 17, 18]
+      fail-fast: false
+      max-parallel: 4
+    name: JDK ${{ matrix.java }}
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: ${{ matrix.java }}
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build with Gradle
+        run: ./gradlew build --warning-mode all
+
+      - name: Run Tests
+        run: ./gradlew check
+
+      - name: Maven Install
+        run: ./gradlew clean publishToMavenLocal
+
+...
+","name: Build and Test
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Java
+      uses: actions/setup-java@v1
+      with:
+        java-version: '11'
+
+    - name: Build with Gradle
+      run: |
+        ./gradlew build
+",,,Valid,0.4617299064504308
+,https://github.com/jhy/jsoup,"name: Build
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macOS-latest]
+        # choosing to run a reduced set of LTS, current, and next, to balance coverage and execution time
+        java: [8, 17, 21]
+      fail-fast: false
+    name: Test JDK ${{ matrix.java }}, ${{ matrix.os }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK ${{ matrix.java }}
+        uses: actions/setup-java@v3
+        with:
+          java-version: ${{ matrix.java }}
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Maven Compile
+        run: mvn -X compile -B --file pom.xml
+
+      - name: Maven Verify
+        run: mvn -X verify -B --file pom.xml
+...
+","name: Build and Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Java
+      uses: actions/setup-java@v3
+      with:
+        java-version: '11'
+
+    - name: Build with Maven
+      run: mvn -B package --file pom.xml
+
+    - name: Run Tests
+      run: mvn test",,,Valid,0.6470118785305605
+,https://github.com/karatelabs/karate,"name: maven-build
+
+on:
+  push:
+    branches: [ master, develop, java11 ]
+  pull_request:
+    branches: [ master, develop ]
+
+jobs:
+  build:
+    timeout-minutes: 20
+    runs-on: ubuntu-latest
+    steps:
+    - name: git checkout
+      uses: actions/checkout@v4    
+    - name: set up jdk 11
+      uses: actions/setup-java@v3
+      with:
+        distribution: adopt
+        java-version: 11
+    - name: cache maven packages
+      uses: actions/cache@v3
+      with:
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        restore-keys: ${{ runner.os }}-maven-
+    - name: build with maven
+      run: mvn -B clean install -P pre-release -Djavacpp.platform=linux-x86_64
+    - name: build and test with docker
+      run: ./build-docker.sh
+    - name: upload workspace if build fails
+      # if: ${{ failure() }}
+      if: ${{ false }}
+      uses: actions/upload-artifact@v3
+      with:
+        name: build-results
+        path: .
+        retention-days: 5        
+","name: Build and Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v3
+        with:
+          java-version: 11
+
+      - name: Build with Maven
+        run: mvn -B package --file pom.xml
+",,,Valid,0.647538382560504

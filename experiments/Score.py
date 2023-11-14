@@ -49,7 +49,7 @@ def get_devops_aware_score (generated_workflow_file_content, actual_workflow_fil
                 score += get_bleu_score(actual_step['run'], generated_step['run'])
 
         else:
-            score += get_bleu_score(actual_step, generated_step)
+            score += get_bleu_score(actual_step, generated_step)*0.5
 
     return score/len(actual_steps_updated)
         
