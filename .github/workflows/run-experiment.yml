@@ -2,6 +2,11 @@ name: Run Experiments
 
 on:
   workflow_dispatch:
+    inputs:
+      dataset:
+        description: 'Dataset'
+        required: true
+        default: 'dataset_sample'
 
 jobs:
   run-experiment:
@@ -10,10 +15,16 @@ jobs:
     - name: 'Checkout GitHub Action'
       uses: actions/checkout@v2
 
+    - name: Update in secrets txt
+      run: |
+        echo ${{ secrets.PAT }} > ./secrets/github-pat.txt
+        echo ${{ secrets.OPENAI_API }} > ./secrets/api-key.txt
+      working-directory: ./experiments
+
     - name: Run python script
       run: |
         pip install -r requirements.txt
-        python3 run_experiment.py
+        python3 run_experiment.py 
       working-directory: ./experiments
 
     - name: Publish output.csv

@@ -3,6 +3,7 @@ import time
 import github
 import gpt
 import Score
+import sys
 
 def run_experiment(csvFile):
     for i in range(0, len(csvFile)):
@@ -49,8 +50,9 @@ def run_experiment(csvFile):
 
     csvFile.to_csv('dataset/output.csv', index=False)
 
+print (sys.argv)
 # reading the CSV file
-csvFile = pandas.read_csv('dataset/dataset_sample.csv')
+csvFile = pandas.read_csv(f'dataset/{sys.argv[1]}.csv')
 
 # Pre-processing the CSV file
 csvFile = csvFile[csvFile['GitHub_Repo_Link'].notna()]
