@@ -14,3 +14,4 @@ urllib3==2.0.6
 yarl==1.9.2
 pyyaml
 pandas
+nltk
