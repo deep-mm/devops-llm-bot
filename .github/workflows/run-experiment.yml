@@ -24,7 +24,7 @@ jobs:
     - name: Run python script
       run: |
         pip install -r requirements.txt
-        python3 run_experiment.py 
+        python3 run_experiment.py ${{ github.event.inputs.dataset }}
       working-directory: ./experiments
 
     - name: Publish output.csv
