@@ -6,7 +6,7 @@ import Score
 import sys
 
 def run_experiment(csvFile):
-    for i in range(0, len(csvFile)):
+    for i in range(0, 100):
         repo_identifier = csvFile.iloc[i]['GitHub_Repo_Link'].split('github.com/')[1]
         print(repo_identifier)
         try:
