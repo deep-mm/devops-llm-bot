@@ -1,0 +1,22 @@
+name: Run Experiments
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: 'Checkout GitHub Action'
+      uses: actions/checkout@v2
+
+    - name: Run python script
+      run: |
+        pip install -r requirements.txt
+        python3 experiments/run_experiment.py
+
+    - name: Publish output.csv
+      uses: actions/upload-artifact@v2
+      with:
+        name: output.csv
+        path: experiments/dataset/output.csv
