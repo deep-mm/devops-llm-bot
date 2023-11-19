@@ -1,0 +1,36 @@
+name: Build and Test
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout
+
+    - name: Install Dependency
+      run: |
+        install
+
+    - name: Install Dependency
+      uses: install
+
+    - name: Build
+      run: |
+        build
+
+    - name: Build
+      uses: build
+
+    - name: Test
+      run: |
+        test
+
+    - name: Test
+      uses: test

@@ -4,51 +4,43 @@ import github
 import gpt
 import Score
 import sys
+import asyncio
 
-def run_experiment(csvFile):
-    for i in range(0, 100):
-        repo_identifier = csvFile.iloc[i]['GitHub_Repo_Link'].split('github.com/')[1]
-        print(repo_identifier)
-        try:
-            default_branch = github.get_default_branch(repo_identifier);
-            repo_structure = github.get_repository_tree(repo_identifier, default_branch)
-            dependencies = github.get_list_of_dependencies(repo_identifier)
+async def run_experiment_row(csvFile, i):
+    repo_identifier = csvFile.iloc[i]['GitHub_Repo_Link'].split('github.com/')[1]
+    print(repo_identifier)
+    try:
+        default_branch = github.get_default_branch(repo_identifier);
+        repo_structure = github.get_repository_tree(repo_identifier, default_branch)
+        dependencies = github.get_list_of_dependencies(repo_identifier)
+        build_file_content = csvFile.iloc[i]['GitHub_Build_Pipeline_File_Content']
 
-            generated_workflow_file = gpt.generate_build_pipeline(repo_structure, dependencies, default_branch)
+        generated_workflow_file = gpt.generate_build_pipeline(repo_structure, dependencies, default_branch)
 
-            csvFile.loc[i,'Generated_Build_Pipeline_File_Content'] = generated_workflow_file
-            valid_syntax = True#github.check_yaml_syntax(generated_workflow_file);
-            if not valid_syntax:
-                csvFile.loc[i,'Syntax_Check'] = 'Invalid'
-                continue
+        csvFile.loc[i,'Generated_Build_Pipeline_File_Content'] = generated_workflow_file
+        valid_syntax = github.run_action_lint(generated_workflow_file);
+        if not valid_syntax:
+            csvFile.loc[i,'Syntax_Check'] = 'Invalid'
+            return
 
-            csvFile.loc[i,'Syntax_Check'] = 'Valid'
-            workflow_files = github.get_all_workflow_files(repo_identifier)
+        csvFile.loc[i,'Syntax_Check'] = 'Valid'
+        
+        exact_match_score = Score.get_exact_match_score(generated_workflow_file, build_file_content)
+        bleu_score = Score.get_bleu_score(generated_workflow_file, build_file_content)
+        devops_aware_score = Score.get_devops_aware_score(generated_workflow_file, build_file_content)
 
-            build_file_content = ''
-            build_file_devops_aware_score = 0
-            # Loop through workflow files
-            for workflow_file in workflow_files:
-                workflow_file_content = github.get_workflow_file_content(repo_identifier, workflow_file, default_branch)
-                devops_aware_score = Score.get_devops_aware_score(generated_workflow_file, workflow_file_content)
-                if devops_aware_score > build_file_devops_aware_score:
-                    build_file_devops_aware_score = devops_aware_score
-                    build_file_content = workflow_file_content
+        csvFile.loc[i,'Exact_Match_Score'] = exact_match_score
+        csvFile.loc[i,'BLEU_Score'] = bleu_score
+        csvFile.loc[i,'DevOps_Aware_Score'] = devops_aware_score
+        # Add delay to avoid rate limiting
+        #time.sleep(5)
+    except Exception as e:
+        print(e)
+        return
 
-            exact_match_score = Score.get_exact_match_score(generated_workflow_file, build_file_content)
-            bleu_score = Score.get_bleu_score(generated_workflow_file, build_file_content)
-
-            csvFile.loc[i,'GitHub_Build_Pipeline_File_Content'] = build_file_content
-            csvFile.loc[i,'DevOps_Aware_Score'] = build_file_devops_aware_score
-            csvFile.loc[i,'Exact_Match_Score'] = exact_match_score
-            csvFile.loc[i,'BLEU_Score'] = bleu_score
-            # Add delay to avoid rate limiting
-            time.sleep(10)
-        except Exception as e:
-            print(e)
-            continue
-
-    csvFile.to_csv('dataset/output.csv', index=False)
+async def run_experiment(csvFile):
+    tasks = [run_experiment_row(csvFile, row) for row in range(len(csvFile))]
+    await asyncio.gather(*tasks)
 
 print (sys.argv)
 # reading the CSV file
@@ -57,6 +49,18 @@ csvFile = pandas.read_csv(f'dataset/{sys.argv[1]}.csv')
 # Pre-processing the CSV file
 csvFile = csvFile[csvFile['GitHub_Repo_Link'].notna()]
 
-csvFile
+# Explicitly specify dtypes to avoid pandas inferring dtypes
+csvFile = csvFile.astype({'GitHub_Repo_Link': 'string', 'GitHub_Build_Pipeline_File_Content': 'string', 'Generated_Build_Pipeline_File_Content': 'string', 'Syntax_Check': 'string', 'Exact_Match_Score': 'float', 'BLEU_Score': 'float', 'DevOps_Aware_Score': 'float'})
 
-run_experiment(csvFile)
+# Start time
+start_time = time.time()
+
+asyncio.run(run_experiment(csvFile))
+
+# End time
+end_time = time.time()
+
+# Print time taken
+print(f"Time taken: {end_time - start_time}")
+
+csvFile.to_csv('dataset/output.csv', index=False)

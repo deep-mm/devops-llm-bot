@@ -1,5 +1,5 @@
 Index,GitHub_Repo_Link,GitHub_Build_Pipeline_File_Content,Generated_Build_Pipeline_File_Content,Exact_Match_Score,BLEU_Score,Syntax_Check,DevOps_Aware_Score
-1.0,https://github.com/DapperLib/Dapper,"name: Main Build
+1,https://github.com/DapperLib/Dapper,"name: Main Build
 
 on:
   pull_request:
@@ -51,36 +51,8 @@ jobs:
         PostgesConnectionString: Server=localhost;Port=${{ job.services.postgres.ports[5432] }};Database=test;User Id=postgres;Password=postgres;
         SqlServerConnectionString: Server=tcp:localhost,${{ job.services.sqlserver.ports[1433] }};Database=tempdb;User Id=sa;Password=Password.;
     - name: .NET Lib Pack
-      run: dotnet pack Build.csproj --no-build -c Release /p:PackageOutputPath=%CD%\.nupkgs /p:CI=true","name: Build and Test
-
-on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
-
-    - name: Set up .NET Core
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: 3.1
-
-    - name: Restore dependencies
-      run: dotnet restore
-
-    - name: Build
-      run: dotnet build --configuration Release
-
-    - name: Test
-      run: dotnet test",0.058922558922558925,0.1995116966314082,Valid,0.39707691739489065
-2.0,https://github.com/huiyadanli/RevokeMsgPatcher,"name: .Net Build
+      run: dotnet pack Build.csproj --no-build -c Release /p:PackageOutputPath=%CD%\.nupkgs /p:CI=true",,,,,
+2,https://github.com/huiyadanli/RevokeMsgPatcher,"name: .Net Build
 
 on:
   workflow_dispatch:
@@ -146,32 +118,8 @@ jobs:
         path: |
           .\RevokeMsgPatcher\bin
           !.\RevokeMsgPatcher\bin\**\RevokeMsgPatcher.exe.config
-          !.\RevokeMsgPatcher\bin\**\RevokeMsgPatcher.pdb","name: Build and Test
-
-on:
-  push:
-    branches:
-      - master
-  pull_request:
-    branches:
-      - master
-
-jobs:
-  build:
-    runs-on: windows-latest
-
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
-
-    - name: Setup MSBuild
-      uses: actions/setup-msbuild@v1.0.2
-
-    - name: Build and Test
-      run: |
-        msbuild RevokeMsgPatcher.sln
-",0.12655086848635236,0.16548021587837275,Valid,0.5258620689655172
-3.0,https://github.com/jasontaylordev/CleanArchitecture,"name: Build
+          !.\RevokeMsgPatcher\bin\**\RevokeMsgPatcher.pdb",,,,,
+3,https://github.com/jasontaylordev/CleanArchitecture,"name: Build
 
 on:
   pull_request:
@@ -260,39 +208,8 @@ jobs:
       with:
         name: efbundle
         path: ./efbundle.zip
-        if-no-files-found: error","name: Build and Test
-
-on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
-
-    - name: Set up Node.js
-      uses: actions/setup-node@v2
-      with:
-        node-version: '14'
-
-    - name: Install dependencies
-      run: |
-        npm install
-
-    - name: Build the application
-      run: |
-        npm run build
-
-    - name: Test the application
-      run: |
-        npm test",0.12889955433664724,0.18839837189778205,Valid,0.23450380441352825
-4.0,https://github.com/nilaoda/N_m3u8DL-CLI,"name: Build_Latest
+        if-no-files-found: error",,,,,
+4,https://github.com/nilaoda/N_m3u8DL-CLI,"name: Build_Latest
  
 on: [push]
  
@@ -325,39 +242,8 @@ jobs:
       uses: actions/upload-artifact@v1.0.0
       with:
         name: N_m3u8DL-CLI_latest
-        path: N_m3u8DL-CLI\bin\Release\N_m3u8DL-CLI.exe","name: Build and Test
-
-on:
-  push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
-
-    - name: Set up .NET Core
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: 3.1
-
-    - name: Restore dependencies
-      run: dotnet restore
-
-    - name: Build
-      run: dotnet build --configuration Release
-
-    - name: Test
-      run: |
-        if [ -f ""./N_m3u8DL-CLI/N_m3u8DL-CLI.Tests.csproj"" ]; then
-          dotnet test --no-build --verbosity normal ./N_m3u8DL-CLI/N_m3u8DL-CLI.Tests.csproj
-        fi",0.1007591442374051,0.5286973343132557,Valid,0.43441509433962266
-5.0,https://github.com/shadowsocks/shadowsocks-windows,"name: Build
+        path: N_m3u8DL-CLI\bin\Release\N_m3u8DL-CLI.exe",,,,,
+5,https://github.com/shadowsocks/shadowsocks-windows,"name: Build
 
 on:
   push:
@@ -485,37 +371,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: shadowsocks-wpf-${{ github.sha }}-windows
-          path: Shadowsocks.WPF/bin/Release/net5.0-windows10.0.19041.0/publish/","name: Build and Test
-
-on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
-
-jobs:
-  build:
-    runs-on: windows-latest
-
-    steps:
-    - uses: actions/checkout@v2
-
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: 5.0.100
-
-    - name: Restore dependencies
-      run: |
-        dotnet restore
-
-    - name: Build
-      run: |
-        dotnet build --configuration Release
-
-    - name: Test
-      run: |
-        dotnet test --configuration Release",0.025268258913118725,0.08416491101386121,Valid,0.3916916663627839
+          path: Shadowsocks.WPF/bin/Release/net5.0-windows10.0.19041.0/publish/",,,,,
 ,https://github.com/ShareX/ShareX,"name: Build ShareX
 
 on:
@@ -638,38 +494,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: MicrosoftStoreDebug
-          path: Output\ShareX-${{ env.APP_VERSION }}-debug.appx","name: Build and Test
-
-on:
-  push:
-    branches:
-      - develop
-  pull_request:
-    branches:
-      - develop
-
-jobs:
-  build:
-    runs-on: windows-latest
-
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
-
-    - name: Setup MSBuild
-      uses: actions/setup-msbuild@v1.1
-
-    - name: Restore NuGet packages
-      run: nuget restore ShareX.sln
-
-    - name: Build solution
-      run: msbuild /p:Configuration=Release ShareX.sln
-
-    - name: Run tests
-      run: |
-        if [ -f ""./tests"" ]; then
-          ./tests
-        fi",0.05815831987075929,0.12337480139266732,Valid,0.5790050405435021
+          path: Output\ShareX-${{ env.APP_VERSION }}-debug.appx",,,,,
 ,https://github.com/DapperLib/Dapper,"name: Main Build
 
 on:
@@ -722,37 +547,7 @@ jobs:
         PostgesConnectionString: Server=localhost;Port=${{ job.services.postgres.ports[5432] }};Database=test;User Id=postgres;Password=postgres;
         SqlServerConnectionString: Server=tcp:localhost,${{ job.services.sqlserver.ports[1433] }};Database=tempdb;User Id=sa;Password=Password.;
     - name: .NET Lib Pack
-      run: dotnet pack Build.csproj --no-build -c Release /p:PackageOutputPath=%CD%\.nupkgs /p:CI=true","name: Build and Test
-
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
-
-    - name: Set up .NET Core
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: 3.1
-
-    - name: Restore dependencies
-      run: dotnet restore
-
-    - name: Build
-      run: dotnet build --configuration Release
-
-    - name: Test
-      run: dotnet test",0.0587248322147651,0.20864423099435844,Valid,0.39707691739489065
+      run: dotnet pack Build.csproj --no-build -c Release /p:PackageOutputPath=%CD%\.nupkgs /p:CI=true",,,,,
 ,https://github.com/aalhour/C-Sharp-Algorithms,"name: Build and Test
 
 on: [push]
@@ -774,37 +569,7 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: Run Tests
-      run: dotnet test","name: Build and Test
-
-on:
-  push:
-    branches:
-      - master
-  pull_request:
-    branches:
-      - master
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
-
-    - name: Setup .NET Core
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: 3.1
-
-    - name: Restore dependencies
-      run: dotnet restore
-
-    - name: Build
-      run: dotnet build
-
-    - name: Test
-      run: dotnet test",0.41865509761388287,0.7266089774260932,Valid,0.75
+      run: dotnet test",,,,,
 ,https://github.com/Cysharp/UniTask,"name: build-release
 
 on:
@@ -853,38 +618,7 @@ jobs:
       - uses: actions/upload-artifact@v2
         with:
           name: nuget
-          path: ./publish/","name: Build and Test
-
-on:
-  push:
-    branches:
-      - master
-  pull_request:
-    branches:
-      - master
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
-
-    - name: Setup .NET Core
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: 3.1
-
-    - name: Restore dependencies
-      run: dotnet restore
-
-    - name: Build
-      run: dotnet build --configuration Release
-
-    - name: Test
-      run: dotnet test --no-build --configuration Release
-",0.021526418786692758,0.2626842427577535,Valid,0.4776991316754913
+          path: ./publish/",,,,,
 ,https://github.com/EduardoPires/EquinoxProject,"name: .NET Core
 
 on:
@@ -909,37 +643,7 @@ jobs:
     - name: Build
       run: dotnet build --configuration Release --no-restore
     - name: Test
-      run: dotnet test --no-restore --verbosity normal","name: Build and Test
-
-on:
-  push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
-
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: 6.0.x
-
-    - name: Restore dependencies
-      run: dotnet restore
-
-    - name: Build
-      run: dotnet build
-
-    - name: Test
-      run: |
-        dotnet test --no-build
-",0.2459349593495935,0.8496287106473093,Valid,0.5252525252525253
+      run: dotnet test --no-restore --verbosity normal",,,,,
 ,https://github.com/felixse/FluentTerminal,"name: CI
 
 on: [push]
@@ -962,35 +666,7 @@ jobs:
       uses: microsoft/setup-msbuild@v1.0.2
     
     - name: MSBuild
-      run: msbuild FluentTerminal.sln -t:build -p:Configuration=Debug -p:Platform=x64 -m -restore","name: Build and Test
-
-on:
-  push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
-
-    - name: Set up .NET Core
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: 6.0.x
-
-    - name: Restore dependencies
-      run: dotnet restore
-
-    - name: Build
-      run: dotnet build --configuration Release
-
-    - name: Test
-      run: dotnet test",0.04525862068965517,0.5390198934126075,Valid,0.40245624053233087
+      run: msbuild FluentTerminal.sln -t:build -p:Configuration=Debug -p:Platform=x64 -m -restore",,,,,
 ,https://github.com/graphql-dotnet/graphql-dotnet,"name: Build artifacts
 
 # ==== NOTE: do not rename this yml file or the run_number will be reset ====
@@ -1054,40 +730,7 @@ jobs:
             src/out/*
       - name: Publish Nuget packages to GitHub registry
         working-directory: src
-        run: dotnet nuget push ""out/*"" -k ${{secrets.GITHUB_TOKEN}}","name: Build and Test
-
-on:
-  push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
-
-    - name: Set up .NET Core
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: 5.0
-
-    - name: Restore dependencies
-      run: dotnet restore
-
-    - name: Build
-      run: dotnet build
-
-    - name: Test
-      run: |
-        if [ -f ""./test.sh"" ]; then
-          ./test.sh
-        else
-          dotnet test
-        fi",0.1419457735247209,0.23448474657610652,Valid,0.3830500644913488
+        run: dotnet nuget push ""out/*"" -k ${{secrets.GITHUB_TOKEN}}",,,,,
 ,https://github.com/gui-cs/Terminal.Gui,"name: .NET Core
 
 on:
@@ -1143,32 +786,7 @@ jobs:
     - name: Print Code Coverage
       run: |
         echo ""Code coverage percentage: ${{steps.create_coverage_badge.outputs.percentage}}%""
-        echo ""Badge data: ${{steps.create_coverage_badge.outputs.badge}}""","name: Build and Test
-
-on:
-  push:
-    branches:
-      - develop
-  pull_request:
-    branches:
-      - develop
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v3.0.3
-        with:
-          dotnet-version: 5.0.x
-      - name: Restore dependencies
-        run: dotnet restore
-      - name: Build
-        run: dotnet build
-      - name: Test
-        run: dotnet test",0.02312673450508788,0.2703268882725308,Valid,0.3321643591725818
+        echo ""Badge data: ${{steps.create_coverage_badge.outputs.badge}}""",,,,,
 ,https://github.com/hellzerg/optimizer,"name: Build
 
 on:
@@ -1197,42 +815,7 @@ jobs:
       run: nuget restore Optimizer.sln
 
     - name: Build Solution
-      run: msbuild.exe Optimizer.sln","name: Build and Test
-
-on:
-  push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
-
-    - name: Setup MSBuild
-      uses: actions/setup-msbuild@v1
-
-    - name: Setup NuGet
-      uses: actions/setup-nuget@v1
-
-    - name: Restore dependencies
-      run: nuget restore Optimizer.sln
-
-    - name: Build
-      run: msbuild /p:Configuration=Release Optimizer.sln
-
-    - name: Test
-      run: |
-        if [ -f ""./tests"" ]; then
-          # Run tests if present
-          ./tests
-        else
-          echo ""No tests to run""
-        fi",0.42324371205550737,0.5687825353920157,Valid,0.723943661971831
+      run: msbuild.exe Optimizer.sln",,,,,
 ,https://github.com/JeffreySu/WeiXinMPSDK,"# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
 # More GitHub Actions for Azure: https://github.com/Azure/actions
 
@@ -1296,37 +879,7 @@ jobs:
     #    app-name: 'senparcweixinsamplenetcore3'
     #    slot-name: 'senparcweixinsamplenet5'
     #    publish-profile: ${{ secrets.AzureAppService_PublishProfile_3ee3a42f0a324bf7be968d8c232a8555 }}
-    #    package: \published\","name: Build and Test
-
-on:
-  push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
-
-    - name: Set up Node.js
-      uses: actions/setup-node@v2
-      with:
-        node-version: '14'
-
-    - name: Install dependencies
-      run: |
-        npm install
-        npm install @vuepress/plugin-back-to-top@1.9.9
-        npm install vuepress@1.9.9
-
-    - name: Build and Test
-      run: |
-        npm run build
-        npm test",0.03667481662591687,0.20531136259935961,Valid,0.3335649220318049
+    #    package: \published\",,,,,
 ,https://github.com/jstedfast/MailKit,"name: MailKit CI/CD Pipeline
 
 on: [push, pull_request, workflow_dispatch]
@@ -1483,36 +1036,7 @@ jobs:
           & ./scripts/test.ps1 -Configuration:$env:BUILD_CONFIGURATION -GenerateCodeCoverage:$env:GENERATE_CODE_COVERAGE
         env:
           BUILD_CONFIGURATION: ${{ matrix.build-configuration }}
-          GENERATE_CODE_COVERAGE: ${{ steps.configure.outputs.generate_code_coverage }}","name: Build and Test
-
-on:
-  push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
-
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v3
-      with:
-        dotnet-version: 5.0.402
-
-    - name: Restore dependencies
-      run: dotnet restore
-
-    - name: Build
-      run: dotnet build --configuration Release
-
-    - name: Test
-      run: dotnet test --configuration Release
-",0.04411993164517632,0.075964276613253,Valid,0.2523522447784144
+          GENERATE_CODE_COVERAGE: ${{ steps.configure.outputs.generate_code_coverage }}",,,,,
 ,https://github.com/JustArchiNET/ArchiSteamFarm,"name: ASF-ci
 
 on: [push, pull_request]
@@ -1560,35 +1084,7 @@ jobs:
         crowdin_branch_name: main
         config: '.github/crowdin.yml'
         project_id: ${{ secrets.ASF_CROWDIN_PROJECT_ID }}
-        token: ${{ secrets.ASF_CROWDIN_API_TOKEN }}","name: Build and Test
-
-on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
-
-    - name: Set up Node.js
-      uses: actions/setup-node@v2
-      with:
-        node-version: '14'
-
-    - name: Install dependencies
-      run: |
-        npm install
-
-    - name: Build and Test
-      run: |
-        npm run build
-        npm test",0.16750756811301715,0.2320347479759543,Valid,0.20527674011513541
+        token: ${{ secrets.ASF_CROWDIN_API_TOKEN }}",,,,,
 ,https://github.com/kgrzybek/modular-monolith-with-ddd,"name: CI Pipeline
 
 on:
@@ -1624,12 +1120,7 @@ jobs:
       with:
         dotnet-version: 3.1.301
     - name: Run build
-      run: ./build.sh RunAllIntegrationTests","name: Build and Test\non:
-  push:
-    branches: [ master ]\n  pull_request:\n    branches: [ master ]\njobs:\n  build:\n    runs-on: ubuntu-latest\n    steps:\n    - name: Checkout repository\n      uses: actions/checkout@v2\n    - name: Setup .NET Core\n      uses: actions/setup-dotnet@v1\n      with:\n        dotnet-version: 3.1\n    - name: Restore dependencies\n      run: |
-        dotnet restore\n    - name: Build\n      run: |
-        dotnet build --configuration Release\n    - name: Test\n      run: |
-        dotnet test",,,Invalid,
+      run: ./build.sh RunAllIntegrationTests",,,,,
 ,https://github.com/MahApps/MahApps.Metro,"name: ci
 
 on:
@@ -1669,37 +1160,7 @@ jobs:
           azure-key-vault-client-id: ${{ secrets.AZURE_KEY_VAULT_CLIENT_ID }}
           azure-key-vault-tenant-id: ${{ secrets.AZURE_KEY_VAULT_TENANT_ID }}
           azure-key-vault-client-secret: ${{ secrets.AZURE_KEY_VAULT_CLIENT_SECRET }}
-          azure-key-vault-certificate: ${{ secrets.AZURE_KEY_VAULT_CERTIFICATE }}","name: Build and Test
-
-on:
-  push:
-    branches:
-      - develop
-  pull_request:
-    branches:
-      - develop
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
-
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: '3.1'
-
-    - name: Restore dependencies
-      run: dotnet restore
-
-    - name: Build
-      run: dotnet build
-
-    - name: Test
-      run: dotnet test",0.14990390775144138,0.3492435540955356,Valid,0.375
+          azure-key-vault-certificate: ${{ secrets.AZURE_KEY_VAULT_CERTIFICATE }}",,,,,
 ,https://github.com/MassTransit/MassTransit,"name: MassTransit
 env:
   MASSTRANSIT_VERSION: 8.1.2
@@ -1750,34 +1211,4 @@ jobs:
 
       - name: Test Analyzers
         run: dotnet test -c Release --logger:""console;verbosity=normal"" --no-build --filter Category!=Flaky
-        working-directory: tests/MassTransit.Analyzers.Tests","name: Build and Test
-
-on:
-  push:
-    branches:
-      - develop
-  pull_request:
-    branches:
-      - develop
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: '14'
-
-      - name: Install dependencies
-        run: npm install
-
-      - name: Build
-        run: npm run build
-
-      - name: Test
-        run: npm test",0.25901833234772326,0.3246096329822619,Valid,0.22788889692889003
+        working-directory: tests/MassTransit.Analyzers.Tests",,,,,

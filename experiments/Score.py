@@ -8,6 +8,29 @@ def get_exact_match_score (generated_workflow_file_content, actual_workflow_file
 def get_bleu_score (generated_workflow_file_content, actual_workflow_file_content):
     return sentence_bleu([generated_workflow_file_content], actual_workflow_file_content)
 
+def calc_step_score (generated_step, actual_step):
+    # Check if step dictionary contains uses key
+    if 'uses' in actual_step.keys() and 'uses' in generated_step.keys():
+        return get_exact_match_score(actual_step['uses'], generated_step['uses'])
+            
+    # Check if step dictionary contains run key
+    elif 'run' in actual_step.keys() and 'run' in generated_step.keys():
+        return get_exact_match_score(actual_step['run'], generated_step['run'])
+            
+    else:
+        return get_bleu_score(str(actual_step), str(generated_step))
+    
+def check_if_build_or_test_step (step):
+    # Check if build or test keyword is present in name, run or uses key
+    if 'name' in step.keys() and ('build' in step['name'].lower() or 'test' in step['name'].lower()):
+        return True
+    elif 'run' in step.keys() and ('build' in step['run'].lower() or 'test' in step['run'].lower()):
+        return True
+    elif 'uses' in step.keys() and ('build' in step['uses'].lower() or 'test' in step['uses'].lower()):
+        return True
+    else:
+        return False
+
 def get_devops_aware_score (generated_workflow_file_content, actual_workflow_file_content):
     actual = yaml.safe_load(actual_workflow_file_content)
     generated = yaml.safe_load(generated_workflow_file_content)
@@ -21,37 +44,38 @@ def get_devops_aware_score (generated_workflow_file_content, actual_workflow_fil
     # Get list of steps
     actual_steps = []
     for job_name in actual_jobs_names:
-        actual_steps += actual_jobs[job_name]['steps']
+        # Check if job dictionary contains steps key
+        if 'steps' in actual_jobs[job_name].keys():
+            actual_steps += actual_jobs[job_name]['steps']
 
     generated_steps = []
     for job_name in generated_jobs_names:
-        generated_steps += generated_jobs[job_name]['steps']
+        # Check if job dictionary contains steps key
+        if 'steps' in generated_jobs[job_name].keys():
+            generated_steps += generated_jobs[job_name]['steps']
 
     # Get list of actions
-    actual_steps_updated = []
-
-    # For each step in generated step list, find the corresponding step in actual step list by nearest bleu score of step name
-    for generated_step in generated_steps:
-        actual_step_updated = max(actual_steps, key=lambda actual_step: sentence_bleu([generated_step], actual_step))
-        actual_steps_updated.append(actual_step_updated)
-
-    # Compare the steps in actual and generated steps list
+    matched_actual_steps = []
+    matched_generated_steps = []
     score = 0
-    for actual_step, generated_step in zip(actual_steps_updated, generated_steps):
-        # Check if step dictionary contains uses key
-        if 'uses' in actual_step.keys() and 'uses' in generated_step.keys():
-            if get_exact_match_score(actual_step['uses'], generated_step['uses']) > 0.5:
-                score += get_bleu_score(actual_step['uses'], generated_step['uses'])
 
-        # Check if step dictionary contains run key
-        elif 'run' in actual_step.keys() and 'run' in generated_step.keys():
-            if get_exact_match_score(actual_step['run'], generated_step['run']) > 0.5:
-                score += get_bleu_score(actual_step['run'], generated_step['run'])
+    # For each step in actual step list, find the steps with build or test keywords in it
+    for actual_step in actual_steps:
+        # Check equalIgnoreCase for build or test keywords
+        if check_if_build_or_test_step(actual_step):
+            matched_actual_steps.append(actual_step)
+            # Find the corresponding step in generated step list by max step score
+            max_step_score = 0
+            matched_generated_step = None
+            for generated_step in generated_steps:
+                step_score = calc_step_score(generated_step, actual_step)
+                if step_score > max_step_score:
+                    max_step_score = step_score
+                    matched_generated_step = generated_step
+            score += max_step_score
+            matched_generated_steps.append(matched_generated_step)
 
-        else:
-            score += get_bleu_score(actual_step, generated_step)*0.5
-
-    return score/len(actual_steps_updated)
+    return score/len(matched_actual_steps)
         
 
 

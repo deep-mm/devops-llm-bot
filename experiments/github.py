@@ -3,6 +3,7 @@ import requests
 import json
 import time
 import yaml
+import subprocess
 
 def get_repository_tree(repository_identifier, branch='main'):
     repository_tree = []
@@ -74,6 +75,17 @@ def check_yaml_syntax(yaml_file_content):
 
     return True
 
+def run_action_lint(workflow_file_content):
+    # Write workflow file content to a file
+    with open('workflow.yml', 'w', newline='\n') as f:
+        f.write(workflow_file_content)
+    try :
+        subprocess.run(['actionlint', 'workflow.yml'], check = True)
+        return True
+    except subprocess.CalledProcessError as e:
+        print(e)
+        return False
+    
 def is_workflow_syntax_valid (workflow_file_content):
     url = 'https://api.github.com/repos/devops-llm-bot/github-action-lint/actions'
     data = {
