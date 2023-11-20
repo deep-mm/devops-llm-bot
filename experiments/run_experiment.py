@@ -38,6 +38,7 @@ async def run_experiment_row(csvFile, i):
         #time.sleep(5)
     except Exception as e:
         print(e)
+        csvFile.loc[i,'Syntax_Check'] = e
         return
 
 async def run_experiment(csvFile):

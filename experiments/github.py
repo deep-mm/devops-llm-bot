@@ -49,8 +49,11 @@ def get_list_of_dependencies(repository_identifier):
     url = 'https://api.github.com/repos/' + repository_identifier + '/dependency-graph/sbom'
 
     response = requests.get(url, headers=Helper.get_github_headers())
-    response.json()['sbom']['packages']
-    dependency_names = [package['name'] + ', version = ' + package['versionInfo'] for package in response.json()['sbom']['packages']]
+    try:
+        response.json()['sbom']['packages']
+        dependency_names = [package['name'] + ', version = ' + package['versionInfo'] for package in response.json()['sbom']['packages']]
+    except:
+        dependency_names = []
     
     return dependency_names
 
