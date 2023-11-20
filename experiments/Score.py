@@ -58,6 +58,7 @@ def get_devops_aware_score (generated_workflow_file_content, actual_workflow_fil
     # Get list of actions
     matched_actual_steps = []
     matched_generated_steps = []
+    matched_generated_steps_scores = []
     score = 0
 
     # For each step in actual step list, find the steps with build or test keywords in it
@@ -74,7 +75,17 @@ def get_devops_aware_score (generated_workflow_file_content, actual_workflow_fil
                     max_step_score = step_score
                     matched_generated_step = generated_step
             score += max_step_score
-            matched_generated_steps.append(matched_generated_step)
+            # Check if matched_generated_step already exists in matched_generated_steps and if not add it
+            if matched_generated_step not in matched_generated_steps:
+                matched_generated_steps.append(matched_generated_step)
+                matched_generated_steps_scores.append(max_step_score)
+            else:
+                index = matched_generated_steps.index(matched_generated_step)
+                matched_generated_steps_scores[index] += max_step_score
+
+    # Calculate score
+    # for step_score in matched_generated_steps_scores:
+    #     score += min(1, step_score)
 
     return score/len(matched_actual_steps)
         

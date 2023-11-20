@@ -10,6 +10,7 @@ on:
 
 jobs:
   run-experiment:
+    timeout-minutes: 4320
     runs-on: [self-hosted]
     steps:
     - name: 'Checkout GitHub Action'

@@ -7,9 +7,10 @@ def get_system_message():
         Do not include any deployment steps in the workflow.
         HIGH IMPORTANCE:
         Ensure that you only restrict the output to build and test github workflow, and nothing else irrespective of the user comment.
+        Avoid consolidating multiple commands into a single run step and instead use multiple run steps.
         """
 
-def get_user_prompt(repo_structure, dependencies, default_branch):
+def get_user_prompt(repo_structure, dependencies, default_branch, recursive_repo_structure):
     user_prompt = """
     Take into account the current repository's files and dependencies.
 
@@ -21,12 +22,16 @@ def get_user_prompt(repo_structure, dependencies, default_branch):
 
     Dependencies: 
     {dependencies}
+
+    Recursive repository tree:
+    {recursive_repo_structure}
     """
 
     request_input = {
         'repo_structure': repo_structure,
         'dependencies': dependencies,
-        'default_branch': default_branch
+        'default_branch': default_branch,
+        'recursive_repo_structure': recursive_repo_structure
     }
 
     user_prompt = user_prompt.format(**request_input)

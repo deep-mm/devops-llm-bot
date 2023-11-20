@@ -12,11 +12,12 @@ async def run_experiment_row(csvFile, i):
     try:
         default_branch = github.get_default_branch(repo_identifier);
         repo_structure = github.get_repository_tree(repo_identifier, default_branch)
+        recursive_repo_structure = github.get_recursive_repository_tree(repo_identifier, default_branch)
         dependencies = github.get_list_of_dependencies(repo_identifier)
         build_file_content = csvFile.iloc[i]['GitHub_Build_Pipeline_File_Content']
         repo_language = csvFile.iloc[i]['Language']
 
-        generated_workflow_file = gpt.generate_build_pipeline(repo_structure, dependencies, default_branch)
+        generated_workflow_file = gpt.generate_build_pipeline(repo_structure, dependencies, default_branch, recursive_repo_structure)
 
         csvFile.loc[i,'Generated_Build_Pipeline_File_Content'] = generated_workflow_file
         valid_syntax = github.run_action_lint(generated_workflow_file);
