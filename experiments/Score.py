@@ -1,5 +1,6 @@
 from difflib import SequenceMatcher
 from nltk.translate.bleu_score import sentence_bleu
+import extract_data
 import yaml
 
 def get_exact_match_score (generated_workflow_file_content, actual_workflow_file_content):
@@ -20,18 +21,18 @@ def calc_step_score (generated_step, actual_step):
     else:
         return get_bleu_score(str(actual_step), str(generated_step))
     
-def check_if_build_or_test_step (step):
+def check_if_build_or_test_step (step, language):
     # Check if build or test keyword is present in name, run or uses key
     if 'name' in step.keys() and ('build' in step['name'].lower() or 'test' in step['name'].lower()):
         return True
-    elif 'run' in step.keys() and ('build' in step['run'].lower() or 'test' in step['run'].lower()):
+    elif 'run' in step.keys() and (extract_data.has_build_command(language, step['run'])):
         return True
     elif 'uses' in step.keys() and ('build' in step['uses'].lower() or 'test' in step['uses'].lower()):
         return True
     else:
         return False
 
-def get_devops_aware_score (generated_workflow_file_content, actual_workflow_file_content):
+def get_devops_aware_score (generated_workflow_file_content, actual_workflow_file_content, language):
     actual = yaml.safe_load(actual_workflow_file_content)
     generated = yaml.safe_load(generated_workflow_file_content)
 
@@ -62,7 +63,7 @@ def get_devops_aware_score (generated_workflow_file_content, actual_workflow_fil
     # For each step in actual step list, find the steps with build or test keywords in it
     for actual_step in actual_steps:
         # Check equalIgnoreCase for build or test keywords
-        if check_if_build_or_test_step(actual_step):
+        if check_if_build_or_test_step(actual_step, language):
             matched_actual_steps.append(actual_step)
             # Find the corresponding step in generated step list by max step score
             max_step_score = 0

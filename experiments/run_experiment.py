@@ -14,6 +14,7 @@ async def run_experiment_row(csvFile, i):
         repo_structure = github.get_repository_tree(repo_identifier, default_branch)
         dependencies = github.get_list_of_dependencies(repo_identifier)
         build_file_content = csvFile.iloc[i]['GitHub_Build_Pipeline_File_Content']
+        repo_language = csvFile.iloc[i]['Language']
 
         generated_workflow_file = gpt.generate_build_pipeline(repo_structure, dependencies, default_branch)
 
@@ -27,7 +28,7 @@ async def run_experiment_row(csvFile, i):
         
         exact_match_score = Score.get_exact_match_score(generated_workflow_file, build_file_content)
         bleu_score = Score.get_bleu_score(generated_workflow_file, build_file_content)
-        devops_aware_score = Score.get_devops_aware_score(generated_workflow_file, build_file_content)
+        devops_aware_score = Score.get_devops_aware_score(generated_workflow_file, build_file_content, repo_language)
 
         csvFile.loc[i,'Exact_Match_Score'] = exact_match_score
         csvFile.loc[i,'BLEU_Score'] = bleu_score
@@ -48,6 +49,9 @@ csvFile = pandas.read_csv(f'dataset/{sys.argv[1]}.csv')
 
 # Pre-processing the CSV file
 csvFile = csvFile[csvFile['GitHub_Repo_Link'].notna()]
+
+# Get first 20 rows
+csvFile = csvFile.head(200)
 
 # Explicitly specify dtypes to avoid pandas inferring dtypes
 csvFile = csvFile.astype({'GitHub_Repo_Link': 'string', 'GitHub_Build_Pipeline_File_Content': 'string', 'Generated_Build_Pipeline_File_Content': 'string', 'Syntax_Check': 'string', 'Exact_Match_Score': 'float', 'BLEU_Score': 'float', 'DevOps_Aware_Score': 'float'})
