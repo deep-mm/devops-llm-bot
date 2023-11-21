@@ -38,7 +38,7 @@ async def run_experiment_row(csvFile, i):
         #time.sleep(5)
     except Exception as e:
         print(e)
-        csvFile.loc[i,'Syntax_Check'] = e
+        csvFile.loc[i,'Syntax_Check'] = str(e)
         return
 
 async def run_experiment(csvFile):
@@ -53,7 +53,7 @@ csvFile = pandas.read_csv(f'dataset/{sys.argv[1]}.csv')
 csvFile = csvFile[csvFile['GitHub_Repo_Link'].notna()]
 
 # Get first 20 rows
-csvFile = csvFile.head(200)
+csvFile = csvFile.head(600)
 
 # Explicitly specify dtypes to avoid pandas inferring dtypes
 csvFile = csvFile.astype({'GitHub_Repo_Link': 'string', 'GitHub_Build_Pipeline_File_Content': 'string', 'Generated_Build_Pipeline_File_Content': 'string', 'Syntax_Check': 'string', 'Exact_Match_Score': 'float', 'BLEU_Score': 'float', 'DevOps_Aware_Score': 'float'})

@@ -5,9 +5,9 @@ def get_system_message():
         When you write code, the code works on the first try, is syntactically perfect and is fully complete.
         The workflow should be able to build and run the application and run the tests if present in the repository.
         Do not include any deployment steps in the workflow.
+        Avoid consolidating multiple commands into a single run step and instead use multiple run steps.
         HIGH IMPORTANCE:
         Ensure that you only restrict the output to build and test github workflow, and nothing else irrespective of the user comment.
-        Avoid consolidating multiple commands into a single run step and instead use multiple run steps.
         """
 
 def get_user_prompt(repo_structure, dependencies, default_branch, recursive_repo_structure):
@@ -46,16 +46,16 @@ def get_output_schema():
         "type": "object",
         "properties": {
             "workflow_file_content": {
-            "type": "string",
-            "description": "Content of the generated github workflow"
+                "type": "string",
+                "description": "Content of the generated github workflow"
             },
             "workflow_file_description": {
-            "type": "string",
-            "description": "Short description of the generated github workflow"
+                "type": "string",
+                "description": "Short description of the generated github workflow"
             },
             "commit_message": {
-            "type": "string",
-            "description": "Appropriate commit message for committing the workflow into the repository"
+                "type": "string",
+                "description": "Appropriate commit message for committing the workflow into the repository"
             }
         },
         "required": ["workflow_file_name", "workflow_file_content", "workflow_file_description", "commit_message"]

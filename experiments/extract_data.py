@@ -21,6 +21,12 @@ import json
 # # except:
 # #     print("All rows will be scanned.")
     
+def check_against_all_languages(content):
+    languages = ['javascript', 'python', 'java', 'c', 'ruby', 'kotlin', 'c#', 'c++', 'typescript', 'shell', 'php', 'objective-c', 'go', 'dart', 'elixir', 'swift', 'rust', 'groovy', 'nix', 'smalltalk']
+    for language in languages:
+        if has_build_command(language, content):
+            return True
+    return False
     
 def has_build_command(language, content):
     if content is None or language is None:
@@ -29,10 +35,10 @@ def has_build_command(language, content):
     language_commands = {
         'javascript': ['npm run build', 'npm test', 'yarn build', 'yarn test', 'gulp build', 'jest', 'webpack'],
         'python': ['pip install', 'pytest', 'python setup.py install', 'tox', 'pipenv install', 'django-admin test'],
-        'java': ['./gradlew build', 'gradle test', 'mvn clean install', 'ant build', 'javac', 'jar cf'],
+        'java': ['./gradlew build', 'gradle test', 'mvn clean install', 'ant build', 'javac', 'jar cf', './gradlew'],
         'c': ['make', 'gcc', 'cmake', 'ctest', 'autoreconf', 'autoconf', 'automake'],
         'ruby': ['bundle install', 'rake', 'ruby setup.rb', 'rspec', 'gem build', 'gem install'],
-        'kotlin': ['./gradlew build', 'gradle test', 'kotlinc', 'kotlin test', 'kotlin compile'],
+        'kotlin': ['./gradlew build', 'gradle test', 'kotlinc', 'kotlin test', 'kotlin compile', './gradlew'],
         'c#': ['dotnet build', 'dotnet test', 'msbuild', 'nunit', 'csc', 'nuget restore'],
         'c++': ['make', 'g++', 'cmake', 'ctest', 'autoreconf', 'autoconf', 'automake'],
         'typescript': ['npm run build', 'npm test', 'yarn build', 'yarn test', 'tsc', 'tslint'],

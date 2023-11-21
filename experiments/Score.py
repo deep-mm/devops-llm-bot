@@ -22,12 +22,13 @@ def calc_step_score (generated_step, actual_step):
         return get_bleu_score(str(actual_step), str(generated_step))
     
 def check_if_build_or_test_step (step, language):
+    keywords = ['build', 'test']
     # Check if build or test keyword is present in name, run or uses key
-    if 'name' in step.keys() and ('build' in step['name'].lower() or 'test' in step['name'].lower()):
+    if 'run' in step.keys() and (extract_data.check_against_all_languages(step['run'])):
         return True
-    elif 'run' in step.keys() and (extract_data.has_build_command(language, step['run'])):
+    elif 'uses' in step.keys() and any(keyword in step['uses'].lower() for keyword in keywords):
         return True
-    elif 'uses' in step.keys() and ('build' in step['uses'].lower() or 'test' in step['uses'].lower()):
+    elif 'name' in step.keys() and any(keyword in step['name'].lower() for keyword in keywords):
         return True
     else:
         return False
@@ -57,8 +58,6 @@ def get_devops_aware_score (generated_workflow_file_content, actual_workflow_fil
 
     # Get list of actions
     matched_actual_steps = []
-    matched_generated_steps = []
-    matched_generated_steps_scores = []
     score = 0
 
     # For each step in actual step list, find the steps with build or test keywords in it
@@ -66,28 +65,7 @@ def get_devops_aware_score (generated_workflow_file_content, actual_workflow_fil
         # Check equalIgnoreCase for build or test keywords
         if check_if_build_or_test_step(actual_step, language):
             matched_actual_steps.append(actual_step)
-            # Find the corresponding step in generated step list by max step score
-            max_step_score = 0
-            matched_generated_step = None
-            for generated_step in generated_steps:
-                step_score = calc_step_score(generated_step, actual_step)
-                if step_score > max_step_score:
-                    max_step_score = step_score
-                    matched_generated_step = generated_step
-            score += max_step_score
-            # Check if matched_generated_step already exists in matched_generated_steps and if not add it
-            if matched_generated_step not in matched_generated_steps:
-                matched_generated_steps.append(matched_generated_step)
-                matched_generated_steps_scores.append(max_step_score)
-            else:
-                index = matched_generated_steps.index(matched_generated_step)
-                matched_generated_steps_scores[index] += max_step_score
-
-    # Calculate score
-    # for step_score in matched_generated_steps_scores:
-    #     score += min(1, step_score)
+            score += max(calc_step_score(generated_step, actual_step) for generated_step in generated_steps)
 
     return score/len(matched_actual_steps)
         
-
-
