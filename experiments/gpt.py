@@ -36,11 +36,11 @@ def get_chat_response_gpt4(user_prompt, system_message, output_schema, model, ma
 def generate_build_pipeline(repo_structure, dependencies, default_branch, recursive_repo_structure):
     opts = Options()
 
-    # response = get_chat_response(user_prompt=Prompt.get_user_prompt(repo_structure, dependencies, default_branch, recursive_repo_structure), system_message=Prompt.get_system_message(), 
-    #                              output_schema=Prompt.get_output_schema(), model=opts.model, max_tokens=opts.max_tokens, temperature=opts.temperature, seed=opts.seed)
+    response = get_chat_response(user_prompt=Prompt.get_user_prompt(repo_structure, dependencies, default_branch, recursive_repo_structure), system_message=Prompt.get_system_message(), 
+                                 output_schema=Prompt.get_output_schema(), model=opts.model, max_tokens=opts.max_tokens, temperature=opts.temperature, seed=opts.seed)
 
-    response = get_chat_response_gpt4(user_prompt=Prompt.get_user_prompt(repo_structure, dependencies, default_branch, recursive_repo_structure), system_message=Prompt.get_system_message(), 
-                                 output_schema=Prompt.get_output_schema(), model=opts.model, max_tokens=opts.max_tokens, temperature=opts.temperature, seed=opts.seed, organization=opts.organization)
+    # response = get_chat_response_gpt4(user_prompt=Prompt.get_user_prompt(repo_structure, dependencies, default_branch, recursive_repo_structure), system_message=Prompt.get_system_message(), 
+    #                              output_schema=Prompt.get_output_schema(), model=opts.model, max_tokens=opts.max_tokens, temperature=opts.temperature, seed=opts.seed, organization=opts.organization)
 
     # Parse response as JSON
     response = json.loads(response)
