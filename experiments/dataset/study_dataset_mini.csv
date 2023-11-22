@@ -31065,7 +31065,7 @@ jobs:
           verbose: true
 
       - name: Run accessibility checks
-        run:	make a11y
+        run: make a11y
 
       - name: Run dependency audits
         run: make audit

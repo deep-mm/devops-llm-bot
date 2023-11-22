@@ -48,12 +48,18 @@ def get_devops_aware_score (generated_workflow_file_content, actual_workflow_fil
     for job_name in actual_jobs_names:
         # Check if job dictionary contains steps key
         if 'steps' in actual_jobs[job_name].keys():
+            # Ensure that steps is a list and if not, convert it to a list
+            if type(actual_jobs[job_name]['steps']) is not list:
+                actual_jobs[job_name]['steps'] = [actual_jobs[job_name]['steps']]
             actual_steps += actual_jobs[job_name]['steps']
 
     generated_steps = []
     for job_name in generated_jobs_names:
         # Check if job dictionary contains steps key
         if 'steps' in generated_jobs[job_name].keys():
+            # Ensure that steps is a list and if not, convert it to a list
+            if type(generated_jobs[job_name]['steps']) is not list:
+                generated_jobs[job_name]['steps'] = [generated_jobs[job_name]['steps']]
             generated_steps += generated_jobs[job_name]['steps']
 
     # Get list of actions
@@ -67,5 +73,9 @@ def get_devops_aware_score (generated_workflow_file_content, actual_workflow_fil
             matched_actual_steps.append(actual_step)
             score += max(calc_step_score(generated_step, actual_step) for generated_step in generated_steps)
 
-    return score/len(matched_actual_steps)
+    # return average score only if there are matched steps
+    if len(matched_actual_steps) > 0:
+        return score / len(matched_actual_steps)
+    else:
+        return 0
         
