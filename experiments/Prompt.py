@@ -37,7 +37,7 @@ def get_user_prompt(repo_structure, dependencies, default_branch, recursive_repo
     user_prompt = user_prompt.format(**request_input)
 
     # Restrict user prompt to 14000 characters
-    user_prompt = user_prompt[:14000]
+    user_prompt = user_prompt[:28000]
 
     return user_prompt
 
