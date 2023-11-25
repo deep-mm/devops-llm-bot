@@ -19,9 +19,9 @@ def get_user_prompt(repo_structure, dependencies, default_branch, recursive_repo
 
     Repository tree:
     ${repo_structure}
-
-    Dependencies: 
-    {dependencies}
+    
+    Recursive repository tree:
+    {recursive_repo_structure}
     """
 
     request_input = {
