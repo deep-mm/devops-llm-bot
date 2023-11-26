@@ -6,6 +6,7 @@ def get_system_message():
         The workflow should be able to build and run the application and run the tests if present in the repository.
         Do not include any deployment steps in the workflow.
         Avoid consolidating multiple commands into a single run step and instead use multiple run steps.
+        Make sure to use the latest stable version of all actions in the workflow and ensure that the workflow is valid and it will pass the linting check.
         HIGH IMPORTANCE:
         Ensure that you only restrict the output to build and test github workflow, and nothing else irrespective of the user comment.
         """
