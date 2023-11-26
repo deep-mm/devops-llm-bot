@@ -1,0 +1,5222 @@
+Index,GitHub_Repo_Link,GitHub_Build_Pipeline_File_Content,Generated_Build_Pipeline_File_Content,Exact_Match_Score,BLEU_Score,Syntax_Check,DevOps_Aware_Score,Language
+160,https://github.com/rgerganov/rf-car,"name: CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  ubuntu-build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Dependencies
+      run: |
+        sudo apt update
+        sudo apt install libsdl2-dev libsdl2-image-dev libhackrf-dev
+    - name: Build
+      run: make
+
+  osx-build:
+
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Dependencies
+      run: |
+        brew update
+        brew install sdl2 sdl2_image hackrf
+    - name: Build
+      run: make
+","name: Build and Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y rf-car
+
+      - name: Build the application
+        run: make
+
+      - name: Run tests
+        run: make test
+        if: always() && steps.build.outcome == 'success'
+",,,Invalid,,C++
+224,https://github.com/mrpt-ros-pkg/mrpt_navigation,"# Based on GTSAM file (by @ProfFan)
+name: CI Build colcon
+
+on: [push, pull_request]
+
+jobs:
+  build_docker: # On Linux, iterates on all ROS 1 and ROS 2 distributions.
+    runs-on: ubuntu-latest
+    env:
+      DEBIAN_FRONTEND: noninteractive
+    strategy:
+      matrix:
+        # Github Actions requires a single row to be added to the build matrix.
+        # See https://help.github.com/en/articles/workflow-syntax-for-github-actions.
+        ros_distribution:
+          - humble
+          - iron
+          - rolling
+
+        # Define the Docker image(s) associated with each ROS distribution.
+        # The include syntax allows additional variables to be defined, like
+        # docker_image in this case. See documentation:
+        # https://help.github.com/en/actions/reference/workflow-syntax-for-github-actions#example-including-configurations-in-a-matrix-build
+        #
+        # Platforms are defined in REP 3 and REP 2000:
+        # https://ros.org/reps/rep-0003.html
+        # https://ros.org/reps/rep-2000.html
+        include:
+          # Humble Hawksbill (May 2022 - May 2027)
+          - docker_image: ubuntu:jammy
+            ros_distribution: humble
+            ros_version: 2
+
+          # Iron Irwini (May 2023 - November 2024)
+          - docker_image: ubuntu:jammy
+            ros_distribution: iron
+            ros_version: 2
+
+          # Rolling Ridley (No End-Of-Life)
+          - docker_image: ubuntu:jammy
+            ros_distribution: rolling
+            ros_version: 2
+
+    container:
+      image: ${{ matrix.docker_image }}
+
+    steps:
+      - name: Checkout
+        run: |
+          apt-get -y update
+          apt-get -y install git
+          git clone https://github.com/$GITHUB_REPOSITORY.git --recursive ""$GITHUB_WORKSPACE""
+
+      - name: setup ROS environment
+        uses: ros-tooling/setup-ros@v0.7
+        with:
+          required-ros-distributions: ${{ matrix.ros_distribution }}
+
+      - name: Install rosdep dependencies
+        run: |
+          . /opt/ros/*/setup.sh
+          rosdep update
+          rosdep install --from-paths . --ignore-src -r -y
+
+      - name: Build with colcon
+        run: |
+          . /opt/ros/*/setup.sh
+          env
+          MAKEFLAGS=""-j2"" colcon build --symlink-install --parallel-workers 2 --event-handlers console_direct+
+","name: CI
+
+on:
+  push:
+    branches:
+      - ros2
+  pull_request:
+    branches:
+      - ros2
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up ROS 2
+        uses: ros-tooling/setup-ros@v0.7
+
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y python3-colcon-common-extensions
+
+      - name: Build
+        run: colcon build --symlink-install
+
+      - name: Run tests
+        run: colcon test
+
+      - name: Gather test results
+        run: colcon test-result --verbose",0.113776559287183,0.21238397418386515,Valid,0.40536851683348496,C++
+3,https://github.com/bwaldvogel/liblinear-java,"name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        java: [ '8', '11', '17', '18' ]
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup Java
+      uses: actions/setup-java@v1
+      with:
+        java-version: ${{ matrix.java }}
+    - name: Build with Gradle
+      run: ./gradlew build
+
+  validateGradleWrapper:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - uses: gradle/wrapper-validation-action@v1.0.4
+
+  publishCoverage:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup Java
+      uses: actions/setup-java@v1
+      with:
+        java-version: 8
+    - name: Build with Gradle
+      run: ./gradlew jacocoTestReport
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v1
+      with:
+        files: ./build/reports/jacoco/test/jacocoTestReport.xml
+        name: codecov
+","name: Build and Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+
+      - name: Validate Gradle wrapper
+        uses: gradle/wrapper-validation-action@v1.0.4
+
+      - name: Build with Gradle
+        run: ./gradlew build
+
+      - name: Run tests
+        run: ./gradlew test
+",,,Invalid,,Java
+24,https://github.com/hibernate/hibernate-tools,"name: Build and Test
+
+on:
+  pull_request
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout PR Branch
+      uses: actions/checkout@v2
+      with:
+        ref: ${{ github.event.pull_request.head.sha }}
+        fetch-depth: 0
+
+    - name: Setup Java 11
+      uses: actions/setup-java@v1
+      with:
+        java-version: 11
+        java-package: jdk
+        architecture: x64
+
+    - name: Build and Test
+      uses: GabrielBB/xvfb-action@v1
+      with: 
+        run: mvn clean install 
+
+","name: Build and Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up JDK 11
+      uses: actions/setup-java@v3
+      with:
+        java-version: '11'
+        distribution: 'adopt'
+
+    - name: Cache Maven packages
+      uses: actions/cache@v3
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-m2-
+
+    - name: Build with Maven
+      run: mvn -B clean install --file pom.xml
+
+    - name: Run tests
+      run: mvn -B test --file pom.xml",0.18166939443535188,0.5208801274293784,Valid,0.4459098997040861,Java
+25,https://github.com/pexplugins/permissionsex,"# Making changes? https://github.com/nektos/act may help you test locally
+
+name: Build And Test
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    # Only run on PRs if the source branch is on someone else's repo
+    if: ${{ github.event_name != 'pull_request' || github.repository != github.event.repository.full_name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      - name: Check out
+        uses: actions/checkout@v2
+      - name: Setup JDK 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+      - name: Cache Gradle packages
+        uses: actions/cache@v2
+        with:
+          path: ~/.gradle/caches
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
+          restore-keys: ${{ runner.os }}-gradle
+      - name: Build with Gradle
+        run: ./gradlew build
+      - name: Archive test results
+        uses: actions/upload-artifact@v2
+        with:
+          name: test-results
+          path: |
+            build/test-results/test/
+            */build/test-results/test/
+            platform/*/build/test-results/test
+      - name: Archive distributable plugins
+        uses: actions/upload-artifact@v2
+        if: ${{ runner.os == 'Linux' }} # Only upload one set of artifacts
+        with:
+          name: PermissionsEx (all platforms)
+          path: build/libs/
+      - name: Publish to Maven
+        if: ${{ runner.os == 'Linux' && github.event_name == 'push' && github.ref == 'refs/heads/master' }}
+        run: ./gradlew publish
+        env:
+          ORG_GRADLE_PROJECT_pexUsername: ${{ secrets.REPO_USERNAME }}
+          ORG_GRADLE_PROJECT_pexPassword: ${{ secrets.REPO_PASSWORD }}
+          ORG_GRADLE_PROJECT_stellardriftUsername: ${{ secrets.STELLARDRIFT_REPO_USER }}
+          ORG_GRADLE_PROJECT_stellardriftPassword: ${{ secrets.STELLARDRIFT_REPO_PASSWORD }}
+","name: Build and Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+
+      - name: Validate Gradle Wrapper
+        uses: gradle/wrapper-validation-action@v1
+
+      - name: Cache Gradle dependencies
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Build with Gradle
+        run: ./gradlew build
+
+      - name: Run tests
+        run: ./gradlew test
+",,,Invalid,,Java
+30,https://github.com/netflix/astyanax,"name: ""Publish snapshot to NetflixOSS and Maven Central""
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Set up JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: 8
+      - uses: actions/cache@v2
+        id: gradle-cache
+        with:
+          path: |
+            ~/.gradle/caches
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
+      - uses: actions/cache@v2
+        id: gradle-wrapper-cache
+        with:
+          path: |
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradlewrapper-${{ hashFiles('gradle/wrapper/*') }}
+      - name: Build
+        run: ./gradlew build snapshot
+        env:
+          NETFLIX_OSS_SIGNING_KEY: ${{ secrets.ORG_SIGNING_KEY }}
+          NETFLIX_OSS_SIGNING_PASSWORD: ${{ secrets.ORG_SIGNING_PASSWORD }}
+          NETFLIX_OSS_REPO_USERNAME: ${{ secrets.ORG_NETFLIXOSS_USERNAME }}
+          NETFLIX_OSS_REPO_PASSWORD: ${{ secrets.ORG_NETFLIXOSS_PASSWORD }}
+","name: Build and Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Cache Gradle packages
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Build with Gradle
+        run: ./gradlew build
+
+      - name: Run tests
+        run: ./gradlew test",0.33657289002557544,0.5985548619747058,Valid,0.7692307692307693,Java
+33,https://github.com/bwaldvogel/mongo-java-server,"name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        java: [ '11', '17', '20' ]
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup Java
+      uses: actions/setup-java@v1
+      with:
+        java-version: ${{ matrix.java }}
+    - name: Build with Gradle
+      run: ./gradlew build
+
+  publishCoverage:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup Java
+      uses: actions/setup-java@v1
+      with:
+        java-version: 11
+    - name: Publish coverage
+      run: ./gradlew build
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v1
+      with:
+        files: ./build/reports/jacoco/testCodeCoverageReport/testCodeCoverageReport.xml
+","name: Build and Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build with Gradle
+        run: ./gradlew build
+
+      - name: Run tests
+        run: ./gradlew test
+
+      - name: Upload test coverage to Codecov
+        uses: codecov/codecov-action@v1
+        with:
+          file: ./build/reports/jacoco/test/jacocoTestReport.xml
+          flags: unittests
+          name: codecov-umbrella
+          fail_ci_if_error: true
+          verbose: true",,,Invalid,,Java
+49,https://github.com/netflix/governator,"name: ""Publish snapshot to NetflixOSS and Maven Central""
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Set up JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: 8
+      - uses: actions/cache@v2
+        id: gradle-cache
+        with:
+          path: |
+            ~/.gradle/caches
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
+      - uses: actions/cache@v2
+        id: gradle-wrapper-cache
+        with:
+          path: |
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradlewrapper-${{ hashFiles('gradle/wrapper/*') }}
+      - name: Build
+        run: ./gradlew build snapshot
+        env:
+          NETFLIX_OSS_SIGNING_KEY: ${{ secrets.ORG_SIGNING_KEY }}
+          NETFLIX_OSS_SIGNING_PASSWORD: ${{ secrets.ORG_SIGNING_PASSWORD }}
+          NETFLIX_OSS_REPO_USERNAME: ${{ secrets.ORG_NETFLIXOSS_USERNAME }}
+          NETFLIX_OSS_REPO_PASSWORD: ${{ secrets.ORG_NETFLIXOSS_PASSWORD }}
+","name: Build and Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Cache Gradle packages
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Build with Gradle
+        run: ./gradlew build
+
+      - name: Run tests
+        run: ./gradlew test",,,Invalid,,Java
+54,https://github.com/netflix/eureka,"name: ""Publish snapshot to NetflixOSS and Maven Central""
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Set up JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: 8
+      - uses: actions/cache@v2
+        id: gradle-cache
+        with:
+          path: |
+            ~/.gradle/caches
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
+      - uses: actions/cache@v2
+        id: gradle-wrapper-cache
+        with:
+          path: |
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradlewrapper-${{ hashFiles('gradle/wrapper/*') }}
+      - name: Build
+        run: ./gradlew build snapshot
+        env:
+          NETFLIX_OSS_SIGNING_KEY: ${{ secrets.ORG_SIGNING_KEY }}
+          NETFLIX_OSS_SIGNING_PASSWORD: ${{ secrets.ORG_SIGNING_PASSWORD }}
+          NETFLIX_OSS_REPO_USERNAME: ${{ secrets.ORG_NETFLIXOSS_USERNAME }}
+          NETFLIX_OSS_REPO_PASSWORD: ${{ secrets.ORG_NETFLIXOSS_PASSWORD }}
+","name: Build and Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Cache Gradle packages
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Build with Gradle
+        run: ./gradlew build
+
+      - name: Run tests
+        run: ./gradlew test
+",,,Invalid,,Java
+57,https://github.com/robo-code/robocode,"name: Java CI
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Set up JDK 1.8
+      uses: actions/setup-java@v1
+      with:
+        java-version: 1.8
+
+    - name: Build with Gradle
+      run: ./gradlew build
+
+    - name: robocode.core test artifacts
+      if: always()
+      uses: actions/upload-artifact@v2
+      with:
+        name: robocode.core-test-result
+        path: robocode.core/build/reports/tests/test
+
+    - name: robocode.host test artifacts
+      if: always()
+      uses: actions/upload-artifact@v2
+      with:
+        name: robocode.host-test-result
+        path: robocode.host/build/reports/tests/test
+
+    - name: robocode.tests test artifacts
+      if: always()
+      uses: actions/upload-artifact@v2
+      with:
+        name: robocode.tests-result
+        path: robocode.tests/build/reports/tests/test
+
+    - name: setup binary artifact
+      uses: actions/upload-artifact@v2
+      with:
+        path: build/robocode-*-setup.jar
+","name: Build and Test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up JDK 11
+      uses: actions/setup-java@v3
+      with:
+        java-version: '11'
+        distribution: 'adopt'
+
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+
+    - name: Build with Gradle
+      run: ./gradlew build
+
+    - name: Run tests
+      run: ./gradlew test",0.3037135278514589,0.35328861256551203,Valid,0.6968085106382979,Java
+58,https://github.com/flansmods/flansmod,"name: Java CI with Gradle
+
+on: [ push, pull_request ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up JDK 1.8
+      uses: actions/setup-java@v1
+      with:
+        java-version: 1.8
+
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+    - name: Build with Gradle
+      run: ./gradlew build
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v1
+      with:
+        name: build-artifacts
+        path: build/output/
+","name: Build and Test
+
+on:
+  push:
+    branches:
+      - $1.12.2
+  pull_request:
+    branches:
+      - $1.12.2
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up JDK 11
+      uses: actions/setup-java@v1
+      with:
+        java-version: '11'
+        distribution: 'adopt'
+
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+
+    - name: Build with Gradle
+      run: ./gradlew build
+
+    - name: Run tests
+      run: ./gradlew test
+",,,Invalid,,Java
+59,https://github.com/drallgood/jpasskit,"# For most projects, this workflow file will not need changing; you simply need
+# to commit it to your repository.
+#
+# You may wish to alter this file to override the set of languages analyzed,
+# or to provide custom queries or build logic.
+#
+# ******** NOTE ********
+# We have attempted to detect the languages in your repository. Please check
+# the `language` matrix defined below to confirm you have the correct set of
+# supported CodeQL languages.
+#
+name: ""CodeQL""
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    # The branches below must be a subset of the branches above
+    branches: [ master ]
+  schedule:
+    - cron: '29 15 * * 4'
+
+jobs:
+  analyze:
+    name: Analyze
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [ 'java' ]
+        # CodeQL supports [ 'cpp', 'csharp', 'go', 'java', 'javascript', 'python' ]
+        # Learn more:
+        # https://docs.github.com/en/free-pro-team@latest/github/finding-security-vulnerabilities-and-errors-in-your-code/configuring-code-scanning#changing-the-languages-that-are-analyzed
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    # Initializes the CodeQL tools for scanning.
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v1
+      with:
+        languages: ${{ matrix.language }}
+        # If you wish to specify custom queries, you can do so here or in a config file.
+        # By default, queries listed here will override any specified in a config file.
+        # Prefix the list here with ""+"" to use these queries and those in the config file.
+        # queries: ./path/to/local/query, your-org/your-repo/queries@main
+    - name: Set up JDK 1.8
+      uses: actions/setup-java@v1
+      with:
+        java-version: 1.8
+    # Autobuild attempts to build any compiled languages  (C/C++, C#, or Java).
+    # If this step fails, then you should remove it and run the build manually (see below)
+    #- name: Autobuild
+    #  uses: github/codeql-action/autobuild@v1
+
+    # ℹ️ Command-line programs to run using the OS shell.
+    # 📚 https://git.io/JvXDl
+
+    # ✏️ If the Autobuild fails above, remove it and uncomment the following three lines
+    #    and modify them (or add more) to build your code if your project
+    #    uses a compiled language
+
+    #- run: |
+    #   make bootstrap
+    #   make release
+    - run: |
+        mvn clean install
+        
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v1
+","name: Build and Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+
+      - name: Cache Maven packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-m2
+
+      - name: Build with Maven
+        run: mvn -B package --file pom.xml
+
+      - name: Test with Maven
+        run: mvn -B test
+",0.10866190624029805,0.22415080518000122,Valid,0.4827586206896552,Java
+67,https://github.com/ukanth/afwall,"name: Android CI
+
+on:
+  push:
+    branches: [ beta ]
+  pull_request:
+    branches: [ beta ]
+  workflow_dispatch:
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: set up JDK
+      uses: actions/setup-java@v1
+      with:
+        java-version: 17
+    - name: Build with Gradle
+      run: ./gradlew build
+","name: Android CI
+
+on:
+  push:
+    branches:
+      - beta
+  pull_request:
+    branches:
+      - beta
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      - name: Build with Gradle
+        run: ./gradlew build
+
+      - name: Run tests
+        run: ./gradlew test",,,Invalid,,Java
+68,https://github.com/chainfire/libsuperuser,"name: ci
+on: [push, pull_request]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-java@v1
+        with:
+          java-version: 1.8
+      - uses: gradle/wrapper-validation-action@v1
+      - run: ./gradlew build
+","name: Build and Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+
+      - name: Validate Gradle Wrapper
+        uses: gradle/wrapper-validation-action@v1
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      - name: Build with Gradle
+        run: ./gradlew build
+
+      - name: Run tests
+        run: ./gradlew test
+",,,Invalid,,Java
+69,https://github.com/banmanagement/banmanager,"name: Java CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+  schedule:
+    - cron: '0 0 * * 0' # weekly
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: Java ${{ matrix.java }} - ${{ matrix.storageType }}
+    strategy:
+      matrix:
+        include:
+          - storageType: mariadb
+            java: 8
+          - storageType: h2
+            java: 8
+          - storageType: mariadb
+            java: 11
+          - storageType: h2
+            java: 11
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up JDK ${{ matrix.java }}
+        uses: actions/setup-java@v1
+        with:
+          java-version: ${{ matrix.java }}
+
+      - name: Validate Gradle wrapper
+        uses: gradle/wrapper-validation-action@v1
+
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2
+
+      - name: Execute Gradle build
+        env:
+          STORAGE_TYPE: ${{ matrix.storageType }}
+        run: ./gradlew build
+
+      - name: Publish to Maven Central
+        # only publish once
+        if: github.ref == 'refs/heads/master' && matrix.java == '8' && matrix.storageType == 'h2'
+        env:
+          ORG_GRADLE_PROJECT_sonatypeUsername: ${{ secrets.ORG_GRADLE_PROJECT_SONATYPEUSERNAME }}
+          ORG_GRADLE_PROJECT_sonatypePassword: ${{ secrets.ORG_GRADLE_PROJECT_SONATYPEPASSWORD }}
+          ORG_GRADLE_PROJECT_signingKey : ${{ secrets.ORG_GRADLE_PROJECT_SIGNINGINMEMORYKEY }}
+          ORG_GRADLE_PROJECT_signingPassword : ${{ secrets.ORG_GRADLE_PROJECT_SIGNINGINMEMORYKEYPASSWORD }}
+        run: |
+          ./gradlew publishToSonatype closeAndReleaseSonatypeStagingRepository
+","name: Build and Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up JDK 11
+      uses: actions/setup-java@v1
+      with:
+        java-version: '11'
+        distribution: 'adopt'
+
+    - name: Validate Gradle Wrapper
+      uses: gradle/wrapper-validation-action@v1
+
+    - name: Build with Gradle
+      uses: gradle/gradle-build-action@v2
+      with:
+        arguments: build
+
+    - name: Run tests
+      run: ./gradlew test
+",,,Invalid,,Java
+71,https://github.com/netflix/blitz4j,"name: Snapshot
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Set up JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: 8
+      - uses: actions/cache@v2
+        id: gradle-cache
+        with:
+          path: |
+            ~/.gradle/caches
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
+      - uses: actions/cache@v2
+        id: gradle-wrapper-cache
+        with:
+          path: |
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradlewrapper-${{ hashFiles('gradle/wrapper/*') }}
+      - name: Build
+        run: ./gradlew build snapshot
+        env:
+          NETFLIX_OSS_SIGNING_KEY: ${{ secrets.ORG_SIGNING_KEY }}
+          NETFLIX_OSS_SIGNING_PASSWORD: ${{ secrets.ORG_SIGNING_PASSWORD }}
+          NETFLIX_OSS_REPO_USERNAME: ${{ secrets.ORG_NETFLIXOSS_USERNAME }}
+          NETFLIX_OSS_REPO_PASSWORD: ${{ secrets.ORG_NETFLIXOSS_PASSWORD }}
+","name: Build and Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Cache Gradle dependencies
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Build
+        run: ./gradlew build
+
+      - name: Run tests
+        run: ./gradlew test
+",,,Invalid,,Java
+72,https://github.com/netflix/hystrix,"name: ""Publish snapshot to NetflixOSS and Maven Central""
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Set up JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: 8
+      - uses: actions/cache@v2
+        id: gradle-cache
+        with:
+          path: |
+            ~/.gradle/caches
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
+      - uses: actions/cache@v2
+        id: gradle-wrapper-cache
+        with:
+          path: |
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradlewrapper-${{ hashFiles('gradle/wrapper/*') }}
+      - name: Build
+        run: ./gradlew build snapshot
+        env:
+          NETFLIX_OSS_SIGNING_KEY: ${{ secrets.ORG_SIGNING_KEY }}
+          NETFLIX_OSS_SIGNING_PASSWORD: ${{ secrets.ORG_SIGNING_PASSWORD }}
+          NETFLIX_OSS_REPO_USERNAME: ${{ secrets.ORG_NETFLIXOSS_USERNAME }}
+          NETFLIX_OSS_REPO_PASSWORD: ${{ secrets.ORG_NETFLIXOSS_PASSWORD }}
+","name: Build and Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Cache Gradle packages
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Build with Gradle
+        run: ./gradlew build
+
+      - name: Run tests
+        run: ./gradlew test",,,Invalid,,Java
+75,https://github.com/tada/pljava,"# This workflow will build and test PL/Java against the version of PostgreSQL
+# preinstalled in the GitHub Actions runner environment. Naturally, this one
+# does not have a PostgreSQL version in the build matrix. The version that's
+# preinstalled is the version you get.
+
+name: PL/Java CI with PostgreSQL version supplied by the runner
+
+on:
+  push:
+    branches: [ master, REL1_6_STABLE ]
+  pull_request:
+    branches: [ master, REL1_6_STABLE ]
+
+jobs:
+  build:
+    if: true
+
+    runs-on: ${{ matrix.oscc.os }}
+    continue-on-error: true
+    strategy:
+      matrix:
+        oscc:
+          - os: ubuntu-latest
+            cc: gcc
+          - os: macos-latest
+            cc: clang
+#         - os: windows-latest
+#           cc: msvc
+#         - os: windows-latest
+#           cc: mingw
+        java: [9, 11, 12, 17, 18, 19]
+
+    steps:
+
+    - name: Check out PL/Java
+      uses: actions/checkout@v2
+      with:
+        path: pljava
+
+    - name: Set up JDK
+      uses: actions/setup-java@v1
+      with:
+        java-version: ${{ matrix.java }}
+
+    - name: Report Java, Maven, and PostgreSQL versions (Linux, macOS)
+      if: ${{ 'Windows' != runner.os }}
+      run: |
+        java -version
+        mvn --version
+        pg_config
+
+    - name: Report Java, Maven, and PostgreSQL versions (Windows)
+      if: ${{ 'Windows' == runner.os }}
+      run: |
+        java -version
+        mvn --version
+        & ""$Env:PGBIN\pg_config""
+
+    - name: Obtain PG development files (Ubuntu, PGDG)
+      if: ${{ 'Linux' == runner.os }}
+      run: |
+        curl -s -S https://www.postgresql.org/media/keys/ACCC4CF8.asc |
+        gpg --dearmor |
+        sudo dd of=/etc/apt/trusted.gpg.d/apt.postgresql.org.gpg
+        echo  \
+          deb \
+          http://apt.postgresql.org/pub/repos/apt \
+          ""$(lsb_release -cs)-pgdg"" \
+          main |
+        sudo tee /etc/apt/sources.list.d/pgdg.list
+        sudo apt-get update
+        sudo apt-get install postgresql-server-dev-14 libkrb5-dev
+
+    - name: Build PL/Java (Linux, macOS)
+      if: ${{ 'Windows' != runner.os }}
+      working-directory: pljava
+      run: |
+        mvn clean install --batch-mode \
+          -Psaxon-examples -Ppgjdbc-ng \
+          -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
+
+    - name: Build PL/Java (Windows MinGW-w64)
+      if: ${{ 'Windows' == runner.os && 'mingw' == matrix.oscc.cc }}
+      working-directory: pljava
+      #
+      # GitHub Actions will allow 'bash' as a shell choice, even on a Windows
+      # runner, in which case it's the bash from Git for Windows. That isn't the
+      # same as the msys64\usr\bin\bash that we want; what's more, while both
+      # rely on a cygwin DLL, they don't rely on the same one, and an attempt
+      # to exec one from the other leads to a ""fatal error - cygheap base
+      # mismatch"". So, the bash we want has to be started by something other
+      # than the bash we've got. In this case, set shell: to a command that
+      # will use cmd to start the right bash.
+      #
+      # Some of the MinGW magic is set up by the bash profile run at ""login"", so
+      # bash must be started with -l. That profile ends with a cd $HOME, so to
+      # avoid changing the current directory, set HOME=. first (credit for that:
+      # https://superuser.com/a/806371). As set above, . is really the pljava
+      # working-directory, so the bash script should start by resetting HOME to
+      # the path of its parent.
+      #
+      # The runner is provisioned with a very long PATH that includes separate
+      # bin directories for pre-provisioned packages. The MinGW profile replaces
+      # that with a much shorter path, so mvn and pg_config below must be given
+      # as absolute paths (using M2 and PGBIN supplied in the environment) or
+      # they won't be found. As long as mvn itself can be found, it is able
+      # to find java without difficulty, using the JAVA_HOME that is also in
+      # the environment.
+      #
+      # Those existing variables in the environment are all spelled in Windows
+      # style with drive letters, colons, and backslashes, rather than the MinGW
+      # unixy style, but the mingw bash doesn't seem to object.
+      #
+      # If you use the runner-supplied bash to examine the environment, you will
+      # see MSYSTEM=MINGW64 already in it, but that apparently is something the
+      # runner-supplied bash does. It must be set here before invoking the MinGW
+      # bash directly.
+      #
+      env:
+        HOME: .
+        MSYSTEM: MINGW64
+      shell: 'cmd /C ""c:\msys64\usr\bin\bash -l ""{0}""""'
+      run: |
+        HOME=$( (cd .. && pwd) )
+        ""$M2""/mvn clean install --batch-mode \
+          -Dpgsql.pgconfig=""$PGBIN""'\pg_config' \
+          -Psaxon-examples -Ppgjdbc-ng \
+          -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
+
+    - name: Install and test PL/Java
+      if: ${{ '9' != matrix.java  ||  'Windows' != runner.os }}
+      working-directory: pljava
+      shell: bash
+      run: |
+        pgConfig=pg_config # runner-supplied, just get it from the PATH
+
+        packageJar=$(find pljava-packaging -name pljava-pg*.jar -print)
+
+        mavenRepo=""$HOME/.m2/repository""
+
+        saxonVer=$(
+          find ""$mavenRepo/net/sf/saxon/Saxon-HE"" \
+            -name 'Saxon-HE-*.jar' -print |
+          sort |
+          tail -n 1
+        )
+        saxonVer=${saxonVer%/*}
+        saxonVer=${saxonVer##*/}
+
+        jdbcJar=$(
+          find ""$mavenRepo/com/impossibl/pgjdbc-ng/pgjdbc-ng-all"" \
+            -name 'pgjdbc-ng-all-*.jar' -print |
+          sort |
+          tail -n 1
+        )
+
+        #
+        # The runner on a Unix-like OS is running as a non-privileged user, but
+        # has passwordless sudo available (needed to install the PL/Java files
+        # into the system directories where the supplied PostgreSQL lives). By
+        # contrast, on Windows the runner has admin privilege, and can install
+        # the files without any fuss (but later below, pg_ctl will have to be
+        # used when starting PostgreSQL; pg_ctl has a Windows-specific ability
+        # to drop admin privs so postgres will not refuse to start).
+        #
+        # The Windows runner seems to have an extra pg_config somewhere on the
+        # path, that reports it was built with MinGW and installed in paths
+        # containing Strawberry that don't really exist. $PGBIN\pg_config refers
+        # to a different build made with MSVC, and those directories really
+        # exist, so specify that one explicitly when running on Windows.
+        #
+        # The Git for Windows bash environment includes a find command, and the
+        # things found have unixy paths returned. Make them Windowsy here, with
+        # a hardcoded assumption they start with /c which should become c: (as
+        # appears to be the case in the Windows runner currently).
+        #
+        if [[ $RUNNER_OS == Windows ]]
+        then
+          pathSep=';'
+          pgConfig=""$PGBIN""'\pg_config'
+          java -Dpgconfig=""$pgConfig"" -jar ""$packageJar""
+          function toWindowsPath() {
+            local p
+            p=""c:${1#/c}""
+            printf ""%s"" ""${p//\//\\}""
+          }
+          jdbcJar=""$(toWindowsPath ""$jdbcJar"")""
+          mavenRepo=""$(toWindowsPath ""$mavenRepo"")""
+        else
+          pathSep=':'
+          sudo ""$JAVA_HOME""/bin/java -Dpgconfig=""$pgConfig"" -jar ""$packageJar""
+        fi
+
+        jshell \
+          -execution local \
+          ""-J--class-path=$packageJar$pathSep$jdbcJar"" \
+          ""--class-path=$packageJar"" \
+          ""-J--add-modules=java.sql.rowset,jdk.httpserver"" \
+          ""-J-Dpgconfig=$pgConfig"" \
+          ""-J-Dcom.impossibl.shadow.io.netty.noUnsafe=true"" \
+          ""-J-DmavenRepo=$mavenRepo"" \
+          ""-J-DsaxonVer=$saxonVer"" - <<\ENDJSHELL
+
+        boolean succeeding = false; // begin pessimistic
+
+        import static java.nio.file.Files.createTempFile;
+        import static java.nio.file.Files.write;
+        import java.nio.file.Path;
+        import static java.nio.file.Paths.get;
+        import java.sql.Connection;
+        import java.sql.PreparedStatement;
+        import java.sql.ResultSet;
+        import org.postgresql.pljava.packaging.Node;
+        import static org.postgresql.pljava.packaging.Node.q;
+        import static org.postgresql.pljava.packaging.Node.stateMachine;
+        import static org.postgresql.pljava.packaging.Node.isVoidResultSet;
+        import static org.postgresql.pljava.packaging.Node.s_isWindows;
+        import static
+            org.postgresql.pljava.packaging.Node.NOTHING_OR_PGJDBC_ZERO_COUNT;
+        /*
+         * Imports that will be needed to serve a jar file over http
+         * when the time comes for testing that.
+         */
+        import static java.nio.charset.StandardCharsets.UTF_8;
+        import java.util.jar.Attributes;
+        import java.util.jar.Manifest;
+        import java.util.jar.JarOutputStream;
+        import java.util.zip.ZipEntry;
+        import com.sun.net.httpserver.BasicAuthenticator;
+        import com.sun.net.httpserver.HttpContext;
+        import com.sun.net.httpserver.HttpExchange;
+        import com.sun.net.httpserver.HttpHandler;
+        import com.sun.net.httpserver.HttpServer;
+
+        String javaHome = System.getProperty(""java.home"");
+
+        Path javaLibDir = get(javaHome, s_isWindows ? ""bin"" : ""lib"");
+
+        Path libjvm = (
+          ""Mac OS X"".equals(System.getProperty(""os.name""))
+          ? Stream.of(""libjli.dylib"", ""jli/libjli.dylib"")
+            .map(s -> javaLibDir.resolve(s))
+            .filter(Files::exists).findFirst().get()
+          : javaLibDir.resolve(s_isWindows ? ""jvm.dll"" : ""server/libjvm.so"")
+        );
+
+        String vmopts =
+          ""-enableassertions:org.postgresql.pljava... -Xcheck:jni"";
+
+        if ( 17 < Runtime.version().feature() )
+          vmopts += "" -Djava.security.manager=allow"";
+
+        Node n1 = Node.get_new_node(""TestNode1"");
+
+        if ( s_isWindows )
+          n1.use_pg_ctl(true);
+
+        /*
+         * Keep a tally of the three types of diagnostic notices that may be
+         * received, and, independently, how many represent no-good test results
+         * (error always, but also warning if seen from the tests in the
+         * examples.jar deployment descriptor).
+         */
+        Map<String,Integer> results =
+          Stream.of(""info"", ""warning"", ""error"", ""ng"").collect(
+            LinkedHashMap<String,Integer>::new,
+            (m,k) -> m.put(k, 0), (r,s) -> {});
+
+        boolean isDiagnostic(Object o, Set<String> whatIsNG)
+        {
+          if ( ! ( o instanceof Throwable ) )
+            return false;
+          String[] parts = Node.classify((Throwable)o);
+          String type = parts[0];
+          String message = parts[2];
+          results.compute(type, (k,v) -> 1 + v);
+          if ( whatIsNG.contains(type) )
+            if ( ! ""warning"".equals(type)
+              ||  ! message.startsWith(""[JEP 411]"") )
+              results.compute(""ng"", (k,v) -> 1 + v);
+          return true;
+        }
+
+        /*
+         * Write a trial policy into a temporary file in n's data_dir,
+         * and set pljava.vmoptions accordingly over connection c.
+         * Returns the 'succeeding' flag from the state machine looking
+         * at the command results.
+         */
+        boolean useTrialPolicy(Node n, Connection c, List<String> contents)
+        throws Exception
+        {
+          Path trialPolicy =
+            createTempFile(n.data_dir().getParent(), ""trial"", ""policy"");
+
+          write(trialPolicy, contents);
+
+          PreparedStatement setVmOpts = c.prepareStatement(
+            ""SELECT null::pg_catalog.void"" +
+            "" FROM pg_catalog.set_config('pljava.vmoptions', ?, false)""
+          );
+
+          setVmOpts.setString(1, vmopts +
+            "" -Dorg.postgresql.pljava.policy.trial="" + trialPolicy.toUri());
+
+          return stateMachine(
+            ""change pljava.vmoptions"",
+            null,
+
+            q(setVmOpts, setVmOpts::execute)
+            .flatMap(Node::semiFlattenDiagnostics)
+            .peek(Node::peek),
+
+            (o,p,q) -> isDiagnostic(o, Set.of(""error"")) ? 1 : -2,
+            (o,p,q) -> isVoidResultSet(o, 1, 1) ? 3 : false,
+            (o,p,q) -> null == o
+          );
+        }
+
+        try (
+          AutoCloseable t1 = n1.initialized_cluster();
+          AutoCloseable t2 = n1.started_server(Map.of(
+            ""client_min_messages"", ""info"",
+            ""pljava.vmoptions"", vmopts,
+            ""pljava.libjvm_location"", libjvm.toString()
+          ));
+        )
+        {
+          try ( Connection c = n1.connect() )
+          {
+            succeeding = true; // become optimistic, will be using &= below
+
+            succeeding &= stateMachine(
+              ""create extension no result"",
+              null,
+
+              q(c, ""CREATE EXTENSION pljava"")
+              .flatMap(Node::semiFlattenDiagnostics)
+              .peek(Node::peek),
+
+              // state 1: consume any diagnostics, or to state 2 with same item
+              (o,p,q) -> isDiagnostic(o, Set.of(""error"")) ? 1 : -2,
+
+              NOTHING_OR_PGJDBC_ZERO_COUNT, // state 2
+
+              // state 3: must be end of input
+              (o,p,q) -> null == o
+            );
+          }
+
+          /*
+           * Get a new connection; 'create extension' always sets a near-silent
+           * logging level, and PL/Java only checks once at VM start time, so in
+           * the same session where 'create extension' was done, logging is
+           * somewhat suppressed.
+           */
+          try ( Connection c = n1.connect() )
+          {
+            succeeding &= stateMachine(
+              ""saxon path examples path"",
+              null,
+
+              Node.installSaxonAndExamplesAndPath(c,
+                System.getProperty(""mavenRepo""),
+                System.getProperty(""saxonVer""),
+                true)
+              .flatMap(Node::semiFlattenDiagnostics)
+              .peek(Node::peek),
+
+              // states 1,2: diagnostics* then a void result set (saxon install)
+              (o,p,q) -> isDiagnostic(o, Set.of(""error"")) ? 1 : -2,
+              (o,p,q) -> isVoidResultSet(o, 1, 1) ? 3 : false,
+
+              // states 3,4: diagnostics* then a void result set (set classpath)
+              (o,p,q) -> isDiagnostic(o, Set.of(""error"")) ? 3 : -4,
+              (o,p,q) -> isVoidResultSet(o, 1, 1) ? 5 : false,
+
+              // states 5,6: diagnostics* then void result set (example install)
+              (o,p,q) -> isDiagnostic(o, Set.of(""error"", ""warning"")) ? 5 : -6,
+              (o,p,q) -> isVoidResultSet(o, 1, 1) ? 7 : false,
+
+              // states 7,8: diagnostics* then a void result set (set classpath)
+              (o,p,q) -> isDiagnostic(o, Set.of(""error"")) ? 7 : -8,
+              (o,p,q) -> isVoidResultSet(o, 1, 1) ? 9 : false,
+
+              // state 9: must be end of input
+              (o,p,q) -> null == o
+            );
+
+            /*
+             * Exercise TrialPolicy some. Need another connection to change
+             * vmoptions. Uses some example functions, so insert here before the
+             * test of undeploying the examples.
+             */
+            try ( Connection c2 = n1.connect() )
+            {
+              succeeding &= useTrialPolicy(n1, c2, List.of(
+                ""grant {"",
+                ""  permission"",
+                ""    org.postgresql.pljava.policy.TrialPolicy$Permission;"",
+                ""};""
+              ));
+
+              PreparedStatement tryForbiddenRead = c2.prepareStatement(
+                ""SELECT"" +
+                ""  CASE WHEN javatest.java_getsystemproperty('java.home')"" +
+                ""    OPERATOR(pg_catalog.=) ?"" +
+                ""  THEN javatest.logmessage('INFO', 'trial policy test ok')"" +
+                ""  ELSE javatest.logmessage('WARNING', 'trial policy test ng')"" +
+                ""  END""
+              );
+
+              tryForbiddenRead.setString(1, javaHome);
+
+              succeeding &= stateMachine(
+                ""try to read a forbidden property"",
+                null,
+
+                q(tryForbiddenRead, tryForbiddenRead::execute)
+                .flatMap(Node::semiFlattenDiagnostics)
+                .peek(Node::peek),
+
+                (o,p,q) -> isDiagnostic(o, Set.of(""error"", ""warning"")) ? 1 : -2,
+                (o,p,q) -> isVoidResultSet(o, 1, 1) ? 3 : false,
+                (o,p,q) -> null == o
+              );
+              // done with connection c2
+            }
+
+            /*
+             * Spin up an http server with a little jar file to serve, and test
+             * that install_jar works with an http: url.
+             *
+             * First make a little jar empty but for a deployment descriptor.
+             */
+            String ddrName = ""foo.ddr"";
+            Attributes a = new Attributes();
+            a.putValue(""SQLJDeploymentDescriptor"", ""TRUE"");
+            Manifest m = new Manifest();
+            m.getEntries().put(ddrName, a);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            JarOutputStream jos = new JarOutputStream(baos, m);
+            jos.putNextEntry(new ZipEntry(ddrName));
+            jos.write(
+              (
+                ""SQLActions[]={\n\""BEGIN INSTALL\n"" +
+                ""SELECT javatest.logmessage('INFO',"" +
+                "" 'jar installed from http');\n"" +
+                ""END INSTALL\"",\n\""BEGIN REMOVE\n"" +
+                ""BEGIN dummy\n"" +
+                ""END dummy;\n"" +
+                ""END REMOVE\""\n}\n""
+              ).getBytes(UTF_8)
+            );
+            jos.closeEntry();
+            jos.close();
+            byte[] jar = baos.toByteArray();
+
+            /*
+             * Now an http server.
+             */
+            HttpServer hs =
+              HttpServer.create(new InetSocketAddress(""localhost"", 0), 0);
+
+            try (
+              Connection c2 = n1.connect();
+              AutoCloseable t = ((Supplier<AutoCloseable>)() ->
+                {
+                  hs.start();
+                  return () -> hs.stop(0);
+                }
+              ).get()
+            )
+            {
+              InetSocketAddress addr = hs.getAddress();
+
+              String id = ""bar"", pw = ""baz"";
+
+              URL u = new URI(
+                ""http"", id+':'+pw, addr.getHostString(), addr.getPort(),
+                ""/foo.jar"", null, null
+              ).toURL();
+
+              HttpContext hc = hs.createContext(
+                u.getPath(),
+                new HttpHandler()
+                {
+                  @Override
+                  public void handle(HttpExchange t) throws IOException
+                  {
+                    try ( InputStream is = t.getRequestBody() ) {
+                      is.readAllBytes();
+                    }
+                    t.getResponseHeaders().add(
+                      ""Content-Type"", ""application/java-archive"");
+                    t.sendResponseHeaders(200, jar.length);
+                    try ( OutputStream os = t.getResponseBody() ) {
+                      os.write(jar);
+                    }
+                  }
+                }
+              );
+
+              hc.setAuthenticator(
+                new BasicAuthenticator(""CI realm"")
+                // (""CI realm"", UTF_8) only available in Java 14 or later
+                {
+                  @Override
+                  public boolean checkCredentials(String c_id, String c_pw)
+                  {
+                      return id.equals(c_id) && pw.equals(c_pw);
+                  }
+                }
+              );
+
+              succeeding &= useTrialPolicy(n1, c2, List.of(
+                ""grant codebase \""${org.postgresql.pljava.codesource}\"" {"",
+                ""  permission"",
+                ""    java.net.URLPermission \""http:*\"", \""GET:Accept\"";"",
+                ""};""
+              ));
+
+              succeeding &= stateMachine(
+                ""install a jar over http"",
+                null,
+
+                Node.installJar(c2, u.toString(), ""foo"", true)
+                .flatMap(Node::semiFlattenDiagnostics)
+                .peek(Node::peek),
+
+                (o,p,q) -> isDiagnostic(o, Set.of(""error"", ""warning"")) ? 1 : -2,
+                (o,p,q) -> isVoidResultSet(o, 1, 1) ? 3 : false,
+                (o,p,q) -> null == o
+              );
+
+              // done with connection c2 again, and the http server
+            }
+
+            /*
+             * Also confirm that the generated undeploy actions work.
+             */
+            succeeding &= stateMachine(
+              ""remove jar void result"",
+              null,
+
+              q(c, ""SELECT sqlj.remove_jar('examples', true)"")
+              .flatMap(Node::semiFlattenDiagnostics)
+              .peek(Node::peek),
+
+              (o,p,q) -> isDiagnostic(o, Set.of(""error"")) ? 1 : -2,
+              (o,p,q) -> isVoidResultSet(o, 1, 1) ? 3 : false,
+              (o,p,q) -> null == o
+            );
+
+            /*
+             * Get another new connection and make sure the extension can be
+             * loaded in a non-superuser session.
+             */
+            try ( Connection c2 = n1.connect() )
+            {
+              succeeding &= stateMachine(
+                ""become non-superuser"",
+                null,
+
+                q(c2,
+                  ""CREATE ROLE alice;"" +
+                  ""GRANT USAGE ON SCHEMA sqlj TO alice;"" +
+                  ""SET SESSION AUTHORIZATION alice"")
+                .flatMap(Node::semiFlattenDiagnostics)
+                .peek(Node::peek),
+
+                (o,p,q) -> isDiagnostic(o, Set.of(""error"")) ? 1 : -2,
+                NOTHING_OR_PGJDBC_ZERO_COUNT,
+                NOTHING_OR_PGJDBC_ZERO_COUNT,
+                NOTHING_OR_PGJDBC_ZERO_COUNT,
+                (o,p,q) -> null == o
+              );
+
+              succeeding &= stateMachine(
+                ""load as non-superuser"",
+                null,
+
+                q(c2, ""SELECT null::pg_catalog.void"" +
+                      ""  FROM sqlj.get_classpath('public')"")
+                .flatMap(Node::semiFlattenDiagnostics)
+                .peek(Node::peek),
+
+                (o,p,q) -> isDiagnostic(o, Set.of(""error"")) ? 1 : -2,
+                (o,p,q) -> isVoidResultSet(o, 1, 1) ? 3 : false,
+                (o,p,q) -> null == o
+              );
+              // done with connection c2 again
+            }
+
+            /*
+             * Make sure the extension drops cleanly and nothing
+             * is left in sqlj.
+             */
+            succeeding &= stateMachine(
+              ""drop extension and schema no result"",
+              null,
+
+              q(c, ""DROP EXTENSION pljava;DROP SCHEMA sqlj"")
+              .flatMap(Node::semiFlattenDiagnostics)
+              .peek(Node::peek),
+
+              (o,p,q) -> isDiagnostic(o, Set.of(""error"")) ? 1 : -2,
+              NOTHING_OR_PGJDBC_ZERO_COUNT,
+              NOTHING_OR_PGJDBC_ZERO_COUNT,
+              (o,p,q) -> null == o
+            );
+          }
+
+          /*
+           * Get another new connection and confirm that the old, pre-extension,
+           * LOAD method of installing PL/Java works. It is largely obsolete in
+           * the era of extensions, but still covers the use case of installing
+           * PL/Java without admin access on the server filesystem to where
+           * CREATE EXTENSION requires the files to be; they can still be
+           * installed in some other writable location the server can read, and
+           * pljava.module_path set to the right locations of the jars, and the
+           * correct shared-object path given to LOAD.
+           *
+           * Also test the after-the-fact packaging up with CREATE EXTENSION
+           * FROM unpackaged. That officially goes away in PG 13, where the
+           * equivalent sequence
+           *  CREATE EXTENSION pljava VERSION unpackaged
+           *  \c
+           *  ALTER EXTENSION pljava UPDATE
+           * should be tested instead.
+           */
+          try ( Connection c = n1.connect() )
+          {
+            int majorVersion = c.getMetaData().getDatabaseMajorVersion();
+
+            succeeding &= stateMachine(
+              ""load as non-extension"",
+              null,
+
+              Node.loadPLJava(c)
+              .flatMap(Node::semiFlattenDiagnostics)
+              .peek(Node::peek),
+
+              (o,p,q) -> isDiagnostic(o, Set.of(""error"")) ? 1 : -2,
+              NOTHING_OR_PGJDBC_ZERO_COUNT,
+              (o,p,q) -> null == o
+            );
+
+            if ( 13 <= majorVersion )
+            {
+              succeeding &= stateMachine(
+                ""create unpackaged (PG >= 13)"",
+                null,
+
+                q(c, ""CREATE EXTENSION pljava VERSION unpackaged"")
+                .flatMap(Node::semiFlattenDiagnostics)
+                .peek(Node::peek),
+
+                (o,p,q) -> isDiagnostic(o, Set.of(""error"")) ? 1 : -2,
+                NOTHING_OR_PGJDBC_ZERO_COUNT,
+                (o,p,q) -> null == o
+              );
+            }
+          }
+
+          /*
+           * CREATE EXTENSION FROM unpackaged (or the second half of the
+           * PG >= 13 CREATE EXTENSION VERSION unpackaged;ALTER EXTENSION UPDATE
+           * sequence) has to happen over a new connection.
+           */
+          try ( Connection c = n1.connect() )
+          {
+            int majorVersion = c.getMetaData().getDatabaseMajorVersion();
+
+            succeeding &= stateMachine(
+              ""package after loading"",
+              null,
+
+              q(c, 13 > majorVersion
+                ? ""CREATE EXTENSION pljava FROM unpackaged""
+                :  ""ALTER EXTENSION pljava UPDATE"")
+              .flatMap(Node::semiFlattenDiagnostics)
+              .peek(Node::peek),
+
+              (o,p,q) -> isDiagnostic(o, Set.of(""error"")) ? 1 : -2,
+              NOTHING_OR_PGJDBC_ZERO_COUNT,
+              (o,p,q) -> null == o
+            );
+
+            /*
+             * Again make sure extension drops cleanly with nothing left behind.
+             */
+            succeeding &= stateMachine(
+              ""drop extension and schema no result"",
+              null,
+
+              q(c, ""DROP EXTENSION pljava;DROP SCHEMA sqlj"")
+              .flatMap(Node::semiFlattenDiagnostics)
+              .peek(Node::peek),
+
+              (o,p,q) -> isDiagnostic(o, Set.of(""error"")) ? 1 : -2,
+              NOTHING_OR_PGJDBC_ZERO_COUNT,
+              NOTHING_OR_PGJDBC_ZERO_COUNT,
+              (o,p,q) -> null == o
+            );
+          }
+        } catch ( Throwable t )
+        {
+          succeeding = false;
+          throw t;
+        }
+
+        System.out.println(results);
+        succeeding &= (0 == results.get(""ng""));
+        System.exit(succeeding ? 0 : 1);
+        ENDJSHELL
+","name: Build and Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+
+      - name: Cache Maven packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-m2-
+
+      - name: Build with Maven
+        run: mvn -B package --file pom.xml
+
+      - name: Run tests with Maven
+        run: mvn -B test
+",0.017475516073834057,0.024413732894486385,Valid,0.10353299909023381,Java
+76,https://github.com/netflix/ribbon,"name: ""Publish snapshot to NetflixOSS and Maven Central""
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Set up JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: 8
+      - uses: actions/cache@v2
+        id: gradle-cache
+        with:
+          path: |
+            ~/.gradle/caches
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
+      - uses: actions/cache@v2
+        id: gradle-wrapper-cache
+        with:
+          path: |
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradlewrapper-${{ hashFiles('gradle/wrapper/*') }}
+      - name: Build
+        run: ./gradlew build snapshot
+        env:
+          NETFLIX_OSS_SIGNING_KEY: ${{ secrets.ORG_SIGNING_KEY }}
+          NETFLIX_OSS_SIGNING_PASSWORD: ${{ secrets.ORG_SIGNING_PASSWORD }}
+          NETFLIX_OSS_REPO_USERNAME: ${{ secrets.ORG_NETFLIXOSS_USERNAME }}
+          NETFLIX_OSS_REPO_PASSWORD: ${{ secrets.ORG_NETFLIXOSS_PASSWORD }}
+","name: Build and Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+
+      - name: Validate Gradle Wrapper
+        uses: gradle/wrapper-validation-action@v1
+
+      - name: Cache Gradle dependencies
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Build with Gradle
+        run: ./gradlew build
+
+      - name: Run tests
+        run: ./gradlew test
+",,,Invalid,,Java
+78,https://github.com/netflix/evcache,"name: ""Publish snapshot to NetflixOSS and Maven Central""
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Set up JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: 8
+      - uses: actions/cache@v2
+        id: gradle-cache
+        with:
+          path: |
+            ~/.gradle/caches
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
+      - uses: actions/cache@v2
+        id: gradle-wrapper-cache
+        with:
+          path: |
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradlewrapper-${{ hashFiles('gradle/wrapper/*') }}
+      - name: Build
+        run: ./gradlew build snapshot -x test
+        env:
+          NETFLIX_OSS_SIGNING_KEY: ${{ secrets.ORG_SIGNING_KEY }}
+          NETFLIX_OSS_SIGNING_PASSWORD: ${{ secrets.ORG_SIGNING_PASSWORD }}
+          NETFLIX_OSS_REPO_USERNAME: ${{ secrets.ORG_NETFLIXOSS_USERNAME }}
+          NETFLIX_OSS_REPO_PASSWORD: ${{ secrets.ORG_NETFLIXOSS_PASSWORD }}
+","name: Build and Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up JDK 11
+      uses: actions/setup-java@v1
+      with:
+        java-version: '11'
+        distribution: 'adopt'
+
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+
+    - name: Cache Gradle packages
+      uses: actions/cache@v2
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-
+
+    - name: Build with Gradle
+      run: ./gradlew build
+
+    - name: Run tests
+      run: ./gradlew test
+",,,Invalid,,Java
+80,https://github.com/tng/junit-dataprovider,"name: Java CI
+
+on: [push, pull_request]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up JDK 1.8
+      uses: actions/setup-java@v1
+      with:
+        java-version: 1.8
+    - name: Build with Gradle
+      run: ./gradlew build
+","name: Build and Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+
+      - name: Validate Gradle Wrapper
+        uses: gradle/wrapper-validation-action@v1
+
+      - name: Build with Gradle
+        run: ./gradlew build --no-daemon
+
+      - name: Run tests
+        run: ./gradlew test --no-daemon",0.2650056625141563,0.29634854404056304,Valid,0.7142857142857143,Java
+81,https://github.com/rameshkec85/bottomtabsfragmenttabhost,"name: Android CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: set up JDK 1.8
+      uses: actions/setup-java@v1
+      with:
+        java-version: 1.8
+    - name: Build with Gradle
+      run: ./gradlew build
+","name: Android CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v2
+
+    - name: Set up JDK 1.8
+      uses: actions/setup-java@v1
+      with:
+        java-version: '1.8'
+        distribution: 'adopt'
+
+    - name: Grant execute permission for gradlew
+      run: chmod +x ./gradlew
+
+    - name: Build with Gradle
+      run: ./gradlew build
+
+    - name: Run tests
+      run: ./gradlew test",,,Invalid,,Java
+82,https://github.com/eclipse/golo-lang,"name: Continuous integration and deployment
+
+on:
+  push:
+    branches:
+      - master
+    tags:
+      - 'milestone/*'
+      - 'release/*'
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  pipeline:
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Set up JDK 1.8
+      uses: actions/setup-java@v1
+      with:
+        java-version: 1.8
+
+    - name: Cache Gradle packages
+      uses: actions/cache@v2
+      with:
+        path: ~/.gradle/caches
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
+        restore-keys: ${{ runner.os }}-gradle
+
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+
+    - name: Build with Gradle
+      run: ./gradlew build
+
+    - name: Copy build distribution
+      run: cp build/distributions/*.zip golo-distribution.zip
+
+    - name: Attach build distribution from this build
+      uses: actions/upload-artifact@v2
+      with:
+        name: Golo distribution from this build
+        path: ./golo-distribution.zip
+
+    # Only pushes to master trigger a publication to Sonatype OSS
+    - name: Deploy
+      if: github.ref == 'refs/heads/master'
+      run: .build/deploy.sh
+      env:
+        GPG_SECRET: ${{ secrets.GPG_SECRET }}
+
+    # Only pushes of tags trigger a release creation
+    - name: Create the release
+      id: create_release
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        draft: true
+        prerelease: startsWith(github.ref, 'refs/tags/milestone/')
+    - name: Attach build distribution to the release
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./golo-distribution.zip
+        asset_name: golo-distribution.zip
+        asset_content_type: application/zip
+
+","name: Build and Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build with Gradle
+        run: ./gradlew build
+
+      - name: Run tests
+        run: ./gradlew test",0.25727069351230425,0.24862791247228697,Valid,0.5589605178354707,Java
+83,https://github.com/netflix/netflix-graph,"name: ""Publish snapshot to NetflixOSS and Maven Central""
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Set up JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: 8
+      - uses: actions/cache@v2
+        id: gradle-cache
+        with:
+          path: |
+            ~/.gradle/caches
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
+      - uses: actions/cache@v2
+        id: gradle-wrapper-cache
+        with:
+          path: |
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradlewrapper-${{ hashFiles('gradle/wrapper/*') }}
+      - name: Build
+        run: ./gradlew build snapshot
+        env:
+          NETFLIX_OSS_SIGNING_KEY: ${{ secrets.ORG_SIGNING_KEY }}
+          NETFLIX_OSS_SIGNING_PASSWORD: ${{ secrets.ORG_SIGNING_PASSWORD }}
+          NETFLIX_OSS_REPO_USERNAME: ${{ secrets.ORG_NETFLIXOSS_USERNAME }}
+          NETFLIX_OSS_REPO_PASSWORD: ${{ secrets.ORG_NETFLIXOSS_PASSWORD }}
+","name: Build and Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v2
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Cache Gradle packages
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Build
+        run: ./gradlew build
+
+      - name: Run tests
+        run: ./gradlew test
+",0.266735324407827,0.6013907113421952,Valid,0.7692307692307693,Java
+97,https://github.com/panxw/android-image-indicator,"# This workflow will build a Java project with Gradle
+# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-gradle
+
+name: Java CI with Gradle
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up JDK 1.8
+      uses: actions/setup-java@v1
+      with:
+        java-version: 1.8
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+    - name: Build with Gradle
+      run: ./gradlew build
+","name: Build and Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      - name: Build with Gradle
+        run: ./gradlew build
+
+      - name: Run tests
+        run: ./gradlew test",,,Invalid,,Java
+121,https://github.com/splitwise/tokenautocomplete,"name: Android CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        device-split: [
+          {model: ""NexusLowRes"", version: 23},
+          {model: ""NexusLowRes"", version: 24},
+          {model: ""NexusLowRes"", version: 25},
+          {model: ""NexusLowRes"", version: 26},
+          {model: ""NexusLowRes"", version: 27},
+          {model: ""NexusLowRes"", version: 28},
+          {model: ""NexusLowRes"", version: 29},
+          {model: ""NexusLowRes"", version: 30},
+
+          {model: ""oriole"", version: 31},
+          {model: ""oriole"", version: 32},
+          {model: ""oriole"", version: 33}
+        ]
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: set up JDK 11
+      uses: actions/setup-java@v1
+      with:
+        java-version: 11
+    - name: Build with Gradle
+      run: ./gradlew build
+    - name: Run unit tests
+      run: ./gradlew test
+    - name: Build integration test target
+      run: ./gradlew assembleAndroidTest
+    - name: Configure Google Cloud credentials
+      env:
+        GOOGLE_CLOUD_SERVICE_KEY: ${{secrets.GOOGLE_CLOUD_SERVICE_KEY}}
+        GOOGLE_PROJECT_ID: ${{secrets.GOOGLE_PROJECT_ID}}
+      run: |
+        echo $GOOGLE_CLOUD_SERVICE_KEY > ${HOME}/gcloud-service-key.json
+        gcloud auth activate-service-account --key-file=${HOME}/gcloud-service-key.json
+        gcloud --quiet config set project $GOOGLE_PROJECT_ID
+    - name: Run Instrumented Tests with Firebase Test Lab
+      run: gcloud firebase test android run --type instrumentation --app example/build/outputs/apk/debug/example-debug.apk --test example/build/outputs/apk/androidTest/debug/example-debug-androidTest.apk --device model=$DEVICE,version=$API_VERSION,locale=en,orientation=portrait --timeout 30m
+      env:
+        API_VERSION: ${{ matrix.device-split.version }}
+        DEVICE: ${{ matrix.device-split.model }}
+","name: Build and Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v2
+
+    - name: Set up JDK 11
+      uses: actions/setup-java@v1
+      with:
+        java-version: '11'
+        distribution: 'adopt'
+
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+
+    - name: Build with Gradle
+      run: ./gradlew build
+
+    - name: Run tests
+      run: ./gradlew test",,,Invalid,,Kotlin
+226,https://github.com/googlesamples/android-custom-lint-rules,"name: CI
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Validate gradle wrapper
+        uses: gradle/wrapper-validation-action@v1
+      - name: Set up JDK 17
+        uses: actions/setup-java@v1
+        with:
+          java-version: 17
+      # AGP 8.2 requires 34.0.0-rc3 - see https://issuetracker.google.com/issues/236167971#comment36
+      # and https://github.com/actions/runner-images/issues/7506#issuecomment-1533097084
+      # TODO: Remove when AGP updates Build Tools to 34.0.0 and pre-installed in the runner
+      #- name: Install Android Build Tools 34.0.0-rc3
+      #  run: yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager ""build-tools;34.0.0-rc3""
+      #  shell: bash
+      - name: Build with Gradle
+        run: ./gradlew build test
+","name: Build and Test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v2
+
+    - name: Set up JDK 11
+      uses: actions/setup-java@v1
+      with:
+        java-version: '11'
+        distribution: 'adopt'
+
+    - name: Validate Gradle Wrapper
+      uses: gradle/wrapper-validation-action@v1
+
+    - name: Build with Gradle
+      run: ./gradlew build
+
+    - name: Run tests
+      run: ./gradlew test",,,Invalid,,Kotlin
+545,https://github.com/skydoves/baserecyclerviewadapter,"name: Android CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: set up JDK 1.8
+      uses: actions/setup-java@v1
+      with:
+        java-version: 1.8
+    - name: Make Gradle executable
+      run: chmod +x ./gradlew
+    - name: Build with Gradle
+      run: ./gradlew build
+    - name: Build Debug APK
+      run: ./gradlew assembleDebug
+","name: Build and Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      - name: Build with Gradle
+        run: ./gradlew build
+
+      - name: Run tests
+        run: ./gradlew test",,,Invalid,,Kotlin
+548,https://github.com/semper-viventem/material-backdrop,"name: Android CI
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: set up JDK 1.8
+      uses: actions/setup-java@v1
+      with:
+        java-version: 1.8
+    - name: Build with Gradle
+      run: ./gradlew build
+","name: Build and Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build with Gradle
+        run: ./gradlew build
+
+      - name: Run tests
+        run: ./gradlew test",0.3,0.3039104322265846,Valid,1.0,Kotlin
+550,https://github.com/madrapps/pikolo,"name: Publish
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup JDK 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+
+      - name: Check
+        run: ./gradlew check --stacktrace
+
+      - name: Build
+        run: ./gradlew build --stacktrace
+
+      - name: Publish Artifact
+        run: ./gradlew pikolo:publishReleasePublicationToSonatypeRepository --max-workers=1 closeAndReleaseSonatypeStagingRepository --stacktrace
+        env:
+          OSS_USERNAME: ${{ secrets.OSS_USERNAME }}
+          OSS_PASSWORD: ${{ secrets.OSS_PASSWORD }}
+          OSS_STAGING_PROFILE_ID: ${{ secrets.OSS_STAGING_PROFILE_ID }}
+          OSS_SIGNING_KEY_ID: ${{ secrets.OSS_SIGNING_KEY_ID }}
+          OSS_SIGNING_PASSWORD: ${{ secrets.OSS_SIGNING_PASSWORD }}
+          OSS_SIGNING_KEY: ${{ secrets.OSS_SIGNING_KEY }}
+","name: Build and Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      - name: Build with Gradle
+        run: ./gradlew build
+
+      - name: Run tests
+        run: ./gradlew test",0.3708086785009862,0.4399788606107866,Valid,0.4982680764776974,Kotlin
+551,https://github.com/skydoves/chamber,"name: Android CI
+
+on:
+ push:
+  branches:
+   - master
+  pull_request:
+   branches:
+   - master
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: set up JDK 1.8
+      uses: actions/setup-java@v1
+      with:
+        java-version: 1.8
+    - name: Make Gradle executable
+      run: chmod +x ./gradlew
+    - name: Build with Gradle
+      run: ./gradlew build
+    - name: Build Debug APK
+      run: ./gradlew assembleDebug
+","name: Build and Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      - name: Build with Gradle
+        run: ./gradlew build
+
+      - name: Run tests
+        run: ./gradlew test
+",,,Invalid,,Kotlin
+553,https://github.com/skydoves/lazybones,"name: Android CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  lint:
+    name: Spotless check
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+      - name: Set up JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+      - name: spotless
+        run: ./gradlew spotlessCheck
+
+  api_check:
+    name: API check
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+      - name: Set up JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+      - name: API check
+        run: ./gradlew apiCheck
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: set up JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+
+      - name: Cache Gradle and wrapper
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Make Gradle executable
+        run: chmod +x ./gradlew
+
+      - name: Build with Gradle
+        run: ./gradlew build","name: Build and Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      - name: Cache Gradle dependencies
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Build with Gradle
+        run: ./gradlew build
+
+      - name: Run tests
+        run: ./gradlew test
+",,,Invalid,,Kotlin
+554,https://github.com/afollestad/drag-select-recyclerview,"name: Android CI
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: set up JDK 1.8
+      uses: actions/setup-java@v1
+      with:
+        java-version: 1.8
+    - name: Build with Gradle
+      run: ./gradlew build check
+","name: Build and Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      - name: Build with Gradle
+        run: ./gradlew build
+
+      - name: Run tests
+        run: ./gradlew test
+",0.25677267373380447,0.3128194577437345,Valid,0.8333333333333334,Kotlin
+556,https://github.com/saschpe/android-customtabs,"name: Gradle Build
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+        with:
+          lfs: true
+      - name: Set up JDK 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+      - uses: actions/cache@v1
+        with:
+          path: ~/.gradle/caches
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle.kts') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+      - name: Setup Android problem matchers
+        uses: jonasb/android-problem-matchers-action@v1
+      - name: Build with Gradle
+        run: ./gradlew build
+","name: Build and Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+
+      - name: Validate Gradle Wrapper
+        uses: gradle/wrapper-validation-action@v1
+
+      - name: Cache Gradle dependencies
+        uses: actions/cache@v1
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Run Gradle Build
+        run: ./gradlew build
+
+      - name: Run Gradle Test
+        run: ./gradlew test
+
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: test-results
+          path: build/reports/tests
+",,,Invalid,,Kotlin
+557,https://github.com/afollestad/inline-activity-result,"name: Android CI
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: set up JDK 1.8
+      uses: actions/setup-java@v1
+      with:
+        java-version: 1.8
+    - name: Build with Gradle
+      run: ./gradlew build check
+","name: Build and Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      - name: Build with Gradle
+        run: ./gradlew build
+
+      - name: Run tests
+        run: ./gradlew test
+",0.25707547169811323,0.313591715617581,Valid,0.8333333333333334,Kotlin
+559,https://github.com/afollestad/rxkprefs,"name: Android CI
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: set up JDK 1.8
+      uses: actions/setup-java@v1
+      with:
+        java-version: 1.8
+    - name: Build with Gradle
+      run: ./gradlew build check
+","name: Build and Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      - name: Build with Gradle
+        run: ./gradlew build
+
+      - name: Run tests
+        run: ./gradlew test",0.25616921269095183,0.30893032562461376,Valid,0.8333333333333334,Kotlin
+561,https://github.com/afollestad/viewpagerdots,"name: Android CI
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: set up JDK 1.8
+      uses: actions/setup-java@v1
+      with:
+        java-version: 1.8
+    - name: Build with Gradle
+      run: ./gradlew build check
+","name: Build and Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      - name: Build with Gradle
+        run: ./gradlew build
+
+      - name: Run tests
+        run: ./gradlew test",0.25707547169811323,0.3139426861898797,Valid,0.8333333333333334,Kotlin
+562,https://github.com/bnorm/ktor-retrofit,"name: Project Build
+
+on: [push, pull_request]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v1
+
+      - name: Set up JDK 1.8
+        uses: actions/setup-java@v1
+        with:
+          java-version: 1.8
+
+      - uses: actions/cache@v1
+        with:
+          path: ~/.gradle/caches
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle.kts') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Build with Gradle
+        run: ./gradlew build
+","name: Build and Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      - name: Cache Gradle dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Build
+        run: ./gradlew build
+
+      - name: Run tests
+        run: ./gradlew test
+",0.56657223796034,0.4582195635088756,Valid,1.0,Kotlin
+569,https://github.com/chrisvin/rubberpicker,"name: Android CI
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: set up JDK 1.8
+      uses: actions/setup-java@v1
+      with:
+        java-version: 1.8
+    - name: Make Gradle executable
+      run: chmod +x ./gradlew
+    - name: Build with Gradle
+      run: ./gradlew build
+","name: Build and Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      - name: Build with Gradle
+        run: ./gradlew build
+
+      - name: Run tests
+        run: ./gradlew test",0.31346578366445915,0.4456435894389272,Valid,1.0,Kotlin
+571,https://github.com/mumayank/airlocation,"name: Android CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: set up JDK 1.8
+      uses: actions/setup-java@v1
+      with:
+        java-version: 1.8
+    - name: Build with Gradle
+      run: ./gradlew build
+","name: Android CI
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v2
+
+    - name: Set up JDK 11
+      uses: actions/setup-java@v1
+      with:
+        java-version: '11'
+        distribution: 'adopt'
+
+    - name: Grant execute permission for gradlew
+      run: chmod +x ./gradlew
+
+    - name: Build with Gradle
+      run: ./gradlew build
+
+    - name: Run tests
+      run: ./gradlew test",,,Invalid,,Kotlin
+573,https://github.com/yariksoffice/venom,"name: Build
+
+on:
+  push:
+    branches:
+      - master
+
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  jvm:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2.2.2
+        with:
+          cache-read-only: ${{ github.ref != 'refs/heads/master' }}
+
+      - name: Validate Gradle wrapper
+        uses: gradle/wrapper-validation-action@v1
+
+      - name: Configure JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: 17
+
+      - name: Assemble and test
+        run: ./gradlew build --stacktrace
+
+  android:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2.2.2
+        with:
+          cache-read-only: ${{ github.ref != 'refs/heads/master' }}
+
+      - name: Validate Gradle wrapper
+        uses: gradle/wrapper-validation-action@v1
+
+      - name: Configure JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: 17
+
+      - name: Run all device checks
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 29
+          script: ./gradlew connectedCheck --stacktrace
+","name: Build and Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+
+      - name: Validate Gradle Wrapper
+        uses: gradle/wrapper-validation-action@v1
+
+      - name: Build with Gradle
+        uses: gradle/gradle-build-action@v2.2.2
+        with:
+          arguments: build
+
+      - name: Run Tests
+        run: ./gradlew test
+",,,Invalid,,Kotlin
+577,https://github.com/wrbug/developerhelper,"name: Java CI
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Set up JDK 1.8
+      uses: actions/setup-java@v1
+      with:
+        java-version: 1.8
+    - name: Build with Gradle
+      run: ./gradlew build
+","name: Build and Test
+
+on:
+  push:
+    branches:
+      - develop
+  pull_request:
+    branches:
+      - develop
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      - name: Build with Gradle
+        run: ./gradlew build
+
+      - name: Run tests
+        run: ./gradlew test
+",0.3491686460807601,0.2964834853002267,Valid,1.0,Kotlin
+578,https://github.com/yariksoffice/lingver,"name: Build
+
+on:
+  push:
+    branches:
+      - master
+
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  jvm:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Validate Gradle wrapper
+        uses: gradle/wrapper-validation-action@v1
+
+      - name: Configure JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: 1.8
+
+      - name: Assemble and test
+        run: ./gradlew build --stacktrace","name: Build and Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+
+      - name: Validate Gradle Wrapper
+        uses: gradle/wrapper-validation-action@v1
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      - name: Build with Gradle
+        run: ./gradlew build
+
+      - name: Run tests
+        run: ./gradlew test
+",,,Invalid,,Kotlin
+583,https://github.com/chrisvin/liquidswipe,"name: Android CI
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: set up JDK 1.8
+      uses: actions/setup-java@v1
+      with:
+        java-version: 1.8
+    - name: Make Gradle executable
+      run: chmod +x ./gradlew
+    - name: Build with Gradle
+      run: ./gradlew build
+","name: Build and Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build with Gradle
+        run: ./gradlew build
+
+      - name: Run unit tests
+        run: ./gradlew test
+
+      - name: Run Android Instrumented tests
+        run: ./gradlew connectedAndroidTest",0.21,0.342962951395623,Valid,0.9705882352941176,Kotlin
+584,https://github.com/afollestad/recyclical,"name: Android CI
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: set up JDK 1.8
+      uses: actions/setup-java@v1
+      with:
+        java-version: 1.8
+    - name: Build with Gradle
+      run: ./gradlew build check
+","name: Build and Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build with Gradle
+        run: ./gradlew build
+
+      - name: Run tests
+        run: ./gradlew test",0.29239766081871343,0.3042535556093292,Valid,0.8333333333333334,Kotlin
+591,https://github.com/michaelbull/kotlin-retry,"name: ci
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/cache@v1
+        with:
+          path: ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('gradle/wrapper/gradle-wrapper.*') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-wrapper-
+
+      - uses: actions/cache@v1
+        with:
+          path: ~/.gradle/caches
+          key: ${{ runner.os }}-gradle-caches-${{ hashFiles('**/*.gradle.kts') }} }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-caches-
+
+      - uses: actions/setup-java@v1
+        with:
+          java-version: 1.8
+
+      - run: ./gradlew build
+
+  publish:
+    needs: build
+    if: github.ref == 'refs/heads/master' && github.event_name == 'push' && needs.build.result == 'success'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/cache@v1
+        with:
+          path: ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('gradle/wrapper/gradle-wrapper.*') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-wrapper-
+
+      - uses: actions/cache@v1
+        with:
+          path: ~/.gradle/caches
+          key: ${{ runner.os }}-gradle-caches-${{ hashFiles('**/*.gradle.kts') }} }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-caches-
+
+      - uses: actions/setup-java@v1
+        with:
+          java-version: 1.8
+
+      - run: ./gradlew publish
+        env:
+          ORG_GRADLE_PROJECT_ossrhUsername: ${{ secrets.OSSRH_USERNAME }}
+          ORG_GRADLE_PROJECT_ossrhPassword: ${{ secrets.OSSRH_PASSWORD }}
+          ORG_GRADLE_PROJECT_signingKeyId: ${{ secrets.SIGNING_KEY_ID }}
+          ORG_GRADLE_PROJECT_signingKey: ${{ secrets.SIGNING_KEY }}
+          ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.SIGNING_PASSWORD }}
+","name: Build and Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Cache Gradle packages
+        uses: actions/cache@v1
+        with:
+          path: ~/.gradle/caches
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Build
+        run: ./gradlew build
+
+      - name: Test
+        run: ./gradlew test
+",,,Invalid,,Kotlin
+593,https://github.com/chrisvin/fliptabs,"name: Android CI
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: set up JDK 1.8
+      uses: actions/setup-java@v1
+      with:
+        java-version: 1.8
+    - name: Make Gradle executable
+      run: chmod +x ./gradlew
+    - name: Build with Gradle
+      run: ./gradlew build
+    - name: Build assembleDebug with Gradle
+      run: ./gradlew assembleDebug
+","name: Build and Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      - name: Build with Gradle
+        run: ./gradlew build
+
+      - name: Run tests
+        run: ./gradlew test",0.4482758620689655,0.5733100520121579,Valid,0.8771929824561404,Kotlin
+594,https://github.com/ruslanys/telegraff,"name: Java CI
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Set up JDK 11
+      uses: actions/setup-java@v1
+      with:
+        java-version: 11
+    - name: Build Telegraff
+      run: ./gradlew build
+    - name: Build Sample
+      run: cd telegraff-sample && ./gradlew build
+","name: Build and Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build with Gradle
+        run: ./gradlew build
+
+      - name: Run tests
+        run: ./gradlew test",0.334070796460177,0.4383670131998958,Valid,0.7830188679245282,Kotlin
+595,https://github.com/mackhartley/roundedprogressbar,"name: Tests
+on:
+  push:
+    branches:
+    - master
+  pull_request:
+    branches:
+    - master
+
+jobs:
+  run_tests:
+    runs-on: macos-latest
+    
+    # Sets variables for what android environments I want to test
+    strategy:
+      matrix:
+        api-level: [21, 29]
+        
+    # Workflow steps
+    steps:
+    
+    # Cancel any previously started (but currently unfinished) workflows
+    - name: Cancel Previous Runs
+      uses: styfle/cancel-workflow-action@0.8.0
+      with:
+        access_token: ${{ github.token }}
+          
+    # Check out repo (under $GITHUB_WORKSPACE) so the job can access it
+    - uses: actions/checkout@v2
+    
+    # Set up JDK
+    - name: Set up JDK 1.8
+      uses: actions/setup-java@v1
+      with:
+        java-version: 1.8
+        
+    # Cache
+    - name: Cache Gradle packages
+      uses: actions/cache@v2
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-
+          
+    # Verify project can build and basic junit unit tests pass
+    - name: Build With Gradle and Run Unit Tests
+      run: ./gradlew build
+
+    # Verify instrumentation tests pass
+    - name: Run Instrumentation Tests
+      uses: reactivecircus/android-emulator-runner@v2
+      with:
+        api-level: ${{ matrix.api-level }}
+        arch: x86_64
+        profile: Nexus 6
+        script: ./gradlew connectedCheck
+      
+    # Clean up cache
+    - name: Cleanup Gradle Cache
+      # Remove some files from the Gradle cache, so they aren't cached by GitHub Actions.
+      # Restoring these files from a GitHub Actions cache might cause problems for future builds.
+      run: |
+        rm -f ~/.gradle/caches/modules-2/modules-2.lock
+        rm -f ~/.gradle/caches/modules-2/gc.properties
+","name: Build and Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build with Gradle
+        run: ./gradlew build
+
+      - name: Run tests
+        run: ./gradlew test
+",,,Invalid,,Kotlin
+598,https://github.com/wasabeef/recyclerview-animators,"name: ""Gradle build""
+on: [push, pull_request]
+
+jobs:
+  gradle:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-java@v1
+        with:
+          java-version: 1.8
+      - name: Build with Gradle
+        run: ./gradlew build","name: Build and Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      - name: Build with Gradle
+        run: ./gradlew build
+
+      - name: Run tests
+        run: ./gradlew test",,,Invalid,,Kotlin
+602,https://github.com/afollestad/material-cab,"name: Android CI
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: set up JDK 1.8
+      uses: actions/setup-java@v1
+      with:
+        java-version: 1.8
+    - name: Build with Gradle
+      run: ./gradlew build check
+","name: Build and Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      - name: Build with Gradle
+        run: ./gradlew build
+
+      - name: Run tests
+        run: ./gradlew test",0.2546728971962617,0.3031009599044451,Valid,0.8333333333333334,Kotlin
+603,https://github.com/lulululbj/wanandroid,"name: Java CI
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Set up JDK 1.8
+      uses: actions/setup-java@v1
+      with:
+        java-version: 1.8
+    - name: Build with Gradle
+      run: ./gradlew build
+","name: Build and Test
+
+on:
+  push:
+    branches:
+      - jetpack-compose
+  pull_request:
+    branches:
+      - jetpack-compose
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+
+    - name: Set up JDK 11
+      uses: actions/setup-java@v3
+      with:
+        java-version: '11'
+        distribution: 'temurin'
+
+    - name: Grant execute permission for gradlew
+      run: chmod +x ./gradlew
+
+    - name: Build with Gradle
+      run: ./gradlew build
+
+    - name: Run tests
+      run: ./gradlew test
+",0.29256594724220625,0.30511000385377407,Valid,1.0,Kotlin
+604,https://github.com/akshaychordiya/news,"name: Build
+
+on:
+  push:
+    branches: 
+    - '*'
+  pull_request:
+    branches:
+    - '*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    
+    # 1. Checkout the repository
+    - name: Checkout repository
+      uses: actions/checkout@v2
+    
+    # 2. Setup JDK
+    - name: Setup JDK 1.8
+      uses: actions/setup-java@v1
+      with:
+        java-version: 1.8
+
+    # 3. Setup Gradle cache
+    - name: Cache Gradle Caches
+      uses: actions/cache@v1
+      with:
+        path: ~/.gradle/caches/
+        key: cache-clean-gradle-${{ matrix.os }}-${{ matrix.jdk }}
+    - name: Cache Gradle Wrapper
+      uses: actions/cache@v1
+      with:
+        path: ~/.gradle/wrapper/
+        key: cache-clean-wrapper-${{ matrix.os }}-${{ matrix.jdk }}
+
+    # 4: Decode credentials.properties file
+    - name: Decode credentials.properties
+      env:
+        CREDENTIALS_PROPERTIES: ${{ secrets.CREDENTIALS_PROPERTIES }}
+      run: echo $CREDENTIALS_PROPERTIES > credentials.properties
+
+    # 5. Build
+    - name: Build with Gradle
+      run: ./gradlew build
+
+    # 6. Test
+    - name: Unit tests
+      run: ./gradlew test
+
+    # 7. Upload APK Artifact
+    - name: Upload APK
+      uses: actions/upload-artifact@v2
+      with:
+        name: news-app
+        path: ./**/*.apk
+","name: Build and Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      - name: Cache Gradle dependencies
+        uses: actions/cache@v1
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Build with Gradle
+        run: ./gradlew build
+
+      - name: Run unit tests
+        run: ./gradlew test
+
+      - name: Run Android Instrumented tests
+        run: ./gradlew connectedAndroidTest",,,Invalid,,Kotlin
+606,https://github.com/afollestad/vvalidator,"name: Android CI
+on:
+  push:
+    branches:
+      - '*'
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup JDK 1.8
+        uses: actions/setup-java@v1
+        with:
+          java-version: 1.8
+      - name: Build with Gradle
+        env:
+          BINTRAY_ORG: ${{ secrets.BINTRAY_ORG }}
+          BINTRAY_USER: ${{ secrets.BINTRAY_USER }}
+          BINTRAY_API_KEY: ${{ secrets.BINTRAY_API_KEY }}
+        run: ./gradlew build check","name: Build and Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      - name: Build with Gradle
+        run: ./gradlew build
+
+      - name: Run tests
+        run: ./gradlew test
+",0.17823639774859287,0.563355015942134,Valid,0.8333333333333334,Kotlin
+608,https://github.com/skydoves/needs,"name: Android CI
+
+on:
+ push:
+  branches:
+   - master
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: set up JDK 1.8
+      uses: actions/setup-java@v1
+      with:
+        java-version: 1.8
+    - name: Make Gradle executable
+      run: chmod +x ./gradlew
+    - name: Build with Gradle
+      run: ./gradlew build
+    - name: Build Debug APK
+      run: ./gradlew assembleDebug
+","name: Build and Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build with Gradle
+        run: ./gradlew build
+
+      - name: Run tests
+        run: ./gradlew test
+",,,Invalid,,Kotlin
+610,https://github.com/andrefrsousa/superbottomsheet,"name: Android CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: set up JDK 1.8
+      uses: actions/setup-java@v1
+      with:
+        java-version: 1.8
+    - name: Build with Gradle
+      run: ./gradlew build assembleDebug
+","name: Build and Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      - name: Build with Gradle
+        run: ./gradlew build
+
+      - name: Run tests
+        run: ./gradlew test",,,Invalid,,Kotlin
+611,https://github.com/dhaval2404/imagepicker,"name: Build
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v2
+
+      - name: set up JDK 1.8
+        uses: actions/setup-java@v1
+        with:
+          java-version: 1.8
+
+      - name: Make Gradle executable
+        run: chmod +x ./gradlew
+
+      - uses: finnp/create-file-action@master
+        env:
+          FILE_NAME: ""local.properties""
+
+      - name: Build with Gradle
+        run: ./gradlew build
+
+      - name: Build Debug APK
+        run: ./gradlew assembleDebug","name: Build and Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      - name: Build with Gradle
+        run: ./gradlew build
+
+      - name: Run tests
+        run: ./gradlew test
+",,,Invalid,,Kotlin
+612,https://github.com/andretietz/retroauth,"name: PR build
+
+on: [pull_request]
+
+jobs:
+  build:
+    name: PR Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Gradle Wrapper Validation
+        uses: gradle/wrapper-validation-action@v1
+
+      - name: Install JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+
+      - name: Build
+        run: |
+          version=$(grep ""VERSION_NAME"" gradle.properties | cut -d'=' -f2 )
+          if [[ $version != *""-SNAPSHOT""* ]]; then
+            echo ""Version string MUST contain \""-SNAPSHOT\""!""
+            exit 1;
+          fi
+          echo ""Next Version: $version""
+          ./gradlew build --no-daemon --no-parallel --stacktrace --warning-mode all
+","name: Build and Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+
+      - name: Validate Gradle Wrapper
+        uses: gradle/wrapper-validation-action@v1
+
+      - name: Build with Gradle
+        run: ./gradlew build
+
+      - name: Run Tests
+        run: ./gradlew test",,,Invalid,,Kotlin
+614,https://github.com/vitorhugods/avatarview,"name: Android CI
+
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs: 
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up JDK 1.8
+      uses: fortum/setup-java@v1
+      with:
+        java-version: 1.8
+
+    - name: Build
+      run: |
+       ./gradlew build
+","name: Build and Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+
+    - name: Set up JDK 11
+      uses: actions/setup-java@v3
+      with:
+        java-version: '11'
+        distribution: 'adopt'
+
+    - name: Grant execute permission for gradlew
+      run: chmod +x ./gradlew
+
+    - name: Build with Gradle
+      run: ./gradlew build
+
+    - name: Run tests
+      run: ./gradlew test",0.24705882352941178,0.3830964829095593,Valid,0.967741935483871,Kotlin
+619,https://github.com/babylonhealth/certificate-transparency-android,"name: CI
+
+on:
+  push:
+    branches:
+    - main
+    tags:
+    - '*'
+  pull_request:
+    branches:
+    - main
+
+env:
+  CI: ""true""
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: set up JDK 1.8
+      uses: actions/setup-java@v1
+      with:
+        java-version: 1.8
+
+    - name: gradle cache
+      uses: actions/cache@v1
+      with:
+        path: ~/.gradle/caches
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-
+    - name: gradle wrapper cache
+      uses: actions/cache@v1
+      with:
+        path: ~/.gradle/wrapper/dists
+        key: ${{ runner.os }}-gradlewrapper
+
+    - name: NVD CVE cache
+      uses: actions/cache@v1
+      with:
+        path: ~/.gradle/dependency-check-data
+        key: ${{ runner.os }}-dependency-check-data
+
+    - name: Build with Gradle
+      run: ./gradlew build --stacktrace
+
+    - name: Set tag version
+      run: echo ::set-env name=CIRCLE_TAG::$(echo ${GITHUB_REF:10})
+      if: startsWith(github.ref, 'refs/tags/')
+      
+    - name: Upload tag
+      env:
+        BINTRAY_USER: ${{ secrets.BINTRAY_USER }}
+        BINTRAY_KEY: ${{ secrets.BINTRAY_KEY }}
+      run: ./gradlew bintrayUpload
+      if: startsWith(github.ref, 'refs/tags/')
+
+    - name: Upload coverage to Codecov  
+      uses: codecov/codecov-action@v1.0.6
+      with:
+        token: ${{secrets.CODECOV_TOKEN}}
+","name: Build and Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+
+      - name: Validate Gradle Wrapper
+        uses: gradle/wrapper-validation-action@v1
+
+      - name: Cache Gradle dependencies
+        uses: actions/cache@v1
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Build with Gradle
+        run: ./gradlew build
+
+      - name: Run tests
+        run: ./gradlew test
+",,,Invalid,,Kotlin
+621,https://github.com/touk/krush,"name: Snapshot
+on:
+  push:
+    branches:
+      - 'sonatype*'
+      - 'master'
+
+jobs:
+  build:
+    name: Build and upload snapshot
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Set up Java
+        uses: actions/setup-java@v1
+        with:
+          java-version: 1.11
+      - name: Build project
+        run: ./gradlew build --stacktrace
+      - name: Publish package
+        run: ./gradlew publish
+        env:
+          SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
+          SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
+          SIGNING_PRIVATE_KEY: ${{ secrets.SIGNING_PRIVATE_KEY }}
+          SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
+","name: Build and Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build with Gradle
+        run: ./gradlew build
+
+      - name: Run tests
+        run: ./gradlew test",0.28400597907324365,0.547940053631179,Valid,0.7238372093023255,Kotlin
+624,https://github.com/guilhe/keyboardstateevents,"name: Pre Merge Checks
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - ""sample/**""
+      - ""buildSrc/**""
+      - ""gradle/**""
+      - ""keyboard-state-events/**""
+  pull_request:
+    branches:
+      - '*'
+
+jobs:
+  gradle:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    if: ${{ !contains(github.event.head_commit.message, '[skip ci]') }}
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v2
+
+      - name: Validate Gradle Wrapper
+        uses: gradle/wrapper-validation-action@v1
+                
+      - name: Cache Gradle Caches
+        uses: actions/cache@v2
+        with:
+          path: ~/.gradle/caches/
+          key: cache-gradle-cache     
+        
+      - name: Cache Gradle Wrapper
+        uses: actions/cache@v2
+        with:
+          path: ~/.gradle/wrapper/
+          key: cache-gradle-wrapper
+
+      - name: Run Gradle tasks
+        run: ./gradlew build check publishToMavenLocal --continue
+
+      - name: Stop Gradle
+        run: ./gradlew --stop
+","name: Build and Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v2
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+
+      - name: Validate Gradle Wrapper
+        uses: gradle/wrapper-validation-action@v1
+
+      - name: Cache Gradle dependencies
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Build
+        run: ./gradlew build
+
+      - name: Run tests
+        run: ./gradlew test
+",0.3170731707317073,0.677440918672097,Valid,0.6238805970149254,Kotlin
+540,https://github.com/cesena/ghidra2dwarf,"name: Tests
+
+on:
+  push:
+    branches:
+      - '*'
+  pull_request:
+    branches:
+      - '*'
+  workflow_dispatch:
+
+jobs:
+  test-ubuntu:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11.0.4
+          architecture: x64
+
+      - uses: er28-0652/setup-ghidra@master
+        with:
+          version: ""9.1.2""
+      
+      - name: install 32bit libs
+        run: |
+          sudo dpkg --add-architecture i386
+          sudo apt update
+          sudo apt install libc6:i386
+
+      - name: install gdb
+        run: sudo apt install gdb
+
+      - name: Build jar
+        run: |
+          cd lib
+          ./fetch_libs_and_build.sh
+          mv target/libdwarf.jar ../src
+
+      - name: install python requirements
+        run: |
+          cd test
+          sudo python3 -m pip install -r requirements.txt
+
+      - name: test
+        run: |
+          cd test
+          #./generate_dbg.py $GHIDRA_INSTALL_DIR
+          #cd binaries
+          #chmod +x ./passcode_dbg
+          #gdb --batch -ex 'start < passcode_input.txt' -ex list -ex continue ./passcode_dbg
+          ./run_tests.sh $GHIDRA_INSTALL_DIR
+
+  test-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11.0.4
+          architecture: x64
+
+      - uses: er28-0652/setup-ghidra@master
+        with:
+          version: ""9.1.2""
+
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+
+      - name: Build jar
+        shell: cmd
+        run: |
+          cd lib
+          bash fetch_libs_and_build.sh
+          move target\libdwarf.jar ..\src
+
+      - name: test
+        shell: cmd
+        run: |
+          cd test
+          copy %pythonLocation%\python.exe python3.exe
+          call run_tests %GHIDRA_INSTALL_DIR%
+
+  test-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11.0.4
+          architecture: x64
+
+      - uses: NextLight/setup-ghidra@octokit-auth
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          version: ""9.1.2""
+
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+
+      - name: Build jar
+        run: |
+          cd lib
+          ./fetch_libs_and_build.sh
+          mv target/libdwarf.jar ../src
+
+      - name: test
+        run: |
+          cd test
+          ./generate_dbg.py $GHIDRA_INSTALL_DIR
+","name: Build and Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+
+      - name: Build with Maven
+        run: mvn -B package --file lib/pom.xml
+
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pygdbmi==0.10.0.0
+          pip install pytest==6.1.2
+
+      - name: Run Python tests
+        run: python -m pytest
+",,,Invalid,,Python
+3361,https://github.com/cloudflare/db-connect,"name: Build
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ${{matrix.os}}
+    strategy:
+      matrix:
+        node_version: [8, 10, 12]
+        os: [ubuntu-latest, windows-latest, macOS-latest]
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-node@v1
+        with:
+          version: ${{matrix.node_version}}
+      - run: npm ci
+      - run: npm test
+","name: Build and Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '14'
+
+    - name: Install Dependencies
+      run: npm install
+
+    - name: Build
+      run: npm run build
+
+    - name: Run Tests
+      run: npm test
+      if: ${{ always() && steps.install-dependencies.outcome == 'success' }}
+",,,Invalid,,TypeScript
+3367,https://github.com/joule-labs/webln,"name: Build package
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+      - name: Install dependencies
+        run: npm install
+      - name: Build
+        run: npm run build
+      - name: Package
+        run: npm pack
+      - name: Upload
+        uses: actions/upload-artifact@v2
+        with:
+          name: webln
+          path: ""*.tgz""
+","name: Build and Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Build the project
+        run: yarn build
+
+      - name: Run tests
+        run: yarn test
+",0.3257199602780536,0.7132171432299834,Valid,0.6956521739130435,TypeScript
