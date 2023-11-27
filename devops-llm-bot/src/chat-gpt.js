@@ -6,6 +6,7 @@ var configuration, openai;
 function setup() {
     configuration = new Configuration({
       apiKey: process.env.OPENAI_API_KEY,
+      organization: "org-vIJLObb0BM3QCjwZzWKNknn8"
     });
     openai = new OpenAIApi(configuration);
 }
@@ -13,7 +14,7 @@ function setup() {
 async function invoke_openai(user_message) {
     try {
       const completion = await openai.createChatCompletion({
-        model: "gpt-3.5-turbo-1106",
+        model: "gpt-4-1106-preview",
         temperature: 0.2,
         max_tokens: 4000,
         messages: [
