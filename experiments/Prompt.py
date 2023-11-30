@@ -12,18 +12,12 @@ def get_system_message():
 
 def get_user_prompt(repo_structure, dependencies, default_branch, recursive_repo_structure):
     user_prompt = """
-    Take into account the current repository's files and dependencies.
+    Take into account the current repository's file structure to generate the workflow.
 
     Repository default branch:
     ${default_branch}
-
-    Repository tree:
-    ${repo_structure}
-
-    Dependencies: 
-    {dependencies}
     
-    Recursive repository tree:
+    Recursive repository tree upto 3 levels:
     {recursive_repo_structure}
     """
 

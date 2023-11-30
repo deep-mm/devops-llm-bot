@@ -21,22 +21,31 @@ def get_repository_tree(repository_identifier, branch='main'):
 
     return repository_tree
 
+def get_folder_structure_as_string(folder_structure):
+    folder_structure_string = ""
+    for path in folder_structure:
+        segments = path.split('/')
+        indent = '    ' * (len(segments) - 1)
+        folder_structure_string += f"{indent}| - {segments[-1]}\n"
+    return folder_structure_string
+
 
 def get_recursive_repository_tree(repository_identifier, branch='main'):
-    repository_tree = []
+    max_depth = 3
     response = requests.get(f'https://api.github.com/repos/{repository_identifier}/git/trees/{branch}?recursive=1', headers=Helper.get_github_headers())
     data = response.json()
 
     if response.status_code == 200:
-        for item in data['tree']:
-            if item['type'] == 'tree':
-                repository_tree.append(f"Directory: {item['path']}")
-            else:
-                repository_tree.append(f"File: {item['path']}")
+        tree_data = response.json().get('tree', [])
+        folder_structure = [
+            entry['path'] for entry in tree_data
+            if len(entry['path'].split('/')) <= max_depth
+        ]
     else:
         print(f"Failed to fetch tree: {data['message']}")
-
-    return repository_tree
+        folder_structure = []
+        
+    return get_folder_structure_as_string(folder_structure)
 
 def get_list_of_languages(repository_identifier):
     url = 'https://api.github.com/repos/' + repository_identifier + '/languages'

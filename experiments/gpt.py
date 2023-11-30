@@ -4,20 +4,6 @@ import Prompt
 import json
 from Config import Options
 
-def get_chat_response(user_prompt, system_message, output_schema, model, max_tokens, temperature, seed):
-    openai.api_key = Helper.get_gpt_api_key()
-    response = openai.ChatCompletion.create(
-        model=model,
-        messages=[{"role": "system", "content": system_message},
-                  {"role": "user", "content": user_prompt}],
-        max_tokens=max_tokens,
-        temperature=temperature,
-        seed=seed,
-        functions=[{ "name": "generate_workflow", "parameters": output_schema, "description": "Generates workflow file and it's description in JSON format. Used by code assistants" }],
-        function_call={"name": "generate_workflow"}
-    )
-    return response.choices[0].message['function_call'].arguments
-
 def get_chat_response_gpt4(user_prompt, system_message, output_schema, model, max_tokens, temperature, seed, organization):
     openai.api_key = Helper.get_gpt_api_key()
     openai.organization = organization

@@ -47,6 +47,15 @@ def print_folder_structure(folder_structure):
         segments = path.split('/')
         indent = '    ' * (len(segments) - 1)
         print(f"{indent}| - {segments[-1]}")
+        
+def get_folder_structure_as_string(folder_structure):
+    folder_structure_string = ""
+    for path in folder_structure:
+        segments = path.split('/')
+        indent = '    ' * (len(segments) - 1)
+        print(f"{indent}| - {segments[-1]}")
+        folder_structure_string += f"{indent}| - {segments[-1]}\n"
+    return folder_structure_string
 
 
 github_url = 'https://github.com/DapperLib/Dapper'
@@ -61,4 +70,5 @@ if latest_commit_sha:
     if folder_structure:
         print(folder_structure)
         print("Folder Structure:")
-        print_folder_structure(folder_structure)
+        print(get_folder_structure_as_string(folder_structure))
+        #print_folder_structure(folder_structure)
