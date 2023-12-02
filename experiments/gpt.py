@@ -12,8 +12,8 @@ def get_chat_response_gpt4(user_prompt, system_message, output_schema, model, ma
         messages=[{"role": "system", "content": system_message},
                   {"role": "user", "content": user_prompt}],
         max_tokens=max_tokens,
-        temperature=temperature,
-        seed=seed,
+        # temperature=temperature,
+        # seed=seed,
         functions=[{ "name": "generate_workflow", "parameters": output_schema, "description": "Generates workflow file and it's description in JSON format. Used by code assistants" }],
         function_call={"name": "generate_workflow"}
     )
