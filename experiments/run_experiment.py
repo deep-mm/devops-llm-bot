@@ -53,7 +53,7 @@ csvFile = pandas.read_csv(f'dataset/{sys.argv[1]}.csv')
 csvFile = csvFile[csvFile['GitHub_Repo_Link'].notna()]
 
 # Get first 20 rows
-csvFile = csvFile.head(20)
+csvFile = csvFile.head(750)
 
 # Explicitly specify dtypes to avoid pandas inferring dtypes
 csvFile = csvFile.astype({'GitHub_Repo_Link': 'string', 'GitHub_Build_Pipeline_File_Content': 'string', 'Generated_Build_Pipeline_File_Content': 'string', 'Syntax_Check': 'string', 'Exact_Match_Score': 'float', 'BLEU_Score': 'float', 'DevOps_Aware_Score': 'float'})
