@@ -1,0 +1,1962 @@
+Index,GitHub_Repo_Link,GitHub_Build_Pipeline_File_Content,Generated_Build_Pipeline_File_Content,Exact_Match_Score,BLEU_Score,Syntax_Check,DevOps_Aware_Score,Language
+3398,https://github.com/citycide/trilogy,"name: Test
+on:
+  pull_request:
+    branches:
+      - master
+  push:
+    branches:
+      - master
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest, macOS-latest]
+        node: [14, 12, 10, 8]
+    name: Node ${{ matrix.node }}
+    steps:
+      - uses: actions/checkout@master
+      - name: Setup node
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node }}
+      - run: npm install
+      - run: npm test
+",,,,,,TypeScript
+3399,https://github.com/simonhoiberg/hue-debugger-ui,"name: Install and test
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [8.x, 10.x, 12.x]
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+    - name: npm install and test
+      run: |
+        npm install
+        npm test --watchAll=false
+      env:
+        CI: true
+",,,,,,TypeScript
+3400,https://github.com/manfredsteyer/angular-crud,"name: Angular CRUD CI
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [14, 16]
+        app:
+          - demo
+          - demo-bootstrap
+          - demo-material
+    steps:
+    - uses: actions/checkout@v3
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3.7.0
+      with:
+        node-version: ${{ matrix.node-version }}
+    - name: Install latest Chrome
+      run: |
+        sudo apt update
+        sudo apt --only-upgrade install google-chrome-stable
+        google-chrome --version
+    - name: npm install, build, and test
+      run: |
+        npm ci
+        npm run build --if-present
+        npm test
+        npm run coverage
+      working-directory: ./angular-crud
+    - name: package angular-crud
+      run: npm pack
+      working-directory: ./angular-crud
+    - name: generate CRUD and run tests
+      run: |
+        npm i -g @angular/cli
+        npm i
+        npm i --no-save ../angular-crud/*.tgz
+        mkdir -p src/app/hotel
+        mv model.json src/app/hotel/.
+        ng g angular-crud:crud-module hotel
+        xvfb-run npm test -- --watch=false
+      working-directory: ./${{ matrix.app }}
+      env:
+        CI: true
+",,,,,,TypeScript
+3401,https://github.com/manekinekko/angular-web-bluetooth,"# This workflow will do a clean install of node dependencies, build the source code and run tests across different versions of node
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
+
+name: Angular CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [16.x]
+        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v2
+      with:
+        node-version: ${{ matrix.node-version }}
+    - run: npm ci --legacy-peer-deps
+    - run: npm run build --if-present
+    - run: npm test
+",,,,,,TypeScript
+3402,https://github.com/fjc0k/tbify,"name: Test
+
+on: [push]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@master
+
+      - name: test
+        run: |
+          yarn
+          npm test
+",,,,,,TypeScript
+3403,https://github.com/xiph/aomanalyzer,"# Workflow to run on pull request and push to master
+
+name: CI
+
+# Controls when the action will run. 
+on:
+  # Triggers the workflow on push or pull request events but only for the master branch
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called ""build""
+  build:
+    # The type of runner that the job will run on
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+          - macos-latest
+          - windows-latest
+        node-version:
+          - 10
+          - 12
+          - 14
+        architecture:
+          - x64
+
+    name: Node ${{ matrix.node_version }} - ${{ matrix.os }}
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v2
+
+      - name: Setup node
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node_version }}
+
+      - name: Install Packages
+        run: npm install
+
+      - name: Check linting
+        run: npm run check-lint
+
+      - name: It can build successfully
+        run: npm run build
+
+      - name: It can package into electron app
+        run: |
+          npm run package-darwin
+          npm run package-linux
+          npm run package-win32",,,,,,TypeScript
+3404,https://github.com/viadee/sonarquest,"# This is the CI Action for SonarQuest to automatically build Docker images on master push and release.
+
+name: SonarQuest-CI
+
+# Controls when the action will run. 
+on:
+  push:
+  release:
+    types: [ released, prereleased, edited ]
+  workflow_dispatch:
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: 1.11
+      - name: Cache Maven packages
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+      - name: Build backend with Maven
+        run: mvn -f ./sonarQuest-backend/pom.xml --batch-mode --update-snapshots verify 
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v1
+        if: ${{ github.event_name == 'release' || (github.event_name == 'push' && github.ref == 'refs/heads/master') }}
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push Docker image - Release
+        uses: docker/build-push-action@v2
+        if: ${{ github.event_name == 'release' }}
+        with:
+          context: ./sonarQuest-backend
+          push: true
+          tags: | 
+            ghcr.io/viadee/sonarquest-backend:latest
+            ghcr.io/viadee/sonarquest-backend:${{ github.event.release.tag_name }}
+      - name: Build and push Docker image - Nightly
+        uses: docker/build-push-action@v2
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
+        with:
+          context: ./sonarQuest-backend
+          push: true
+          tags: ghcr.io/viadee/sonarquest-backend:nightly
+            
+          
+        
+  frontend:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+    - name: Setup node.js
+      uses: actions/setup-node@v1
+      with:
+        node-version: '10.x'
+    - name: Cache Node.js modules
+      uses: actions/cache@v2
+      with:
+        # npm cache files are stored in `~/.npm` on Linux/macOS
+        path: ~/.npm
+        key: ${{ runner.OS }}-node-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.OS }}-node-
+          ${{ runner.OS }}-
+    - name: Install dependencies
+      run: |
+        cd sonarQuest-frontend
+        npm ci
+    - name: Build Angular app
+      run: |
+        cd sonarQuest-frontend
+        npm run build:prod
+    - name: Test
+      run: |
+        cd sonarQuest-frontend
+        npm test
+    - name: Login to GitHub Container Registry
+      uses: docker/login-action@v1
+      if: ${{ github.event_name == 'release' || (github.event_name == 'push' && github.ref == 'refs/heads/master') }}
+      with:
+        registry: ghcr.io
+        username: ${{ github.repository_owner }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    - name: Build and push Docker image - Release
+      uses: docker/build-push-action@v2
+      if: ${{ github.event_name == 'release' }}
+      with:
+        context: ./sonarQuest-frontend
+        push: true
+        tags: | 
+            ghcr.io/viadee/sonarquest-frontend:latest
+            ghcr.io/viadee/sonarquest-frontend:${{ github.event.release.tag_name }}
+    - name: Build and push Docker image - Nightly
+      uses: docker/build-push-action@v2
+      if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
+      with:
+        context: ./sonarQuest-frontend
+        push: true
+        tags: ghcr.io/viadee/sonarquest-frontend:nightly
+  
+",,,,,,TypeScript
+3405,https://github.com/polymerlabs/lit-ssr,"# This workflow will do a clean install of node dependencies, build the source code and run tests across different versions of node
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
+
+name: Tests
+
+on: [push, pull_request]
+
+jobs:
+  tests:
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [14.x]
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+    - run: npm ci
+    - run: npm run build
+    - run: npm test
+",,,,,,TypeScript
+3406,https://github.com/ngneat/dirty-check-forms,"name: CI
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+      - name: use cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            node_modules
+            */*/node_modules
+            /home/runner/.cache/Cypress
+          key: ${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+      - run: npm i -g npm@7.15.0
+      - run: npm i
+      - run: npm run build:lib
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+      - name: use cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            node_modules
+            */*/node_modules
+            /home/runner/.cache/Cypress
+          key: ${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+      - run: npm i -g npm@7.15.0
+      - run: npm i
+      - run: npm run test:lib
+",,,,,,TypeScript
+3407,https://github.com/nilsmehlhorn/ngx-operators,"name: ngx-operators
+on: [push, pull_request]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v2
+      - name: Use Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '18.x'
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build
+      - run: npm run test:ci
+      - uses: codecov/codecov-action@v3
+        with:
+          files: ./projects/ngx-operators/coverage/lcov.info
+          fail_ci_if_error: true
+",,,,,,TypeScript
+3408,https://github.com/thekashey/used-styles,"name: Node.js CI
+
+on:
+  push:
+    branches: ['*']
+  pull_request:
+    branches: ['*']
+
+jobs:
+  test:
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [14.x, 16.x, 18.x]
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Run tests [Node.js ${{ matrix.node-version }}]
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+    - run: yarn --frozen-lockfile
+    - run: yarn test:ci",,,,,,TypeScript
+3409,https://github.com/kohheepeace/docusaurus-pdf,"name: Test
+
+on:
+  [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [10.x, 12.x, 14.x]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Cache node modules
+        uses: actions/cache@v1
+        env:
+          cache-name: cache-node-modules
+        with:
+          path: ~/.npm # npm cache files are stored in `~/.npm` on Linux/macOS
+          key: ${{ runner.os }}-${{ env.cache-name }}-${{ matrix.node-version }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ env.cache-name }}-${{ matrix.node-version }}-
+            ${{ runner.os }}-${{ env.cache-name }}-
+            ${{ runner.os }}-
+      - name: Setup Node ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Install NPM Packages
+        run: npm ci
+      - name: Lint
+        run: npm run lint
+      - name: Test
+        run: npm test -- --ci
+",,,,,,TypeScript
+3410,https://github.com/aykutkardas/json-function,"name: Test
+
+on: [push]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [14.x, 16.x]
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      - run: yarn install
+      - run: yarn test
+        env:
+          CI: true
+",,,,,,TypeScript
+3411,https://github.com/43081j/id3,"name: Build
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [10.x, 14.x]
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+    - run: npm ci
+    - run: npm run build
+    - run: npm run lint
+    - run: npm test
+",,,,,,TypeScript
+3412,https://github.com/kkemple/graphql-auth,"name: CI
+on: [push]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Begin CI...
+        uses: actions/checkout@v2
+
+      - name: Use Node 12
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12.x
+
+      - name: Use cached node_modules
+        uses: actions/cache@v1
+        with:
+          path: node_modules
+          key: nodeModules-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            nodeModules-
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+        env:
+          CI: true
+
+      - name: Lint
+        run: yarn lint
+        env:
+          CI: true
+
+      - name: Test
+        run: yarn test --ci --coverage --maxWorkers=2
+        env:
+          CI: true
+
+      - name: Build
+        run: yarn build
+        env:
+          CI: true
+",,,,,,TypeScript
+3413,https://github.com/alexreardon/tiny-invariant,"name: Unit tests
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: ['**/**']
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  jest:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: '.nvmrc'
+          # Using node action to manage caching node_modules
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install
+
+      - name: Run tests
+        run: yarn test
+",,,,,,TypeScript
+3414,https://github.com/react-native-toolkit/react-native-responsive-dimensions,"name: build
+on:
+  push:
+    branches:
+      - master
+    tags:
+      - ""!*"" # Do not execute on tags
+    paths:
+      - src/*
+      - test/*
+      - __tests__/*
+      - ""*.json""
+      - yarn.lock
+      - .github/**/*.yml
+  pull_request:
+    paths:
+      - ""!*.MD""
+jobs:
+  test:
+    strategy:
+      matrix:
+        platform: [ubuntu-latest, macOS-latest]
+        node: [""12"", ""10""]
+    name: test/node ${{ matrix.node }}/${{ matrix.platform }}
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@master
+      - uses: actions/setup-node@master
+        with:
+          node-version: ${{ matrix.node }}
+      - run: npm install -g yarn
+      - run: yarn install
+      - run: yarn test
+  coverage:
+    needs: [test]
+    name: coverage
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - uses: actions/setup-node@master
+        with:
+          node-version: ""12""
+      - run: npm install -g yarn
+      - run: yarn install
+      - uses: paambaati/codeclimate-action@v2.5.3
+        env:
+          CC_TEST_REPORTER_ID: ${{secrets.CC_TEST_REPORTER_ID}}
+        with:
+          coverageCommand: yarn coverage
+          debug: true
+",,,,,,TypeScript
+3415,https://github.com/samhh/bukubrow-webext,"name: Code Quality
+on: [push]
+jobs:
+  code-quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Cache Yarn dependencies
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-yarn
+        with:
+          path: ~/.cache/yarn/
+          key: yarn-${{ hashFiles('./yarn.lock') }}
+      - name: Setup Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: ""15.x""
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+      - name: Typecheck
+        run: yarn typecheck
+      - name: Lint
+        run: yarn lint
+      - name: Test
+        run: yarn test
+      - name: Check formatting
+        run: yarn fmt-check
+",,,,,,TypeScript
+3416,https://github.com/albert-gao/micro-aws-lambda,"name: Publish to NPM registry
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 12
+          registry-url: https://registry.npmjs.org/
+      - run: npm ci --silent
+      - run: npm run lint
+      - run: npm run test
+      - run: npm run build
+      - run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
+",,,,,,TypeScript
+3417,https://github.com/benlesh/rxjs-for-await,"# This workflow will do a clean install of node dependencies, cache/restore them, build the source code and run tests across different versions of node
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
+
+name: Node.js CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [12.x, 14.x, 16.x]
+        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v2
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+    - run: npm ci
+    - run: npm run build --if-present
+    - run: npm test
+",,,,,,TypeScript
+3418,https://github.com/app-outlet/app-outlet,"name: Pipeline
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - v*
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Fetch dependencies
+        run: npm install
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npm run test:coverage
+
+      - name: Upload code coverage report
+        uses: paambaati/codeclimate-action@v3.0.0
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+        with:
+          coverageLocations: coverage/lcov.info:lcov
+
+      - name: Generage changelog
+        run: npx standard-changelog -r 2 -v -o CHANGELOG.txt
+        if: startsWith(github.ref, 'refs/tags/')
+
+      - name: Print changelog
+        run: cat CHANGELOG.txt
+        if: startsWith(github.ref, 'refs/tags/')
+
+      - name: Build
+        run: npm run build
+        if: startsWith(github.ref, 'refs/tags/')
+
+      - name: Deploy to releases
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: |
+            release/App Outlet-*.AppImage
+            release/app-outlet-*.tar.gz
+            release/app-outlet_*_amd64.deb
+            release/app-outlet-*.x86_64.rpm
+          body_path: CHANGELOG.txt
+          token: ${{ secrets.GITHUB_TOKEN }}
+",,,,,,TypeScript
+3419,https://github.com/custom-cards/decluttering-card,"name: CI
+
+on:
+  pull_request:
+    branches:
+      - '*'
+  push:
+    branches:
+      - '*'
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js 18.x
+        uses: actions/setup-node@v3.6.0
+        with:
+          node-version: 18.x
+      - name: Cache Node.js modules
+        uses: actions/cache@v3.3.1
+        with:
+          path: ~/.npm # npm cache files are stored in `~/.npm` on Linux/macOS
+          key: ${{ runner.OS }}-node-18.x-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.OS }}-node-18.x
+            ${{ runner.OS }}-
+      - name: Install dependencies
+        run: npm ci
+      - name: Lint the code
+        run: npm run lint --if-present
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18.x]
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3.6.0
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Cache Node.js modules
+        uses: actions/cache@v3.3.1
+        with:
+          path: ~/.npm # npm cache files are stored in `~/.npm` on Linux/macOS
+          key: ${{ runner.OS }}-node-${{ matrix.node-version }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.OS }}-node-${{ matrix.node-version }}
+            ${{ runner.OS }}-
+      - name: Install dependencies
+        run: npm ci
+      - name: Build the project
+        run: npm run build --if-present",,,,,,TypeScript
+3420,https://github.com/ryuugan/sol-merger,"# This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
+
+name: Node.js CI
+
+on:
+  push:
+    branches: [ develop ]
+  pull_request:
+    branches: [ develop ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [14.x, 16.x, 18.x]
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v2
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+    - run: npm ci
+    - run: npm run build
+
+  testPublish:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [14.x, 16.x, 18.x]
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v2
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+    - run: npm ci
+    - run: npm run test-docker
+
+  lint:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [14.x]
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v2
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+    - run: npm ci
+    - run: npm run lint
+
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [14.x, 16.x, 18.x]
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v2
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+    - run: npm ci
+    - run: npm test
+
+  dryPublish:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [14.x]
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v2
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+    - run: npm ci
+    - run: npm run build
+    - run: npm publish --dry-run
+",,,,,,TypeScript
+3421,https://github.com/open-draft/until,"name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.CI_GITHUB_TOKEN }}
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          always-auth: true
+          registry-url: https://registry.npmjs.org
+
+      - name: Setup Git
+        run: |
+          git config --local user.name ""Artem Zakharchenko""
+          git config --local user.email ""kettanaito@gmail.com""
+
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 7.12
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Test
+        run: pnpm test
+
+      - name: Build
+        run: pnpm build
+
+      - name: Release
+        if: github.ref == 'refs/heads/main'
+        run: pnpm release
+        env:
+          GITHUB_TOKEN: ${{ secrets.CI_GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+",,,,,,TypeScript
+3422,https://github.com/nolanus/ngx-page-scroll,"name: CI
+
+# Controls when the action will run.
+on:
+  # Trigger the workflow on push or pull request,
+  # but only for the main branch
+  push:
+
+  pull_request:
+    branches:
+      - main
+
+# Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called ""build""
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - uses: wagoid/commitlint-github-action@v3
+
+      # Install Chrome Browser
+      - name: Setup Chrome
+        # You may pin to the exact commit or the version.
+        # uses: browser-actions/setup-chrome@4fa655aad48f56911cad16db9252399a9e592848
+        uses: browser-actions/setup-chrome@latest
+        with:
+          # The Chromium version to install and use.
+          chrome-version: stable
+
+      - name: Print chrome version
+        run: chrome --version
+
+      # Install NodeJS
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v2.1.5
+
+      - name: Cache node modules
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-node-modules
+        with:
+          # npm cache files are stored in `~/.npm` on Linux/macOS
+          path: ~/.npm
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
+
+      # Runs npm install
+      - name: Install dependencies
+        run: npm install
+
+      - name: Lint files
+        run: npm run lint
+
+      - name: Build lib
+        run: npm run build:lib
+
+      - name: Run tests
+        run: npm run test -- --watch false --browsers ChromeHeadless
+
+      - name: Run e2e tests
+        run: npm run e2e -- --protractor-config='e2e/protractor.ci.conf.js'
+",,,,,,TypeScript
+3423,https://github.com/deepkit/deepkit-ml,"name: CI
+
+on:
+  push:
+    branches:
+      - master
+
+env:
+  ACTIONS_ALLOW_UNSECURE_COMMANDS: true
+
+jobs:
+#  build:
+#    runs-on: [ubuntu-latest]
+#    steps:
+#      - uses: actions/checkout@v2
+#      - run: git fetch --prune --unshallow
+#      - run: git fetch --tags
+#      - run: echo ""::set-env name=VERSION::`sh ./release-version.sh`""
+#      - run: echo ""::set-env name=VERSION_FILE_PATH::`sh ./release-version-file-path.sh`""
+#      - run: |
+#          if [ ""${{runner.os}}"" = ""macOS"" ]; then
+#           echo ::set-env name=PLATFORM::darwin
+#          fi
+#          if [ ""${{runner.os}}"" = ""Linux"" ]; then
+#           echo ::set-env name=PLATFORM::linux
+#          fi
+#      - uses: actions/setup-node@v1
+#        with:
+#          node-version: '12.x'
+#      - name: Cache ~/.npm
+#        uses: actions/cache@v1
+#        with:
+#          path: ~/.npm # npm cache files are stored in `~/.npm` on Linux/macOS
+#          key: ${{ runner.os }}-node_modules-${{ hashFiles('**/package-lock.json') }}
+#
+#      - name: Cache node_modules core
+#        uses: actions/cache@v1
+#        with:
+#          path: packages/core/node_modules
+#          key: ${{ runner.os }}-node_modules-${{ hashFiles('packages/core/package-lock.json') }}
+#      - name: Cache node_modules core-node
+#        uses: actions/cache@v1
+#        with:
+#          path: packages/core-node/node_modules
+#          key: ${{ runner.os }}-node_modules-${{ hashFiles('packages/core-node/package-lock.json') }}
+#
+#      - name: Cache node_modules cli
+#        uses: actions/cache@v1
+#        with:
+#          path: packages/cli/node_modules
+#          key: ${{ runner.os }}-node_modules-${{ hashFiles('packages/cli/package-lock.json') }}
+#      - name: Cache node_modules server
+#        uses: actions/cache@v1
+#        with:
+#          path: packages/server/node_modules
+#          key: ${{ runner.os }}-node_modules-${{ hashFiles('packages/server/package-lock.json') }}
+#      - name: Cache node_modules deepkit
+#        uses: actions/cache@v1
+#        with:
+#          path: packages/deepkit/node_modules
+#          key: ${{ runner.os }}-node_modules-${{ hashFiles('packages/deepkit/package-lock.json') }}
+#      - name: Cache build
+#        uses: actions/cache@v1
+#        with:
+#          path: build
+#          key: build-${{env.VERSION}}
+#
+#      - name: Setup
+#        run: npm install -g lerna@3.20.2 npm-local-development
+#        shell: bash
+#      - name: Lerna bootstrap
+#        run: |
+#          if [ ! -d packages/core/node_modules ] || [ ! -d packages/core-node/node_modules ] || [ ! -d packages/cli/node_modules ] || [ ! -d packages/deepkit/node_modules ] || [ ! -d packages/server/node_modules ] || [ ! -d packages/electron/node_modules ]; then
+#            lerna bootstrap --nohoist \* --ignore @deepkit/website
+#          fi
+#          npm-local-development --no-watcher
+#
+#      - name: Build
+#        run: |
+#          mkdir -p build/cli
+#          mkdir -p build/server
+#          mkdir -p build/frontend
+#
+#          if [ ! -f build/cli/main.js ]; then
+#              echo ""build now build/cli""
+#              cd packages/cli && npm run build && cd - && mv packages/cli/dist/main.js build/cli/
+#          fi
+#          if [ ! -f build/server/main.js ]; then
+#              echo ""build now build/server""
+#              cd packages/server && npm run build && cd - && mv packages/server/dist/main.js build/server/
+#          fi
+#          if [ ! -f build/frontend/index.html ]; then
+#              echo ""build now build/frontend""
+#              rm -rf build/frontend
+#              cd packages/deepkit && npm run build && cd - && mv packages/deepkit/dist/deepkit build/frontend
+#              rm build/frontend/emoji_apple_32.*.png
+#              rm build/frontend/statistics.html
+#          fi
+#
+#      - name: Package cli Linux
+#        run: |
+#          mkdir -p build/linux/cli/
+#          cp packages/cli/package.json build/linux/cli/
+#          cp build/cli/main.js build/linux/cli/
+#          cd build/linux/cli/ && npm version ${{env.VERSION}} && cd -
+#          if [ ! -d build/linux/cli/node_modules ]; then
+#              cp packages/cli/package-lock.json build/linux/cli/
+#              cd build/linux/cli/ && npm install --only=prod --unsafe --scripts-prepend-node-path && cd -
+#              rm build/linux/cli/package-lock.json
+#          fi
+#          make build/linux/cli/bin
+#
+#          tar -C build/linux/cli -czf build/linux/deepkit-cli-linux.tar.gz .
+#          rm -rf build/linux/cli
+#
+#      - name: Package server Linux
+#        run: |
+#          mkdir -p build/${{env.PLATFORM}}/server/
+#          cp build/server/main.js build/${{env.PLATFORM}}/server/
+#          cp packages/server/package.json build/${{env.PLATFORM}}/server/
+#          cd build/${{env.PLATFORM}}/server/ && npm version ${{env.VERSION}} && cd -
+#          if [ ! -d build/${{env.PLATFORM}}/server/node_modules ]; then
+#              cp packages/server/package-lock.json build/${{env.PLATFORM}}/server/
+#              cd build/${{env.PLATFORM}}/server/ && npm install --only=prod --unsafe --scripts-prepend-node-path && cd -
+#              rm build/${{env.PLATFORM}}/server/package-lock.json
+#          fi
+#          make build/${{env.PLATFORM}}/server/libs
+#          make build/${{env.PLATFORM}}/server/bin
+#
+#          cp -r build/frontend build/linux/server/frontend
+#          mkdir -p build/linux/server/build/linux/
+#          cp build/linux/deepkit-cli-linux.tar.gz build/linux/server/build/linux/deepkit-cli-linux.tar.gz
+#
+#      - name: Build app.deepkit.ai
+#        if: runner.os == 'Linux' && success()
+#        run: |
+#          cp -r build/linux/server prebuild-server
+#          docker build -t docker.pkg.github.com/deepkit/deepkit/app:${{env.VERSION_FILE_PATH}} -f docker-build/app.Dockerfile .;
+#
+#          echo ""${{secrets.GITHUB_TOKEN}}"" | docker login docker.pkg.github.com --username \$GITHUB_ACTOR  --password-stdin
+#          docker push docker.pkg.github.com/deepkit/deepkit/app:${{env.VERSION_FILE_PATH}}
+#          docker tag docker.pkg.github.com/deepkit/deepkit/app:${{env.VERSION_FILE_PATH}} docker.pkg.github.com/deepkit/deepkit/app:latest
+#          docker push docker.pkg.github.com/deepkit/deepkit/app:latest
+#
+#      - name: Deploy app.deepkit.ai
+#        uses: appleboy/ssh-action@master
+#        with:
+#          host: marcjschmidt.de
+#          username: deploy
+#          password: ${{secrets.SSH_PW}}
+#          script_stop: true
+#          script: |
+#            echo ""${{secrets.GITHUB_TOKEN}}"" | docker login docker.pkg.github.com --username \$GITHUB_ACTOR  --password-stdin
+#            docker pull docker.pkg.github.com/deepkit/deepkit/app:${{env.VERSION_FILE_PATH}}
+#            docker stop deepkit-app || true;
+#            docker rm -f deepkit-app || true;
+#            docker run -d --name deepkit-app -v /root/deepkit/app.deepkit.ai-fs:/app/data/fs -v /root/deepkit/app.deepkit.ai-project-git:/app/data/project-git -v /root/deepkit/app.deepkit.ai-mongo:/app/data/mongo -e DEEPKIT_VERSION=${{env.VERSION}} --restart=unless-stopped --network nginx-proxy -e VIRTUAL_HOST=app.deepkit.ai -e VIRTUAL_PORT=80 -e LETSENCRYPT_HOST=app.deepkit.ai docker.pkg.github.com/deepkit/deepkit/app:${{env.VERSION_FILE_PATH}};
+
+  website:
+    runs-on: [ubuntu-latest]
+    steps:
+      - uses: actions/checkout@v2
+      - run: git fetch --prune --unshallow
+      - run: git fetch --tags
+      - run: echo ""::set-env name=VERSION::`sh ./release-version.sh`""
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '12.x'
+      - name: Cache ~/.npm
+        uses: actions/cache@v1
+        with:
+          path: ~/.npm # npm cache files are stored in `~/.npm` on Linux/macOS
+          key: ${{ runner.os }}-node_modules-${{ hashFiles('**/package-lock.json') }}
+
+      - name: Setup
+        run: npm install -g lerna@3.20.2 npm-local-development @angular/cli@9
+        shell: bash
+      - name: Lerna bootstrap
+        run: lerna bootstrap --nohoist \* --ci --scope @deepkit/website
+      - name: Image build
+        run: |
+          echo ""${{secrets.GITHUB_TOKEN}}"" | docker login docker.pkg.github.com --username \$GITHUB_ACTOR  --password-stdin
+          COMMIT=$(git log -n 1 --pretty=format:%h packages/website)
+          VERSION=$(git describe --tag $COMMIT)
+
+          docker build -t docker.pkg.github.com/deepkit/deepkit/website:latest -f docker-build/website.Dockerfile .;
+
+          docker push docker.pkg.github.com/deepkit/deepkit/website:latest
+
+      - name: Deploy website
+        uses: appleboy/ssh-action@master
+        with:
+          host: marcjschmidt.de
+          username: deploy
+          password: ${{secrets.SSH_PW}}
+          script_stop: true
+          script: |
+            echo ""${{secrets.GITHUB_TOKEN}}"" | docker login docker.pkg.github.com --username \$GITHUB_ACTOR  --password-stdin
+            docker pull docker.pkg.github.com/deepkit/deepkit/website:latest
+            docker rm -f deepkit-website || true;
+            docker rm -f next-deepkit-website || true;
+            docker run -d --name deepkit-website --restart=unless-stopped --network nginx-proxy -e CONTENTFUL_ACCESS_TOKEN=""${{secrets.CONTENTFUL_ACCESS_TOKEN}}"" -e VIRTUAL_HOST=ml.deepkit.io -e VIRTUAL_PORT=80 -e LETSENCRYPT_HOST=ml.deepkit.io docker.pkg.github.com/deepkit/deepkit/website:latest;
+#            docker run -d --name next-deepkit-website --restart=unless-stopped --network nginx-proxy -e VIRTUAL_HOST=next.deepkit.ai -e VIRTUAL_PORT=80 -e LETSENCRYPT_HOST=next.deepkit.ai docker.pkg.github.com/deepkit/deepkit/website:latest;
+",,,,,,TypeScript
+3424,https://github.com/disjukr/croquis.js,"name: Deploy GitHub Pages
+
+on:
+  push:
+    branches:
+    - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v1
+      with:
+        node-version: 12.x
+    - run: yarn
+    - run: yarn build
+    - uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        personal_token: ${{ secrets.ACCESS_TOKEN }}
+        publish_dir: packages/website/out
+        publish_branch: gh-pages
+        cname: croquisjs.0xabcdef.com
+        enable_jekyll: false
+        keep_files: false
+",,,,,,TypeScript
+3425,https://github.com/mtraynham/lodash-joins,"name: test
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [16.x, 17.x, 18.x, 19.x, 20.x]
+    steps:
+    - uses: actions/checkout@v3
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+    - run: npm ci
+    - run: npm run lint
+    - run: npm run build
+    - run: npm test
+      env:
+        CI: true
+",,,,,,TypeScript
+3426,https://github.com/tc39/proposal-array-unique,"name: CI & CD
+on:
+    push:
+        tags:
+            - v*
+jobs:
+    Build-and-Publish:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v2
+            - name: Use Node.js
+              uses: actions/setup-node@v2
+              with:
+                  node-version: 14
+                  registry-url: https://registry.npmjs.org
+                  cache: yarn
+            - name: Install packages
+              run: yarn
+            - name: Test & Build
+              if: ${{ !secrets.NPM_TOKEN }}
+              run: npm test  &&  yarn build
+            - name: Publish
+              if: ${{ secrets.NPM_TOKEN }}
+              run: yarn publish
+              env:
+                  NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+",,,,,,TypeScript
+3427,https://github.com/emeraldpay/hashicon,"name: Unit Tests
+
+on:
+  # if pushed directly to the master
+  push:
+    branches:
+      - master
+  # on a pull request
+  pull_request:
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the code
+        uses: actions/checkout@v2
+
+      - name: Install Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: ""12.x""
+
+      - name: Instal JS dependencies
+        run: yarn install
+
+      - name: Build Sources
+        run: yarn build
+",,,,,,TypeScript
+3428,https://github.com/microsoft/code-push,"name: Сode-push CI
+
+on:
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  Run-tests:
+    name: Test code-push-sdk
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: Setup NodeJs
+        uses: actions/setup-node@v1
+        with:
+          node-version: ""14.x""
+      - name: Setup dependencies
+        run: npm run setup
+      - name: Build
+        run: npm run build
+      - name: Run tests
+        run: npm run test
+",,,,,,TypeScript
+3429,https://github.com/yangshun/lago,"name: CI
+on: [push]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Begin CI...
+        uses: actions/checkout@v2
+
+      - name: Use Node 12
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12.x
+
+      - name: Use cached node_modules
+        uses: actions/cache@v1
+        with:
+          path: node_modules
+          key: nodeModules-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            nodeModules-
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+        env:
+          CI: true
+
+      - name: Lint
+        run: yarn lint
+        env:
+          CI: true
+
+      - name: Test
+        run: yarn test --ci --coverage --maxWorkers=2
+        env:
+          CI: true
+
+      - name: Build
+        run: yarn build
+        env:
+          CI: true
+",,,,,,TypeScript
+3430,https://github.com/cipchk/ngx-weui,"name: Ci
+
+on: push
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@master
+
+      - name: install
+        run: npm install
+
+      - name: run
+        run: |
+          npm run build
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@master
+
+      - name: install
+        run: npm install
+
+      - name: run
+        run: |
+          npm run test
+          cat ./coverage/lcov.info | ./node_modules/.bin/codecov
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@master
+
+      - name: install
+        run: npm install
+
+      - name: run
+        run: |
+          npm run lint
+",,,,,,TypeScript
+3431,https://github.com/data-uri/datauri,"name: DataURI
+on:
+  push:
+    branches:
+      - main
+  pull_request_target:
+    types: [assigned, opened, synchronize, reopened]
+jobs:
+  check-package:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: ['10', '12', '14', '16']
+    name: Check package on Node.js ${{ matrix.node }}
+    steps:
+      - uses: actions/checkout@v2
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+        if: ${{ github.event_name == 'pull_request_target' }}
+      - uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node }}
+      - uses: actions/cache@v2
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+      - name: Build and test
+        run: |
+          npm ci --prefer-offline --no-audit
+          npm test
+",,,,,,TypeScript
+3432,https://github.com/probot/smee-client,"name: Release
+""on"":
+  push:
+    branches:
+      - master
+      - next
+      - beta
+      - ""*.x""
+jobs:
+  release:
+    name: release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - run: npx semantic-release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.PROBOTBOT_NPM_TOKEN }}",,,,,,TypeScript
+3433,https://github.com/davguij/rxios,"name: CI
+on: [push]
+
+jobs:
+  lint_test:
+    runs-on: ubuntu-latest
+    name: Run tests
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+
+      - name: Use Node 12
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12.x
+
+      - name: Use cached node_modules
+        uses: actions/cache@v1
+        with:
+          path: node_modules
+          key: nodeModules-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            nodeModules-
+
+      - name: Install dependencies
+        run: npm ci
+        env:
+          CI: true
+
+      - name: Install peer dependencies
+        run: npm i axios rxjs --no-save
+        env:
+          CI: true
+
+      - name: Test
+        run: npm test
+        env:
+          CI: true
+
+  build:
+    runs-on: ubuntu-latest
+    name: Build
+    needs: lint_test
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+
+      - name: Use Node 12
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12.x
+
+      - name: Use cached node_modules
+        uses: actions/cache@v1
+        with:
+          path: node_modules
+          key: nodeModules-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            nodeModules-
+
+      - name: Install dependencies
+        run: npm ci
+        env:
+          CI: true
+
+      - name: Install peer dependencies
+        run: npm i axios rxjs --no-save
+        env:
+          CI: true
+
+      - name: Build
+        run: npm run build
+        env:
+          CI: true
+
+      - uses: actions/upload-artifact@v2
+        name: Store dist folder to artifacts
+        with:
+          name: dist
+          path: dist/ # or path/to/artifact
+
+  release:
+    runs-on: ubuntu-latest
+    name: Release version to npm registry
+    needs: build
+    if: github.ref == 'refs/heads/master'
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+
+      - name: Use Node 12
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12.x
+
+      - uses: actions/download-artifact@v2
+        name: Load dist folder from artifacts
+        with:
+          name: dist
+          path: dist
+
+      - name: Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npx semantic-release
+",,,,,,TypeScript
+3434,https://github.com/vadimdemedes/ink-spinner,"name: test
+on: [push, pull_request]
+
+jobs:
+  test:
+    name: Node.js ${{ matrix.node_version }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node_version: [14, 16, 18]
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js ${{ matrix.node_version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node_version }}
+      - run: npm install --global npm@latest
+      - run: npm install
+      - run: npm test
+",,,,,,TypeScript
+3435,https://github.com/jason3s/rx-stream,"name: ""build-test""
+on: # rebuild any PRs and main branch changes
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  test-node-versions:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        node-version:
+          - 14.x
+          - 16.x
+          - 18.x
+
+        os:
+          - ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - run: |
+          npm install
+          npm test
+
+  test-os:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os:
+          # - ubuntu-latest
+          - windows-latest
+          - macos-latest
+
+        node-version:
+          - 18.x
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - run: |
+          npm install
+          npm test
+",,,,,,TypeScript
+3436,https://github.com/reactivando/validations-br,"name: ci
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: Set up Node
+      uses: actions/setup-node@v3
+      with:
+        node-version: 16
+
+    - name: Install dependencies
+      run: yarn
+
+    - name: Check tests
+      run: yarn test --coverage
+
+    - name: Check linting
+      run: yarn lint
+
+    - name: Coveralls
+      uses: coverallsapp/github-action@master
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+",,,,,,TypeScript
+3437,https://github.com/grrowl/react-keyed-flatten-children,"name: Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [16.x, 18.x, 20.x]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - run: yarn install
+
+      - run: yarn test
+",,,,,,TypeScript
+3438,https://github.com/dotlottie/player-component,"name: main
+on:
+  push:
+    branches:
+      - 'master'
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🛑 Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.9.0
+
+      - name: ⬇️ Checkout repo
+        uses: actions/checkout@v2
+
+      - name: ⎔ Setup pnpm@v8
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: ⎔ Setup Node@18
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: 📥 Download deps
+        run: pnpm install
+
+      - name: 🏗 Build
+        run: pnpm build
+
+      - name: 🔍 Verify types
+        run: pnpm type-check
+
+      - name: 💅 Verify format (`pnpm format` committed?)
+        run: pnpm format --check --no-write
+
+      - name: 🕵️ Lint
+        run: pnpm lint
+
+      - name: 🛡️ Test
+        run: pnpm test
+
+      - name: 📏 Report bundle size
+        uses: andresz1/size-limit-action@v1
+        continue-on-error: true
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+  release:
+    needs: validate
+    runs-on: ubuntu-latest
+    if: ${{ github.repository == 'dotlottie/player-component' && github.event_name == 'push' }}
+    steps:
+      - name: ⬇️ Checkout repo
+        uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
+
+      - name: ⎔ Setup pnpm@v8
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: ⎔ Setup Node@18
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: 📥 Download deps
+        run: pnpm install
+
+      - name: 🏗 Build
+        run: pnpm build
+
+      - name: 🚀 Release
+        uses: changesets/action@v1
+        with:
+          commit: 'chore: 🤖 update versions'
+          title: 'chore: 🤖 update versions'
+          publish: pnpm release:publish
+          version: pnpm release:version
+        env:
+          GITHUB_TOKEN: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPMJS_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPMJS_TOKEN }}
+
+      - name: 🌐Publish Playground
+        if: success()
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
+          publish_dir: ./apps/dotlottie-playground/dist
+",,,,,,TypeScript
+3439,https://github.com/eduardoborges/use-mask-input,"name: CI
+
+on:
+  pull_request_target:
+    branches:
+      - main
+      - beta
+    types:
+      - synchronize
+      - edited
+      - opened
+
+permissions:
+  pull-requests: write
+
+jobs:
+  semantic_pr:
+    runs-on: ""ubuntu-latest""
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Semantic Pull Request
+        uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
+  health_check:
+    needs: semantic_pr
+    runs-on: ""ubuntu-latest""
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [16, 18, 20]
+    env:
+      GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          cache: ""npm""
+          node-version: ${{ matrix.node }}
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Run Tests
+        run: npm run test
+
+      - name: Run Lint
+        run: npm run lint
+
+      - name: Run Build
+        run: npm run build
+",,,,,,TypeScript
