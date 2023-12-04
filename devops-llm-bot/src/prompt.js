@@ -19,10 +19,7 @@ const generateContent = (repoTree, languages, dependencies, user_comment, defaul
       ${repoTree}
 
       User requests:
-      ${user_comment}
-
-      Dependencies: 
-      ${dependencies}`
+      ${user_comment}`
 }
 
 const generateUpdateWorkflowContent = (old_workflow, user_comment, past_conversations) => {

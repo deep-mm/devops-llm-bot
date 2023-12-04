@@ -113,6 +113,35 @@ const getPreviousConversations = async (context, owner, repo, issue_number) => {
     return comments;
 }
 
+/*
+def get_folder_structure_as_string(folder_structure):
+    folder_structure_string = ""
+    for path in folder_structure:
+        segments = path.split('/')
+        indent = '    ' * (len(segments) - 1)
+        folder_structure_string += f"{indent}| - {segments[-1]}\n"
+    return folder_structure_string
+
+
+def get_recursive_repository_tree(repository_identifier, branch='main'):
+    max_depth = 3
+    response = requests.get(f'https://api.github.com/repos/{repository_identifier}/git/trees/{branch}?recursive=1', headers=Helper.get_github_headers())
+    data = response.json()
+
+    if response.status_code == 200:
+        tree_data = response.json().get('tree', [])
+        folder_structure = [
+            entry['path'] for entry in tree_data
+            if len(entry['path'].split('/')) <= max_depth
+        ]
+    else:
+        print(f"Failed to fetch tree: {data['message']}")
+        folder_structure = []
+        
+    return get_folder_structure_as_string(folder_structure)
+*/
+// Convert above python script to js
+
 module.exports = {
     createIssueComment,
     getDefaultBranch,
