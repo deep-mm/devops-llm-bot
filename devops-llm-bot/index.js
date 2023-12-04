@@ -1,5 +1,5 @@
 const { generate_pipeline, update_pipeline } = require("./src/chat-gpt");
-const { createIssueComment, getDefaultBranch, createBranch, getLanguages, getRepositoryTree, getDependencies, getFileDetails, getPreviousConversations } = require("./src/github");
+const { createIssueComment, getDefaultBranch, createBranch, getLanguages, getRepositoryTree, getDependencies, getFileDetails, getPreviousConversations, getRecursiveRepositoryTree } = require("./src/github");
 
 /**
  * This is the main entrypoint to your Probot app
@@ -25,7 +25,7 @@ module.exports = (app) => {
       await createBranch(context, owner, repo, branch, default_branch);
 
       // Get the repository tree
-      const repoTree = await getRepositoryTree(context, owner, repo, default_branch);
+      const repoTree = await getRecursiveRepositoryTree(context, owner, repo, default_branch);
   
       // Get languages used in the repo
       const languages_array = await getLanguages(context, owner, repo);

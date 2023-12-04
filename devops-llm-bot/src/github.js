@@ -141,6 +141,41 @@ def get_recursive_repository_tree(repository_identifier, branch='main'):
     return get_folder_structure_as_string(folder_structure)
 */
 // Convert above python script to js
+const getFolderStructureAsString = (folder_structure) => {
+    // Remove all undefined values
+    folder_structure = folder_structure.filter((item) => {
+        return item != undefined;
+    });
+    let folder_structure_string = "";
+    for (let path of folder_structure) {
+        let segments = path.split('/');
+        let indent = '    '.repeat(segments.length - 1);
+        folder_structure_string += `${indent}| - ${segments[segments.length - 1]}\n`;
+    }
+    return folder_structure_string;
+}
+
+const getRecursiveRepositoryTree = async (context, owner, repo, branch) => {
+    const max_depth = 3;
+    const response = await context.octokit.git.getTree({
+        repo,
+        owner,
+        tree_sha: "heads/" + branch,
+        recursive: 1,
+    });
+
+    if (response.status == 200) {
+        const tree_data = response.data.tree;
+        const folder_structure = tree_data.map((entry) => {
+            if (entry.path.split('/').length <= max_depth) {
+                return entry.path;
+            }
+        });
+        return getFolderStructureAsString(folder_structure);
+    } else {
+        return "";
+    }
+}
 
 module.exports = {
     createIssueComment,
@@ -151,4 +186,5 @@ module.exports = {
     getDependencies,
     getFileDetails,
     getPreviousConversations,
+    getRecursiveRepositoryTree
 }
