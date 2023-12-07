@@ -1,0 +1,28 @@
+name: Build and Test
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build_and_test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '3.1.x' # Specify the .NET Core version
+
+    - name: Restore dependencies
+      run: dotnet restore NetDevPack.Identity.sln
+
+    - name: Build
+      run: dotnet build NetDevPack.Identity.sln --configuration Release --no-restore
+
+    - name: Test
+      run: dotnet test NetDevPack.Identity.sln --no-build --verbosity normal

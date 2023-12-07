@@ -1,0 +1,24 @@
+name: Build and Test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-and-test-job:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+    - name: Setup .NET Core SDK
+      uses: actions/setup-dotnet@v2
+      with:
+        dotnet-version: '6.0.x'
+    - name: Restore Dependencies
+      run: dotnet restore ./Source/Pablo.sln
+    - name: Build
+      run: dotnet build ./Source/Pablo.sln --configuration Release --no-restore
+    - name: Test
+      run: dotnet test ./Source/Pablo.UnitTests/Pablo.UnitTests.csproj --no-build --verbosity normal

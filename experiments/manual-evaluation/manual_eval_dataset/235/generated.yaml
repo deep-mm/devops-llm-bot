@@ -1,0 +1,50 @@
+name: Build and Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up CMake
+        uses: lukka/get-cmake@v4.1.2
+
+      - name: Create Build Directory
+        run: mkdir build && cd build
+
+      - name: Configure CMake
+        run: cmake .. -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: cmake --build .
+
+  test:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up CMake
+        uses: lukka/get-cmake@v4.1.2
+
+      - name: Create Build Directory
+        run: mkdir build && cd build
+
+      - name: Configure CMake
+        run: cmake .. -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build Tests
+        run: cmake --build . --target smmalloc_test
+
+      - name: Run Tests
+        run: ./smmalloc_test

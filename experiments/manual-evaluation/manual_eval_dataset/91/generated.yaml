@@ -1,0 +1,28 @@
+name: Build and Test
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v2
+        with:
+          dotnet-version: '6.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore NETCore.Encrypt.sln
+
+      - name: Build solution
+        run: dotnet build NETCore.Encrypt.sln --configuration Release --no-restore
+
+      - name: Run tests
+        if: github.event_name == 'push' || github.event_name == 'pull_request'
+        run: dotnet test ./test/NETCore.Encrypt.Tests/NETCore.Encrypt.Tests.csproj --no-build --verbosity normal

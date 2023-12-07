@@ -1,0 +1,2 @@
+Repository Link: https://github.com/idered/typescript-expect-plugin
+Index: 258

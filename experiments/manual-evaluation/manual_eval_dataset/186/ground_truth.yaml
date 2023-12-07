@@ -1,0 +1,51 @@
+name: Build and Test
+on: push
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 16.x
+      - name: install
+        run: yarn
+      - name: lint
+        run: yarn lint
+      - name: build
+        run: yarn build
+      - name: pack
+        run: yarn pack
+      - uses: actions/upload-artifact@v2
+        with:
+          name: creevey
+          path: creevey-*.tgz
+  tests:
+    name: Tests
+    runs-on: ubuntu-latest
+    env:
+      BROWSERSTACK_USERNAME: ${{ secrets.BROWSERSTACK_USERNAME }}
+      BROWSERSTACK_ACCESS_KEY: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          lfs: true
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 16.x
+      - name: checkout lfs
+        run: git lfs checkout
+      - name: install
+        run: yarn
+      - name: unit tests
+        run: yarn test:unit
+      - name: storybook
+        run: yarn start:storybook &
+      - name: creevey
+        run: yarn creevey:github
+      - uses: actions/upload-artifact@v2
+        with:
+          name: report
+          path: report/

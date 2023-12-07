@@ -1,0 +1,23 @@
+name: Build and Test
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+    - name: Check out code
+      uses: actions/checkout@v3
+
+    - name: Set up environment
+      run: . ./firmware/setup_esp_idf.bash
+
+    - name: Build the firmware
+      run: make -C ./firmware
+
+    - name: Run tests (if present)
+      run: make -C ./sdk/master_board_sdk test
+      if: success()

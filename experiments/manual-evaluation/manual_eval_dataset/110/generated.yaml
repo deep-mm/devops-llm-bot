@@ -1,0 +1,31 @@
+name: Build and Test
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check out code
+      uses: actions/checkout@v3
+    
+    - name: Set up JDK 11
+      uses: actions/setup-java@v3
+      with:
+        java-version: '11'
+        distribution: 'temurin'
+        cache: maven
+
+    - name: Build with Maven
+      run: mvn -B clean install --file pom.xml --no-transfer-progress
+
+    - name: Run tests in 'model' module
+      run: mvn -B test --file model/pom.xml --no-transfer-progress
+
+    - name: Run tests in 'view' module
+      run: mvn -B test --file view/pom.xml --no-transfer-progress

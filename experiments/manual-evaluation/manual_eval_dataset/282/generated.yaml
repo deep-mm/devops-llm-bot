@@ -1,0 +1,46 @@
+name: CI Build and Test
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up CMake
+      uses: lukka/get-cmake@latest
+
+    - name: Create Build Directory
+      run: mkdir build
+
+    - name: Configure CMake
+      run: cmake -B build -S .
+
+    - name: Build
+      run: cmake --build build
+
+  test:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up CMake
+      uses: lukka/get-cmake@latest
+
+    - name: Create Build Directory
+      run: mkdir -p build
+
+    - name: Configure CMake
+      run: cmake -B build -S .
+
+    - name: Build
+      run: cmake --build build
+
+    - name: Test
+      run: ctest --test-dir build

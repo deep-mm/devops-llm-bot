@@ -1,0 +1,46 @@
+name: Run Tests
+
+on:
+  push:
+  pull_request:
+    branches: [master]
+
+jobs:
+  build:
+    name: "(${{ matrix.os }})"
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macOS-latest]
+        node-version: [16.x]
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node v${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Setup XVFB
+        if: matrix.os == 'ubuntu-latest'
+        run: Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
+
+      - name: Setup ubuntu
+        if: matrix.os == 'ubuntu-latest'
+        run: sudo apt-get install -y xclip
+
+      - name: npm install
+        run: npm install
+
+      - name: npm lint
+        run: npm run lint
+
+      - name: npm test
+        run: npm test
+        env:
+          CI: true
+          ELECTRON_NO_ATTACH_CONSOLE: 1
+          DISPLAY: ":99.0"

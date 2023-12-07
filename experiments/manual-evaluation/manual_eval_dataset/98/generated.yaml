@@ -1,0 +1,28 @@
+name: Build and Test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build_and_test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v2
+        with:
+          dotnet-version: '6.0.x' # Specify the .NET version
+
+      - name: Restore dependencies
+        run: dotnet restore Polly-Samples.sln
+
+      - name: Build
+        run: dotnet build Polly-Samples.sln --no-restore
+
+      - name: Test
+        run: dotnet test Polly-Samples.sln --no-build --verbosity normal

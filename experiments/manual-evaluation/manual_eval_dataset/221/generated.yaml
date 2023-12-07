@@ -1,0 +1,34 @@
+name: Build and Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build_and_test:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v2
+
+    - name: Install .NET Core SDK
+      run: wget https://dot.net/v1/dotnet-install.sh && bash dotnet-install.sh
+
+    - name: Build Solution (Divergent.CompositionGateway.sln)
+      run: dotnet build demos/asp-net-core/Divergent.CompositionGateway.sln --configuration Release
+
+    - name: Test Solution (Divergent.CompositionGateway.sln)
+      run: dotnet test demos/asp-net-core/Divergent.CompositionGateway.sln --configuration Release
+
+    - name: Build Solution (Divergent.Website.sln)
+      run: dotnet build demos/asp-net-core/Divergent.Website.sln --configuration Release
+
+    - name: Test Solution (Divergent.Website.sln)
+      run: dotnet test demos/asp-net-core/Divergent.Website.sln --configuration Release
+
+    - name: Build Shared API Gateway Project
+      run: dotnet build exercises/shared-api-gateway/ITOps.ViewModelComposition.Gateway/ --configuration Release

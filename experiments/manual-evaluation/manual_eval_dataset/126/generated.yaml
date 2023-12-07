@@ -1,0 +1,40 @@
+name: Build and Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repo
+      uses: actions/checkout@v2
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '14'
+
+    - name: Install Dependencies
+      run: npm install
+
+    - name: Lint Code
+      run: npm run lint
+      if: contains(github.event.push.changed_files, '.eslintrc.json') || contains(github.event.pull_request.changed_files, '.eslintrc.json')
+
+    - name: Build Client
+      run: npm run build:client
+      if: contains(github.event.push.changed_files, 'client.js') || contains(github.event.pull_request.changed_files, 'client.js') || contains(github.event.push.changed_files, 'cli/') || contains(github.event.pull_request.changed_files, 'cli/')
+
+    - name: Build Server
+      run: npm run build:server
+      if: contains(github.event.push.changed_files, 'server.js') || contains(github.event.pull_request.changed_files, 'server.js') || contains(github.event.push.changed_files, 'cli/') || contains(github.event.pull_request.changed_files, 'cli/')
+
+    - name: Run Tests
+      run: npm test

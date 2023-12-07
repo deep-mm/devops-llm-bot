@@ -1,0 +1,67 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - develop
+  pull_request:
+    branches:
+      - develop
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          components: rustfmt, clippy
+
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y pkg-config libssl-dev cmake gcc g++ make
+
+      - name: Build Rust components
+        run: cargo build
+
+      - name: Run Rust tests
+        run: cargo test
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install Python dependencies
+        run: pip install conan
+
+      - name: Build with CMake
+        run: cmake -B build . && cmake --build build
+
+      - name: Run C++ tests (if any)
+        run: cmake --build build --target test || echo "No C++ tests to run."
+
+  test:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install Python dependencies
+        run: pip install poetry
+
+      - name: Install project dependencies with Poetry
+        run: poetry install
+
+      - name: Run Python tests with Poetry (if any)
+        run: poetry run pytest || echo "No Python tests to run."

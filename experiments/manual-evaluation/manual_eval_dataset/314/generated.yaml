@@ -1,0 +1,25 @@
+name: Build and Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '3.1.x' # Specify the .NET Core version
+    - name: Restore dependencies
+      run: dotnet restore GodotInk.csproj
+    - name: Build
+      run: dotnet build GodotInk.csproj --configuration Release --no-restore
+    - name: Test
+      run: dotnet test GodotInk.csproj --no-build --verbosity normal

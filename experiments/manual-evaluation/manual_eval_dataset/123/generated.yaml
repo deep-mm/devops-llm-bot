@@ -1,0 +1,43 @@
+name: Build and Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout the repository
+      - uses: actions/checkout@v3
+
+      # Setup .NET Core SDK
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v2
+        with:
+          dotnet-version: '6.0.x'
+
+      # Build .NET applications
+      - name: Build with dotnet
+        run: dotnet build --configuration Release
+
+  test:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout the repository
+      - uses: actions/checkout@v3
+
+      # Setup .NET Core SDK
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v2
+        with:
+          dotnet-version: '6.0.x'
+
+      # Run unit tests if present
+      - name: Run tests with dotnet test
+        run: dotnet test --no-build --verbosity normal

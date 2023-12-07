@@ -1,0 +1,30 @@
+name: Build and Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build-and-test:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v2
+        with:
+          dotnet-version: '3.1.x' # Specify the .NET Core version
+
+      - name: Restore dependencies
+        run: dotnet restore PoshSec.Framework.Test/PoshSec.Framework.Test.csproj
+
+      - name: Build the project
+        run: dotnet build poshsecframework.sln --configuration Release --no-restore
+
+      - name: Run tests
+        run: dotnet test PoshSec.Framework.Test/PoshSec.Framework.Test.csproj --no-build --verbosity normal

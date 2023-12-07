@@ -1,0 +1,35 @@
+name: Build and Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '16'
+
+    - name: Install Dependencies
+      run: npm install
+
+    - name: Check Code Style (Lint)
+      run: npm run lint
+      if: contains(github.event.head_commit.message, '[lint]') || github.event_name == 'pull_request'
+
+    - name: Test
+      run: npm test
+
+    - name: Build
+      run: npm run build
+      if: contains(github.event.head_commit.message, '[build]') || github.event_name == 'pull_request'

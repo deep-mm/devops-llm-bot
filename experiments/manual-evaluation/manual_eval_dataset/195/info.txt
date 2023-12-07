@@ -1,0 +1,2 @@
+Repository Link: https://github.com/tb/ng2-nouislider
+Index: 195

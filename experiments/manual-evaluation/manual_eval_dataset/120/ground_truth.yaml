@@ -1,0 +1,70 @@
+name: Build project
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+    container: registry.fedoraproject.org/fedora:latest
+    steps:
+      - name: Update and install packages
+        run: |
+          dnf -y update
+          dnf -y install pkgconf-pkg-config which cmake ninja-build make nasm qt6-qtwebsockets-devel hidapi-devel zlib-devel libpng-devel SDL2_net-devel wget zip git ShellCheck
+      - uses: actions/checkout@v3
+      - name: Check shell scripts
+        run: |
+          shellcheck -o all build.sh clean.sh link-mac.sh pull_repos.sh
+      - name: Run build script
+        run: |
+          git config --global --add safe.directory /__w/simple64/simple64
+          ./build.sh
+  build-windows:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v3
+      - uses: msys2/setup-msys2@v2
+        with:
+          update: true
+          install: >-
+            make
+            mingw-w64-x86_64-cmake
+            mingw-w64-x86_64-gcc
+            mingw-w64-x86_64-hidapi
+            mingw-w64-x86_64-freetype
+            mingw-w64-x86_64-libpng
+            mingw-w64-x86_64-SDL2
+            mingw-w64-x86_64-SDL2_net
+            mingw-w64-x86_64-qt6
+            mingw-w64-x86_64-python3-pip
+            mingw-w64-x86_64-python3-pyopenssl
+            mingw-w64-x86_64-nasm
+            git
+            zip
+      - name: Run build script
+        run: msys2 -c 'export SIMPLE64_AUTOUPDATE=1; ./build.sh'
+      - name: Upload zip
+        uses: actions/upload-artifact@v3
+        with:
+          name: simple64-win64
+          path: simple64-*.zip
+  build-mac:
+    runs-on: macos-11
+    steps:
+      - uses: actions/checkout@v3
+      - name: brew update
+        run: |
+          brew update
+          brew upgrade || true
+          brew install hidapi sdl2_net sdl2 ninja molten-vk vulkan-loader qt@6
+      - name: Run build script
+        run: |
+          sudo sh ./build.sh
+      - name: Upload dmg
+        uses: actions/upload-artifact@v3
+        with:
+          name: simple64-osx
+          path: simple64/simple64-*.dmg

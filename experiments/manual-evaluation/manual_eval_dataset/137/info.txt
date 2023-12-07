@@ -1,0 +1,2 @@
+Repository Link: https://github.com/journeyapps/zxing-android-embedded
+Index: 137

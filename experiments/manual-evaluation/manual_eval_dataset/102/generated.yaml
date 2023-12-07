@@ -1,0 +1,23 @@
+name: Build and Test
+
+on: [push, pull_request]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '3.1.x'
+
+    - name: Restore dependencies
+      run: dotnet restore C5.sln
+
+    - name: Build
+      run: dotnet build --no-restore -c Release C5.sln
+
+    - name: Test
+      run: dotnet test --no-build -c Release C5.Tests/C5.Tests.csproj

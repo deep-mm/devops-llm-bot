@@ -1,0 +1,53 @@
+name: Build and Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '16'
+
+    - name: Install dependencies (JavaScript)
+      run: npm ci
+      working-directory: ./js
+
+    - name: Build JavaScript
+      run: npm run build
+      working-directory: ./js
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
+
+    - name: Install dependencies (WASM)
+      run: pip install -r wasm/requirements.txt
+      if: ${{ always() }}
+
+    - name: Build WASM
+      run: bash wasm/build_all_wasm.sh
+      if: ${{ always() }}
+
+    - name: Run tests (JavaScript)
+      run: npm test
+      working-directory: ./js
+
+    - name: Run tests (WASM)
+      run: |
+        # Add commands here to run WASM tests if they exist
+        echo "No WASM test commands provided."
+      if: ${{ always() }}

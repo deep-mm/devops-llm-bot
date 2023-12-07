@@ -1,0 +1,29 @@
+name: Build and Test
+
+on:
+  push:
+    branches:
+      - ros2
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up ROS environment
+        uses: ros-tooling/setup-ros@v0.2
+
+      - name: Install dependencies
+        run: sudo apt update && rosdep install --from-paths src --ignore-src --rosdistro $ROS_DISTRO -y
+
+      - name: Build the project
+        run: colcon build
+
+      - name: Source the setup script
+        run: source install/local_setup.bash
+
+      - name: Run tests
+        if: contains(github.event.head_commit.modified, 'test')
+        run: colcon test && colcon test-result --verbose

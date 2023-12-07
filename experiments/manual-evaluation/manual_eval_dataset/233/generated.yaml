@@ -1,0 +1,30 @@
+name: Build and Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v2
+      with:
+        dotnet-version: '5.0.x'
+
+    - name: Restore dependencies
+      run: dotnet restore src/Ametista.sln
+
+    - name: Build
+      run: dotnet build src/Ametista.sln --no-restore
+
+    - name: Run tests
+      run: dotnet test src/Ametista.sln --no-build --verbosity normal

@@ -1,0 +1,33 @@
+name: Python CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+
+    - name: Install dependencies
+      run: |
+        pip install poetry
+        poetry install
+
+    - name: Lint with pylint
+      run: |
+        pip install pylint
+        pylint gaps/*.py
+
+    - name: Run tests
+      run: |
+        poetry run pytest tests/

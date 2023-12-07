@@ -1,0 +1,34 @@
+name: CI Build and Test
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python 3.x
+      uses: actions/setup-python@v3
+      with:
+        python-version: '3.x'
+    - name: Install Dependencies
+      run: pip install -r requirements.txt
+    - name: Run Build
+      run: python setup.py build
+  test:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python 3.x
+      uses: actions/setup-python@v3
+      with:
+        python-version: '3.x'
+    - name: Install Dependencies
+      run: pip install -r requirements.txt
+    - name: Run Tests
+      run: pytest tests/

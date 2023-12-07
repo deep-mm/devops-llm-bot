@@ -1,0 +1,35 @@
+name: CI Build and Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build_and_test:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '3.1.x'
+
+    - name: Restore dependencies
+      run: dotnet restore src/CrystalQuartz.sln
+
+    - name: Build solution
+      run: dotnet build src/CrystalQuartz.sln --configuration Release --no-restore
+
+    - name: Run tests (if present)
+      run: |
+        dotnet test src/CrystalQuartz.Application.Tests/CrystalQuartz.Application.Tests.csproj --no-restore --verbosity normal
+        dotnet test src/CrystalQuartz.Core.Quartz2.Tests/CrystalQuartz.Core.Quartz2.Tests.csproj --no-restore --verbosity normal
+        dotnet test src/CrystalQuartz.Core.Quartz3.Tests/CrystalQuartz.Core.Quartz3.Tests.csproj --no-restore --verbosity normal
+        dotnet test src/CrystalQuartz.Core.Tests/CrystalQuartz.Core.Tests.csproj --no-restore --verbosity normal
+        dotnet test src/CrystalQuartz.WebFramework.Tests/CrystalQuartz.WebFramework.Tests.csproj --no-restore --verbosity normal

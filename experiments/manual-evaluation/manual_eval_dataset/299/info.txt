@@ -1,0 +1,2 @@
+Repository Link: https://github.com/easynetq/easynetq.management.client
+Index: 299

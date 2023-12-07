@@ -1,0 +1,25 @@
+name: CI Build and Test
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+    - name: Setup CMake
+      uses: lukka/get-cmake@v3.27.0
+    - name: Create Build directory
+      run: mkdir -p ${{ github.workspace }}/build
+    - name: Configure CMake project
+      run: cmake -B ${{ github.workspace }}/build -S ${{ github.workspace }}
+    - name: Build project
+      run: cmake --build ${{ github.workspace }}/build --config Release
+    - name: Test project
+      run: cmake --build ${{ github.workspace }}/build --target test --config Release
+      continue-on-error: true

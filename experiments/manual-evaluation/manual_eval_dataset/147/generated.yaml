@@ -1,0 +1,29 @@
+name: Build and Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v2
+      with:
+        dotnet-version: '5.0.x' # Define the .NET version (modify as needed)
+    - name: Restore dependencies
+      run: dotnet restore
+    - name: Build solution
+      run: dotnet build --no-restore -c Release
+    - name: Run tests (Unit Tests)
+      run: dotnet test tests/Clean.Architecture.UnitTests/Clean.Architecture.UnitTests.csproj --no-build -c Release
+    - name: Run tests (Integration Tests)
+      run: dotnet test tests/Clean.Architecture.IntegrationTests/Clean.Architecture.IntegrationTests.csproj --no-build -c Release
+    - name: Run tests (Functional Tests)
+      run: dotnet test tests/Clean.Architecture.FunctionalTests/Clean.Architecture.FunctionalTests.csproj --no-build -c Release

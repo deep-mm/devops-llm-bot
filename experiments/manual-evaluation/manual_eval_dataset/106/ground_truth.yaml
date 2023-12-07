@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        java: [ '8', '11', '17', '18' ]
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup Java
+      uses: actions/setup-java@v1
+      with:
+        java-version: ${{ matrix.java }}
+    - name: Build with Gradle
+      run: ./gradlew build
+
+  validateGradleWrapper:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - uses: gradle/wrapper-validation-action@v1.0.4
+
+  publishCoverage:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup Java
+      uses: actions/setup-java@v1
+      with:
+        java-version: 8
+    - name: Build with Gradle
+      run: ./gradlew jacocoTestReport
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v1
+      with:
+        files: ./build/reports/jacoco/test/jacocoTestReport.xml
+        name: codecov

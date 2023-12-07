@@ -1,0 +1,36 @@
+name: Build and Test
+
+on:
+  push:
+    branches: [ ros2 ]
+  pull_request:
+    branches: [ ros2 ]
+
+jobs:
+  build_and_test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up ROS 2 environment
+      uses: ros-tooling/setup-ros@v0.2
+
+    - name: Install dependencies with rosdep
+      run: |
+        rosdep update
+        rosdep install --from-paths src --ignore-src -r -y
+
+    - name: Build with colcon
+      run: colcon build --symlink-install
+
+    - name: Test with colcon
+      run: colcon test --return-code-on-test-failure
+
+    - name: Upload test results
+      if: always()
+      uses: actions/upload-artifact@v2
+      with:
+        name: test-results
+        path: ./log

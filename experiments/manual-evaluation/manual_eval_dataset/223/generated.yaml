@@ -1,0 +1,36 @@
+name: Build and Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up CMake
+      uses: lukka/get-cmake@v3.21.1
+
+    - name: Create build directory
+      run: mkdir build
+
+    - name: Configure CMake
+      run: cmake -B build -S .
+
+    - name: Build project
+      run: cmake --build build
+
+    - name: Test project
+      run: |
+        if [ -d "build" ]; then
+          cd build
+          ctest
+        fi

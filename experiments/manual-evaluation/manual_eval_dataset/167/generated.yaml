@@ -1,0 +1,43 @@
+name: Build and Test Application
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-test-client:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./client
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 16
+    - name: Install client dependencies
+      run: npm install
+    - name: Build client application
+      run: npm run build
+    - name: Run client tests
+      run: npm test
+  build-and-test-server:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./server
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 16
+    - name: Install server dependencies
+      run: npm install
+    - name: Run server tests
+      run: npm test

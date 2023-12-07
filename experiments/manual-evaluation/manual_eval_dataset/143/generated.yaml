@@ -1,0 +1,31 @@
+name: Build and Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '6.0.x' # Specify the .NET version needed
+
+    - name: Restore dependencies
+      run: dotnet restore Orleans.Clustering.Kubernetes.sln
+
+    - name: Build
+      run: dotnet build Orleans.Clustering.Kubernetes.sln --no-restore -c Release
+
+    - name: Run tests
+      run: dotnet test test/Orleans.Clustering.Kubernetes.Test/Orleans.Clustering.Kubernetes.Test.csproj --no-build -c Release

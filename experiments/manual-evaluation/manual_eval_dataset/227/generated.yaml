@@ -1,0 +1,32 @@
+name: Build and Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build_and_test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '16'
+
+    - name: Install Dependencies
+      run: npm install
+
+    - name: Build Application
+      run: npm run build
+      if: success() && contains(github.event.workflow_run.files, 'package.json') && contains(github.event.workflow_run.files, 'index.js')
+
+    - name: Run Tests
+      run: npm test
+      if: success() && contains(github.event.workflow_run.files, 'test/')

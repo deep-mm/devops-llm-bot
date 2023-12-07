@@ -1,0 +1,40 @@
+name: Build and Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+
+      - name: Build with Maven
+        run: mvn --batch-mode --update-snapshots clean install
+
+      - name: Run tests (structr-core module)
+        run: mvn --batch-mode test --file structr-core/pom.xml
+
+      - name: Run tests (structr-db-driver-api module)
+        run: mvn --batch-mode test --file structr-db-driver-api/pom.xml
+
+      - name: Run tests (structr-memory-driver module)
+        run: mvn --batch-mode test --file structr-memory-driver/pom.xml
+
+      - name: Run tests (structr-rest module)
+        run: mvn --batch-mode test --file structr-rest/pom.xml
+
+      - name: Run tests (structr-ui module)
+        run: mvn --batch-mode test --file structr-ui/pom.xml

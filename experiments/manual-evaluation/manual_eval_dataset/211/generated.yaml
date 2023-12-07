@@ -1,0 +1,42 @@
+name: CI Workflow
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Arduino CLI
+      run: |
+        curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | BINDIR=$HOME/bin sh
+        echo "$HOME/bin" >> $GITHUB_PATH
+    - name: Update index files
+      run: arduino-cli core update-index
+    - name: Install Arduino AVR core
+      run: arduino-cli core install arduino:avr
+    - name: Build Arduino Examples
+      run: |
+        arduino-cli compile --fqbn arduino:avr:uno examples/CustomMatrix
+        arduino-cli compile --fqbn arduino:avr:uno examples/HowToUse
+        arduino-cli compile --fqbn arduino:avr:uno examples/References
+        arduino-cli compile --fqbn arduino:avr:uno examples/SolveLinearEquations
+        arduino-cli compile --fqbn arduino:avr:uno examples/Tensor
+    - name: Set up CMake
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y cmake
+    - name: Build Test
+      run: |
+        mkdir test/build
+        cd test/build
+        cmake ..
+        make
+    - name: Run Test
+      run: ./test/build/test_basic_linear_algebra

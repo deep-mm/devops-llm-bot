@@ -1,0 +1,2 @@
+Repository Link: https://github.com/manekinekko/angular-web-bluetooth
+Index: 45

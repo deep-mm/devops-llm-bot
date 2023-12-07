@@ -1,0 +1,37 @@
+name: Build and Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build_and_test:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Setup Node.js environment
+      uses: actions/setup-node@v3
+      with:
+        node-version: '16'
+
+    - name: Install npm dependencies
+      run: npm install
+      working-directory: ./js
+
+    - name: Run build
+      run: npm run build
+      working-directory: ./js
+
+    - name: Run webpack
+      run: npm run webpack
+      working-directory: ./js
+
+    - name: Run tests
+      run: npm test
+      working-directory: ./js

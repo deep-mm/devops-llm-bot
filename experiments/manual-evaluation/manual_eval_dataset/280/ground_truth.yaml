@@ -1,0 +1,58 @@
+# This workflow will build a Java project with Gradle
+# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-gradle
+
+name: Java CI with Gradle
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+    - name: Set up JDK 17
+      uses: actions/setup-java@v2
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+    - name: Build with Gradle
+      run: ./gradlew build
+    - name: Upload documentation
+      uses: actions/upload-artifact@v2.2.2
+      with:
+        name: Chunky Docs
+        path: build/docs/
+    - name: Build release jar
+      env:
+        PR_NUMBER: ${{ github.event.pull_request.number }}
+      run: |
+        case "${GITHUB_EVENT_NAME}" in
+          "pull_request")
+            ./gradlew buildReleaseJar -PprereleaseTag="PR.${PR_NUMBER}"
+            ;;
+          "push")
+            ./gradlew buildReleaseJar -PprereleaseTag="SNAPSHOT"
+            ;;
+          *)
+            ./gradlew buildReleaseJar
+            ;;
+        esac
+    - name: Upload build
+      uses: actions/upload-artifact@v2.2.2
+      with:
+        name: Chunky Build
+        path: build/installer
+    - name: Upload build
+      uses: actions/upload-artifact@v2.2.2
+      with:
+        name: Chunky Core
+        path: build/chunky-core-*.jar

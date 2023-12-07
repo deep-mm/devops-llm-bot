@@ -1,0 +1,2 @@
+Repository Link: https://github.com/vanniktech/gradle-code-quality-tools-plugin
+Index: 149

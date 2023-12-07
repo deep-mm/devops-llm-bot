@@ -1,0 +1,30 @@
+name: Build and Test
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '16'
+
+    - name: Install Dependencies
+      run: yarn install
+
+    - name: Build
+      run: yarn build
+
+    - name: Run Tests
+      run: yarn test
+      if: 
+        github.event_name == 'pull_request' || contains(github.event.head_commit.message, '#test')

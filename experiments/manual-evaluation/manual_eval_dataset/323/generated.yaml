@@ -1,0 +1,42 @@
+name: Build and Test
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v2
+
+    - name: Set up JDK 11
+      uses: actions/setup-java@v2
+      with:
+        java-version: '11'
+        distribution: 'adopt'
+
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+
+    - name: Build aat-android
+      run: ./gradlew assembleDebug --project-dir aat-android
+
+    - name: Test aat-android
+      run: ./gradlew test --project-dir aat-android
+
+    - name: Build aat-gtk
+      run: ./gradlew build --project-dir aat-gtk
+
+    - name: Test aat-gtk
+      run: ./gradlew test --project-dir aat-gtk
+
+    - name: Build aat-lib
+      run: ./gradlew build --project-dir aat-lib
+
+    - name: Test aat-lib
+      run: ./gradlew test --project-dir aat-lib

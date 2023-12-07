@@ -1,0 +1,29 @@
+name: CI Build and Test
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Install Dependencies
+        run: sudo apt-get update && sudo apt-get install -y qt5-default
+
+      - name: Set up Qt environment
+        run: echo "QT_QPA_PLATFORM=offscreen" >> $GITHUB_ENV
+
+      - name: Configure Project with qmake
+        run: qmake JAERO/JAERO.pro
+
+      - name: Build Project
+        run: make
+
+      - name: Run Tests
+        run: make check

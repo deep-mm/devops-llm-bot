@@ -1,0 +1,30 @@
+name: Build and Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v2
+        with:
+          dotnet-version: '6.0.x'
+      - name: Restore dependencies
+        run: dotnet restore Source/EasyNetQ.Management.Client.sln
+      - name: Build solution
+        run: dotnet build Source/EasyNetQ.Management.Client.sln --configuration Release --no-restore
+      - name: Run tests (Approval Tests)
+        run: dotnet test Source/EasyNetQ.Management.Client.ApprovalTests/EasyNetQ.Management.Client.ApprovalTests.csproj --no-restore --verbosity normal
+      - name: Run tests (Integration Tests)
+        run: dotnet test Source/EasyNetQ.Management.Client.IntegrationTests/EasyNetQ.Management.Client.IntegrationTests.csproj --no-restore --verbosity normal
+      - name: Run tests (Unit Tests)
+        run: dotnet test Source/EasyNetQ.Management.Client.Tests/EasyNetQ.Management.Client.Tests.csproj --no-restore --verbosity normal

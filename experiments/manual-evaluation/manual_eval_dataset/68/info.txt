@@ -1,0 +1,2 @@
+Repository Link: https://github.com/vercel/uid-promise
+Index: 68

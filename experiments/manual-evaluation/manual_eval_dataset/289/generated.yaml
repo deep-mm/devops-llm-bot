@@ -1,0 +1,33 @@
+name: Build and Test
+
+on: [push, pull_request]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        configuration: [Debug, Release]
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v2
+      with:
+        dotnet-version: '6.0.x'
+
+    - name: Restore dependencies
+      run: dotnet restore AdvanceDLSupport.sln
+
+    - name: Build
+      run: dotnet build --no-restore --configuration ${{ matrix.configuration }} AdvanceDLSupport.sln
+
+    - name: Run tests (AdvancedDLSupport.Tests)
+      run: dotnet test --no-build --verbosity normal --configuration ${{ matrix.configuration }} Tests/AdvancedDLSupport.Tests/AdvancedDLSupport.Tests.csproj
+
+    - name: Run tests (AdvancedDLSupport.AOT.Tests)
+      run: dotnet test --no-build --verbosity normal --configuration ${{ matrix.configuration }} Tests/AdvancedDLSupport.AOT.Tests/AdvancedDLSupport.AOT.Tests.csproj
+
+    - name: Run tests (Mono.DllMap.Tests)
+      run: dotnet test --no-build --verbosity normal --configuration ${{ matrix.configuration }} Tests/Mono.DllMap.Tests/Mono.DllMap.Tests.csproj

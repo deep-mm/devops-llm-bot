@@ -1,0 +1,32 @@
+name: Build and Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Setup Node.js environment
+      uses: actions/setup-node@v1
+      with:
+        node-version: '16'
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Build
+      run: npm run build
+      if: contains(github.event.head_commit.message, '[build]') || contains(toJSON(github.event.commits.*.message), '[build]')
+
+    - name: Run tests
+      run: npm test
+      if: contains(github.event.head_commit.message, '[test]') || contains(toJSON(github.event.commits.*.message), '[test]')

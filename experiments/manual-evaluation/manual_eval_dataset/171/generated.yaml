@@ -1,0 +1,30 @@
+name: Build and Test Application
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v3
+      with:
+        python-version: '3.9'
+
+    - name: Install dependencies
+      run: |
+        pip install -r requirements.txt
+        python setup.py install
+
+    - name: Build
+      run: python setup.py build
+
+    - name: Run tests
+      run: python -m unittest discover spacymoji/tests

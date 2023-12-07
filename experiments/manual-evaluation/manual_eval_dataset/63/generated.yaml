@@ -1,0 +1,35 @@
+name: Build and Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up CMake
+        uses: lukka/get-cmake@v3.21.3
+
+      - name: Create build directory
+        run: mkdir build
+
+      - name: Change to build directory
+        run: cd build
+
+      - name: Configure CMake
+        run: cmake .. -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: cmake --build .
+
+      - name: Test
+        run: ctest -C Release

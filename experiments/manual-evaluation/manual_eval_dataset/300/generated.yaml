@@ -1,0 +1,25 @@
+name: C/C++ CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup Conan
+      run: pip install conan
+    - name: Create Build Directory
+      run: mkdir build && cd build
+    - name: Install dependencies with Conan
+      run: conan install ..
+    - name: Configure CMake
+      run: cmake .. -DCMAKE_BUILD_TYPE=Release
+    - name: Build
+      run: cmake --build .
+    - name: Test
+      run: ctest --output-on-failure

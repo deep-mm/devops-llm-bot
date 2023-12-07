@@ -1,0 +1,28 @@
+name: .NET Build and Test
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+    - name: Checkout Repo
+      uses: actions/checkout@v3
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v2
+      with:
+        dotnet-version: '6.0.x' # Modify to match your project's requirements
+
+    - name: Restore dependencies
+      run: dotnet restore KeyNStroke/KeyNStroke.csproj
+
+    - name: Build
+      run: dotnet build KeyNStroke/KeyNStroke.csproj --configuration Release --no-restore
+
+    - name: Run tests
+      run: dotnet test KeyNStroke/KeyNStroke.csproj --no-restore --verbosity normal

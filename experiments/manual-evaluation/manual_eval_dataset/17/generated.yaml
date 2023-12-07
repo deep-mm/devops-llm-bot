@@ -1,0 +1,33 @@
+name: Build and Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '14'
+
+    - name: Install Dependencies
+      run: yarn install --frozen-lockfile
+
+    - name: Run Lint
+      run: npx eslint .
+
+    - name: Build Angular App
+      run: npx ng build
+
+    - name: Run Unit Tests
+      run: npx ng test --watch=false --browsers=ChromeHeadless

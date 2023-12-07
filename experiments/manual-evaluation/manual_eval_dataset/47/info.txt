@@ -1,0 +1,2 @@
+Repository Link: https://github.com/gcanti/newtype-ts
+Index: 47
