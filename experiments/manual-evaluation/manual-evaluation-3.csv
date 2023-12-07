@@ -1,4 +1,4 @@
-Index,GitHub_Repo_Link,GitHub_Build_Pipeline_File_Content,Generated_Build_Pipeline_File_Content,Exact_Match_Score,BLEU_Score,Syntax_Check,DevOps_Aware_Score,Language,Manual_Validation_Score
+Index,GitHub_Repo_Link,GitHub_Build_Pipeline_File_Content,Generated_Build_Pipeline_File_Content,Exact_Match_Score,BLEU_Score,Syntax_Check,DevOps_Aware_Score,Language,Manual_Evaluation_Score
 5272,https://github.com/yapplabs/ember-radio-button,"name: CI
 
 on:

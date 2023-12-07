@@ -1,4 +1,4 @@
-Index,GitHub_Repo_Link,GitHub_Build_Pipeline_File_Content,Generated_Build_Pipeline_File_Content,Exact_Match_Score,BLEU_Score,Syntax_Check,DevOps_Aware_Score,Language,Manual_Validation_Score
+Index,GitHub_Repo_Link,GitHub_Build_Pipeline_File_Content,Generated_Build_Pipeline_File_Content,Exact_Match_Score,BLEU_Score,Syntax_Check,DevOps_Aware_Score,Language,Manual_Evaluation_Score
 3375,https://github.com/formatjs/formatjs-old,"name: Node CI
 
 on: [push, pull_request]
